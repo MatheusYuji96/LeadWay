@@ -1,4 +1,5 @@
-# Sistema Web de Gerenciamento e Acompanhamento de Leads
+# LeadWay 
+### Sistema Web de Gerenciamento e Acompanhamento de Leads
 
 Este projeto tem como intuito monitorar, processar e avaliar informações de prospecção e qualificação de possíveis clientes para representantes comerciais. A solução envolve um tipo de agenda eletrônica para ajudar na gestão de tarefas, clientes e auxiliar na aquisição de ofertas.
 
@@ -7,13 +8,15 @@ Este projeto tem como intuito monitorar, processar e avaliar informações de pr
 ## Tecnologias e Ferramentas
 
 ### **Frontend & Interface**
-* **Linguagens:** A definir
+* **Linguagens:** HTML, CSS, JS
+* **Bibliotecas:** React
 
 ### **Backend & API**
-* **Linguagens:** A definir
+* **Linguagens:** Java
+* **Dependências:** Spring Web, Spring Data JPA, Validation 
 
 ### **Dados & Persistência**
-* **SGBD:** A definir
+* **SGBD:** MySQL
 
 ### **Infraestrutura**
 * **Plataforma:** A definir
