@@ -13,13 +13,17 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // setor_id
+    @OneToOne
+    private Setor setor;
 
-    // endereco_id
+    @OneToOne
+    private Endereco endereco;
 
-    // vendedores_id
+    @OneToOne
+    private Vendedor vendedor;
 
-    // etapas_id
+    @ManyToOne
+    private Etapa etapa;
 
     @Column(columnDefinition = "CHAR(14)", nullable = false, unique = true)
     private String cnpj;

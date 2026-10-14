@@ -24,7 +24,7 @@ public class Contato {
     @Column(nullable = false, length = 255, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 11)
+    @Column(length = 11)
     private String telefone;
 
     @Column(columnDefinition = "CHAR(11)", nullable = false)

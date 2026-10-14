@@ -13,6 +13,9 @@ public class Endereco {
     private String rua;
 
     @Column(nullable = false, length = 20)
+    private String cep;
+
+    @Column(nullable = false, length = 20)
     private String numero;
 
     @Column(nullable = false, length = 100)
