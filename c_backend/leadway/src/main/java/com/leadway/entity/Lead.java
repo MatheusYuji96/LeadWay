@@ -13,13 +13,17 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // setor_id
+    @OneToOne
+    private Setor setor;
 
-    // endereco_id
+    @OneToOne
+    private Endereco endereco;
 
-    // vendedores_id
+    @OneToOne
+    private Vendedor vendedor;
 
-    // etapas_id
+    @ManyToOne
+    private Etapa etapa;
 
     @Column(columnDefinition = "CHAR(14)", nullable = false, unique = true)
     private String cnpj;
@@ -62,4 +66,123 @@ public class Lead {
 
     @Column(nullable = false)
     private Boolean ativo = true;
+
+    protected Lead() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Setor getSetor() {
+        return setor;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
+    public Vendedor getVendedor() {
+        return vendedor;
+    }
+
+    public Etapa getEtapa() {
+        return etapa;
+    }
+
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public String getRazaoSocial() {
+        return razaoSocial;
+    }
+
+    public String getNomeFantasia() {
+        return nomeFantasia;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public String getPrioridade() {
+        return prioridade;
+    }
+
+    public String getPotencial() {
+        return potencial;
+    }
+
+    public String getFarol() {
+        return farol;
+    }
+
+    public LocalDateTime getDataPrimeiroContato() {
+        return dataPrimeiroContato;
+    }
+
+    public LocalDateTime getDataPrimeiraVisita() {
+        return dataPrimeiraVisita;
+    }
+
+    public LocalDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public LocalDateTime getAtualizadoEm() {
+        return atualizadoEm;
+    }
+
+    public String getMotivoPerda() {
+        return motivoPerda;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setSetor(Setor setor) {
+        this.setor = setor;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
+
+    public void setVendedor(Vendedor vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public void setMotivoPerda(String motivoPerda) {
+        this.motivoPerda = motivoPerda;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
+    }
+
+    public void setPotencial(String potencial) {
+        this.potencial = potencial;
+    }
+
+    public void setFarol(String farol) {
+        this.farol = farol;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 }

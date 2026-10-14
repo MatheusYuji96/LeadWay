@@ -13,7 +13,7 @@ public class Interacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // contatos_id
+    private Contato contato;
 
     // leads_id
 
