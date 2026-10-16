@@ -5,6 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Lead {
@@ -14,16 +16,23 @@ public class Lead {
     private Integer id;
 
     @OneToOne
+    @JoinColumn(name = "setor_id", nullable = false)
     private Setor setor;
 
     @OneToOne
+    @JoinColumn(name = "endereco_id", nullable = false)
     private Endereco endereco;
 
     @OneToOne
+    @JoinColumn(name = "vendedor_id")
     private Vendedor vendedor;
 
     @ManyToOne
+    @JoinColumn(name = "etapa_id", nullable = false)
     private Etapa etapa;
+
+    @OneToMany(mappedBy = "lead")
+    private List<Contato> contatos = new ArrayList<>();
 
     @Column(columnDefinition = "CHAR(14)", nullable = false, unique = true)
     private String cnpj;
@@ -158,12 +167,28 @@ public class Lead {
         this.vendedor = vendedor;
     }
 
+    public void setEtapa(Etapa etapa) {
+        this.etapa = etapa;
+    }
+
+    public void adicionarContato(Contato contato) {
+        contatos.add(contato);
+    }
+
+    public void removerContato(Contato contato) {
+        contatos.remove(contato);
+    }
+
     public void setMotivoPerda(String motivoPerda) {
         this.motivoPerda = motivoPerda;
     }
 
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
+    public void ativar() {
+        this.ativo = true;
+    }
+
+    public void desativar() {
+        this.ativo = false;
     }
 
     public void setPrioridade(String prioridade) {

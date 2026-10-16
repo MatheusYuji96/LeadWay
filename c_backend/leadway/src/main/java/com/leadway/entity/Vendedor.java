@@ -2,6 +2,9 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Vendedor {
 
@@ -9,7 +12,12 @@ public class Vendedor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // lider_id
+    @ManyToOne
+    @JoinColumn(name = "lider_id")
+    private Vendedor lider;
+
+    @OneToMany(mappedBy = "lider")
+    private List<Vendedor> liderados = new ArrayList<>();
 
     @Column(nullable = false, length = 30)
     private String codVendedor;
@@ -29,4 +37,58 @@ public class Vendedor {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    protected Vendedor() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getCodVendedor() {
+        return codVendedor;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public void setCodVendedor(String codVendedor) {
+        this.codVendedor = codVendedor;
+    }
+
+    public void ativar() {
+        this.ativo = true;
+    }
+
+    public void desativar() {
+        this.ativo = false;
+    }
 }

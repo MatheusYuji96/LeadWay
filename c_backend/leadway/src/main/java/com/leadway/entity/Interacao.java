@@ -13,9 +13,13 @@ public class Interacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @ManyToOne
+    @JoinColumn(name = "contato_id")
     private Contato contato;
 
-    // leads_id
+    @ManyToOne
+    @JoinColumn(name = "lead_id")
+    private Lead lead;
 
     @Column(nullable = false, length = 45)
     private String tipo;
@@ -29,4 +33,54 @@ public class Interacao {
     @CreationTimestamp
     private LocalDateTime criadoEm;
 
+    protected Interacao() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Contato getContato() {
+        return contato;
+    }
+
+    public Lead getLead() {
+        return lead;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public LocalDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setContato(Contato contato) {
+        this.contato = contato;
+    }
+
+    public void setLead(Lead lead) {
+        this.lead = lead;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setDataHora(LocalDateTime dataHora) {
+        this.dataHora = dataHora;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
 }
