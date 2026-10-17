@@ -30,7 +30,9 @@ public class Tarefa {
     @Column(nullable = false)
     private LocalDateTime dataPrazo;
 
-    // status enum
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "ENUM('ABERTA', 'CONCLUIDA', 'CANCELADA')")
+    private StatusTarefa status;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
