@@ -13,12 +13,42 @@ public class LeadEtapaHistorico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // etapas_id
+    @ManyToOne
+    @JoinColumn(name = "etapa_id", nullable = false)
+    private Etapa etapa;
 
-    // leads_id
+    @ManyToOne
+    @JoinColumn(name = "lead_id", nullable = false)
+    private Lead lead;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
+    protected LeadEtapaHistorico() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Etapa getEtapa() {
+        return etapa;
+    }
+
+    public Lead getLead() {
+        return lead;
+    }
+
+    public LocalDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setEtapa(Etapa etapa) {
+        this.etapa = etapa;
+    }
+
+    public void setLead(Lead lead) {
+        this.lead = lead;
+    }
 }

@@ -12,20 +12,11 @@ public class Setor {
     @Column(nullable = false, length = 45)
     private String nome;
 
-    public Setor() {
-    }
-
-    public Setor(Integer id, String nome) {
-        this.id = id;
-        this.nome = nome;
+    protected Setor() {
     }
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getNome() {

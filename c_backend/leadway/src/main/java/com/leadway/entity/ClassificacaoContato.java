@@ -1,6 +1,6 @@
 package com.leadway.entity;
 
-public enum ClassificacaoEnum {
+public enum ClassificacaoContato {
     PADRAO,
     INFLUENCIADOR,
     DECISOR

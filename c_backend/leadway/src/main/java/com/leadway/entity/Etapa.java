@@ -12,9 +12,29 @@ public class Etapa {
     @Column(nullable = false, length = 50)
     private String nome;
 
-    @Column(length = 45)
-    private String ordem;
+    @Column(columnDefinition = "TINYINT")
+    private Integer ordem;
 
-    @Column(length = 45)
-    private String cadencia_dia;
+    protected Etapa() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public Integer getOrdem() {
+        return ordem;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setOrdem(Integer ordem) {
+        this.ordem = ordem;
+    }
 }
