@@ -47,7 +47,7 @@ public class Contato {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    protected Contato() {
+    public Contato() {
     }
 
     public Integer getId() {
@@ -122,11 +122,16 @@ public class Contato {
         this.classificacao = classificacao;
     }
 
-    public void ativar() {
-        this.ativo = true;
-    }
+//    public void ativar() {
+//        this.ativo = true;
+//    }
+//
+//    public void desativar() {
+//        this.ativo = false;
+//    }
 
-    public void desativar() {
-        this.ativo = false;
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }
