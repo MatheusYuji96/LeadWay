@@ -76,7 +76,11 @@ public class Lead {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+<<<<<<< HEAD:c_backend/src/main/java/com/leadway/leadway/entity/Lead.java
     public Lead() {
+=======
+    protected Lead() {
+>>>>>>> origin/development:c_backend/leadway/src/main/java/com/leadway/entity/Lead.java
     }
 
     public Integer getId() {
@@ -153,6 +157,7 @@ public class Lead {
 
     public Boolean getAtivo() {
         return ativo;
+<<<<<<< HEAD:c_backend/src/main/java/com/leadway/leadway/entity/Lead.java
     }
 
     public void setCnpj(String cnpj) {
@@ -221,9 +226,63 @@ public class Lead {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+=======
+>>>>>>> origin/development:c_backend/leadway/src/main/java/com/leadway/entity/Lead.java
     }
 
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
+    public void setSetor(Setor setor) {
+        this.setor = setor;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
+
+    public void setVendedor(Vendedor vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public void setEtapa(Etapa etapa) {
+        this.etapa = etapa;
+    }
+
+    public void adicionarContato(Contato contato) {
+        contatos.add(contato);
+    }
+
+    public void removerContato(Contato contato) {
+        contatos.remove(contato);
+    }
+
+    public void setMotivoPerda(String motivoPerda) {
+        this.motivoPerda = motivoPerda;
+    }
+
+    public void ativar() {
+        this.ativo = true;
+    }
+
+    public void desativar() {
+        this.ativo = false;
+    }
+
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
+    }
+
+    public void setPotencial(String potencial) {
+        this.potencial = potencial;
+    }
+
+    public void setFarol(String farol) {
+        this.farol = farol;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 }

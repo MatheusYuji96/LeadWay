@@ -33,7 +33,11 @@ public class Endereco {
     @Column(length = 100)
     private String complemento;
 
+<<<<<<< HEAD:c_backend/src/main/java/com/leadway/leadway/entity/Endereco.java
     public Endereco() {
+=======
+    protected Endereco() {
+>>>>>>> origin/development:c_backend/leadway/src/main/java/com/leadway/entity/Endereco.java
     }
 
     public Integer getId() {
@@ -76,8 +80,11 @@ public class Endereco {
         this.rua = rua;
     }
 
+<<<<<<< HEAD:c_backend/src/main/java/com/leadway/leadway/entity/Endereco.java
     public void setCep(String cep) { this.cep = cep; }
 
+=======
+>>>>>>> origin/development:c_backend/leadway/src/main/java/com/leadway/entity/Endereco.java
     public void setNumero(String numero) {
         this.numero = numero;
     }
