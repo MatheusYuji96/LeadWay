@@ -9,7 +9,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping("/leads")
 public class CadastroLeadController {
 
     private final CadastroLeadService cadastroLeadService;
@@ -21,9 +25,8 @@ public class CadastroLeadController {
 
     @PostMapping
     public ResponseEntity<CadastroLeadResponseDTO> cadastrar(@Valid @RequestBody CadastroLeadRequestDTO requestDTO){
-        Lead lead = cadastroLeadMapper.toEntity(requestDTO);
-        Lead leadEntity = cadastroLeadService.salvar(lead);
+        Lead leadEntity = cadastroLeadService.salvar(requestDTO);
         CadastroLeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(leadEntity);
-        return ResponseEntity.status(200).body(responseDTO);
+        return ResponseEntity.status(201).body(responseDTO);
     }
 }
