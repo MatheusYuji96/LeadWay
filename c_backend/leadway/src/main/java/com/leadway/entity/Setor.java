@@ -12,7 +12,7 @@ public class Setor {
     @Column(nullable = false, length = 45)
     private String nome;
 
-    protected Setor() {
+    public Setor() {
     }
 
     public Integer getId() {

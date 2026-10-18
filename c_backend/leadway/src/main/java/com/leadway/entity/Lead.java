@@ -76,7 +76,7 @@ public class Lead {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    protected Lead() {
+    public Lead() {
     }
 
     public Integer getId() {
@@ -155,6 +155,18 @@ public class Lead {
         return ativo;
     }
 
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
+
+    public void setRazaoSocial(String razaoSocial) {
+        this.razaoSocial = razaoSocial;
+    }
+
+    public void setNomeFantasia(String nomeFantasia) {
+        this.nomeFantasia = nomeFantasia;
+    }
+
     public void setSetor(Setor setor) {
         this.setor = setor;
     }
@@ -209,5 +221,9 @@ public class Lead {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }

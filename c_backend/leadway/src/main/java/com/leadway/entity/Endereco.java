@@ -33,7 +33,7 @@ public class Endereco {
     @Column(length = 100)
     private String complemento;
 
-    protected Endereco() {
+    public Endereco() {
     }
 
     public Integer getId() {
@@ -75,6 +75,8 @@ public class Endereco {
     public void setRua(String rua) {
         this.rua = rua;
     }
+
+    public void setCep(String cep) { this.cep = cep; }
 
     public void setNumero(String numero) {
         this.numero = numero;

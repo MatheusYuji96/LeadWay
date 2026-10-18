@@ -14,43 +14,61 @@ public class CadastroLeadMapper {
         lead.setRazaoSocial(cadastroLeadRequestDTO.getRazaoSocial());
         lead.setNomeFantasia(cadastroLeadRequestDTO.getNomeFantasia());
         lead.setEmail(cadastroLeadRequestDTO.getEmail());
-        Setor setor = new Setor();
-        setor.setNome(cadastroLeadRequestDTO.getSetor());
-        lead.setSetor(setor);
-        Endereco endereco = new Endereco();
-        endereco.setRua(cadastroLeadRequestDTO.getRua());
-        endereco.setCep(cadastroLeadRequestDTO.getCep());
-        endereco.setNumero(cadastroLeadRequestDTO.getNumero());
-        endereco.setComplemento(cadastroLeadRequestDTO.getComplemento());
-        endereco.setBairro(cadastroLeadRequestDTO.getBairro());
-        endereco.setCidade(cadastroLeadRequestDTO.getCidade());
-        endereco.setEstado(cadastroLeadRequestDTO.getEstado());
-        lead.setEndereco(endereco);
+        lead.setSetor(toSetor(cadastroLeadRequestDTO.getSetor()));
+        lead.setEndereco(toEndereco(cadastroLeadRequestDTO.getEndereco()));
         lead.setPotencial(cadastroLeadRequestDTO.getPotencial());
-        lead.setAtivo(cadastroLeadRequestDTO.getAtivo());
+        lead.setAtivo(true);
         return lead;
     }
 
     public CadastroLeadResponseDTO toResponse(Lead lead){
-        CadastroLeadResponseDTO leadCadastrado = new CadastroLeadResponseDTO();
-        lead.setCnpj(leadCadastrado.getCnpj());
-        lead.setRazaoSocial(leadCadastrado.getRazaoSocial());
-        lead.setNomeFantasia(leadCadastrado.getNomeFantasia());
-        lead.setEmail(leadCadastrado.getEmail());
-        Setor setor = new Setor();
-        setor.setNome(leadCadastrado.getSetor());
-        lead.setSetor(setor);
+        CadastroLeadResponseDTO leadResponse = new CadastroLeadResponseDTO();
+        leadResponse.setCnpj(lead.getCnpj());
+        leadResponse.setRazaoSocial(lead.getRazaoSocial());
+        leadResponse.setNomeFantasia(lead.getNomeFantasia());
+        leadResponse.setSetor(toSetorResponse(lead.getSetor()));
+        leadResponse.setEmail(lead.getEmail());
+        lead.setEndereco(lead.getEndereco());
+        lead.setPotencial(lead.getPotencial());
+        lead.setAtivo(lead.getAtivo());
+        return leadResponse;
+    }
+
+    public CadastroLeadResponseDTO.SetorDTO toSetorResponse(Setor setor){
+        CadastroLeadResponseDTO.SetorDTO setorDTO = new CadastroLeadResponseDTO.SetorDTO();
+        setorDTO.setNome(setor.getNome());
+        return setorDTO;
+    }
+
+    public CadastroLeadResponseDTO.EnderecoDTO toEnderecoResponse(Endereco endereco){
+        CadastroLeadResponseDTO.EnderecoDTO enderecoDTO = new CadastroLeadResponseDTO.EnderecoDTO();
+        enderecoDTO.setRua(endereco.getRua());
+        enderecoDTO.setNumero(endereco.getNumero());
+        enderecoDTO.setCep(endereco.getCep());
+        enderecoDTO.setComplemento(endereco.getComplemento());
+        enderecoDTO.setBairro(endereco.getBairro());
+        enderecoDTO.setCidade(endereco.getCidade());
+        enderecoDTO.setEstado(endereco.getEstado());
+        enderecoDTO.setPais(endereco.getPais());
+        return enderecoDTO;
+    }
+
+    public Endereco toEndereco(CadastroLeadRequestDTO.EnderecoDto dto){
         Endereco endereco = new Endereco();
-        endereco.setRua(leadCadastrado.getRua());
-        endereco.setCep(leadCadastrado.getCep());
-        endereco.setNumero(leadCadastrado.getNumero());
-        endereco.setComplemento(leadCadastrado.getComplemento());
-        endereco.setBairro(leadCadastrado.getBairro());
-        endereco.setCidade(leadCadastrado.getCidade());
-        endereco.setEstado(leadCadastrado.getEstado());
-        lead.setEndereco(endereco);
-        lead.setPotencial(leadCadastrado.getPotencial());
-        lead.setAtivo(leadCadastrado.getAtivo());
-        return leadCadastrado;
+        endereco.setRua(dto.getRua());
+        endereco.setNumero(dto.getNumero());
+        endereco.setCep(dto.getCep());
+        endereco.setComplemento(dto.getComplemento());
+        endereco.setBairro(dto.getBairro());
+        endereco.setCidade(dto.getCidade());
+        endereco.setEstado(dto.getEstado());
+        endereco.setPais(dto.getPais());
+        return endereco;
+    }
+
+    public Setor toSetor(CadastroLeadRequestDTO.SetorDto dto){
+        Setor setor = new Setor();
+        setor.setNome(dto.getNome());
+        return setor;
     }
 }
