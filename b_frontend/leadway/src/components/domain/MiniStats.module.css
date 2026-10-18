@@ -1,0 +1,33 @@
+.wrap {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--wire-line);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  padding: 16px 0;
+  overflow-x: auto;
+}
+
+.wrap > span {
+  padding: 0 24px;
+  min-width: 140px;
+  border-right: 1px solid var(--wire-line);
+}
+
+.wrap > span:last-child {
+  border-right: 0;
+}
+
+.wrap small {
+  color: var(--muted);
+  font-size: 13px;
+  display: block;
+}
+
+.wrap strong {
+  font-size: 24px;
+}
+
+.wrap .danger strong {
+  color: var(--red-dark);
+}
