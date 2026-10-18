@@ -4,16 +4,31 @@ import com.leadway.leadway.entity.Endereco;
 import com.leadway.leadway.entity.Etapa;
 import com.leadway.leadway.entity.Setor;
 import com.leadway.leadway.entity.Vendedor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 public class CadastroLeadRequestDTO {
 
+    @NotBlank
     private String cnpj;
+
+    @NotBlank
     private String razaoSocial;
+
+    @NotBlank
     private String nomeFantasia;
+
     private Integer setorId;
+
+    @NotBlank
+    @Email
     private String email;
+
     private Integer etapaId;
+
+    @NotBlank
     private EnderecoDto endereco;
+
     private String telefone;
     private String potencial;
     private Integer vendedorId;
