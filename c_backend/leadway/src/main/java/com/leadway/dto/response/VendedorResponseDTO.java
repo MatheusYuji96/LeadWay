@@ -1,23 +1,11 @@
 package com.leadway.dto.response;
 
-import jakarta.persistence.Column;
-
-public class CadastroVendedorResponseDTO {
+public class VendedorResponseDTO {
 
     private Integer id;
     private String nome;
     private String email;
     private String telefone;
-
-    public CadastroVendedorResponseDTO() {
-    }
-
-    public CadastroVendedorResponseDTO(Integer id, String nome, String email, String telefone) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-        this.telefone = telefone;
-    }
 
     public Integer getId() {
         return id;

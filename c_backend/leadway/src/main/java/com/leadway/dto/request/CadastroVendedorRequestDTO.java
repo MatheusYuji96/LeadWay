@@ -25,7 +25,11 @@ public class CadastroVendedorRequestDTO {
     private String senha;
 
     @NotBlank
+    private String confirmarSenha;
+
+    @NotBlank
     @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
     public @NotBlank @Size(min = 3) String getNome() {
@@ -58,11 +62,19 @@ public class CadastroVendedorRequestDTO {
         this.senha = senha;
     }
 
-    public @NotBlank @Size(min = 11, max = 11) String getTelefone() {
+    public @NotBlank String getConfirmarSenha() {
+        return confirmarSenha;
+    }
+
+    public void setConfirmarSenha(@NotBlank String confirmarSenha) {
+        this.confirmarSenha = confirmarSenha;
+    }
+
+    public @NotBlank @Size(min = 11, max = 11) @Pattern(regexp = "^[0-9]+$") String getTelefone() {
         return telefone;
     }
 
-    public void setTelefone(@NotBlank @Size(min = 11, max = 11) String telefone) {
+    public void setTelefone(@NotBlank @Size(min = 11, max = 11) @Pattern(regexp = "^[0-9]+$") String telefone) {
         this.telefone = telefone;
     }
 }
