@@ -8,9 +8,11 @@ import com.leadway.leadway.exception.LeadNaoEncontradoException;
 import com.leadway.leadway.mapper.ContatoMapper;
 import com.leadway.leadway.repository.CadastroLeadRepository;
 import com.leadway.leadway.repository.ContatoRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class ContatoService {
 
     private final ContatoRepository contatoRepository;
@@ -33,6 +35,7 @@ public class ContatoService {
         }
         Lead lead = leadOpt.get();
         contato.setLead(lead);
+        contatoRepository.save(contato);
         return contato;
     }
 }

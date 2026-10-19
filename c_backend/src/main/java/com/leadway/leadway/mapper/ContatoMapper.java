@@ -3,7 +3,9 @@ package com.leadway.leadway.mapper;
 import com.leadway.leadway.dto.request.ContatoRequestDTO;
 import com.leadway.leadway.dto.response.ContatoResponseDTO;
 import com.leadway.leadway.entity.Contato;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ContatoMapper {
 
     public Contato toEntity(ContatoRequestDTO dto){
