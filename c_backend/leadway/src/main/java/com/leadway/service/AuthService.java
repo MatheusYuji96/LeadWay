@@ -31,7 +31,7 @@ public class AuthService {
         return repository.save(vendedor);
     }
 
-    public Vendedor login(String email, String senha) {
+    public Vendedor autenticar(String email, String senha) {
 
         Vendedor vendedor = repository.findByEmail(email)
                 .orElseThrow(CredenciaisInvalidasException::new);

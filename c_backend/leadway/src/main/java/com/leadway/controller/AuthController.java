@@ -1,6 +1,7 @@
 package com.leadway.controller;
 
 import com.leadway.dto.request.CadastroVendedorRequestDTO;
+import com.leadway.dto.request.LoginRequestDTO;
 import com.leadway.dto.response.VendedorResponseDTO;
 import com.leadway.mapper.VendedorMapper;
 import com.leadway.service.AuthService;
@@ -33,5 +34,17 @@ public class AuthController {
 
         return ResponseEntity.status(200).body(vendedor);
 
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<VendedorResponseDTO> autenticar(@Valid @RequestBody LoginRequestDTO dto) {
+        VendedorResponseDTO vendedor = VendedorMapper.toResponse(
+                service.autenticar(
+                        dto.getEmail(),
+                        dto.getSenha()
+                )
+        );
+
+        return ResponseEntity.status(200).body(vendedor);
     }
 }
