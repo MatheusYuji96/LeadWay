@@ -13,9 +13,11 @@ import com.leadway.leadway.repository.CadastroLeadRepository;
 import com.leadway.leadway.repository.EtapaRepository;
 import com.leadway.leadway.repository.SetorRepository;
 import com.leadway.leadway.repository.VendedorRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class CadastroLeadService {
 
     private final CadastroLeadRepository cadastroLeadRepository;

@@ -68,6 +68,14 @@ public class Vendedor {
         return ativo;
     }
 
+    public Vendedor getLider() {
+        return lider;
+    }
+
+    public void setLider(Vendedor lider) {
+        this.lider = lider;
+    }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
