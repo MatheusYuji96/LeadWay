@@ -2,9 +2,6 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 public class Vendedor {
 
@@ -12,12 +9,7 @@ public class Vendedor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "lider_id")
-    private Vendedor lider;
-
-    @OneToMany(mappedBy = "lider")
-    private List<Vendedor> liderados = new ArrayList<>();
+    // lider_id
 
     @Column(nullable = false, length = 30)
     private String codVendedor;
@@ -37,74 +29,60 @@ public class Vendedor {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    public Vendedor() {
-    }
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getCodVendedor() {
         return codVendedor;
     }
 
+    public void setCodVendedor(String codVendedor) {
+        this.codVendedor = codVendedor;
+    }
+
     public String getNome() {
         return nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public Boolean getAtivo() {
-        return ativo;
-    }
-
-    public Vendedor getLider() {
-        return lider;
-    }
-
-    public void setLider(Vendedor lider) {
-        this.lider = lider;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
     }
 
     public void setSenha(String senha) {
         this.senha = senha;
     }
 
+    public String getTelefone() {
+        return telefone;
+    }
+
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
 
-    public void setCodVendedor(String codVendedor) {
-        this.codVendedor = codVendedor;
+    public Boolean getAtivo() {
+        return ativo;
     }
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
     }
-
-    //    public void ativar() {
-//        this.ativo = true;
-//    }
-//
-//    public void desativar() {
-//        this.ativo = false;
-//    }
 }
