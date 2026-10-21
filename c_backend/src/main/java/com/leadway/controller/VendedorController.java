@@ -16,7 +16,6 @@ import java.util.List;
 public class VendedorController {
 
     private final VendedorService vendedorService;
-    private final VendedorMapper vendedorMapper = new VendedorMapper();
 
     public VendedorController(VendedorService vendedorService) {
         this.vendedorService = vendedorService;
@@ -25,13 +24,13 @@ public class VendedorController {
     @GetMapping
     public ResponseEntity<List<VendedorResponseDTO>> listar(){
         List<Vendedor> lista = vendedorService.listarVendedor();
-        List<VendedorResponseDTO> listaResponse = lista.stream().map(vendedorMapper::toResponse).toList();
+        List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
     @PostMapping
     public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO){
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
-        VendedorResponseDTO responseDTO = vendedorMapper.toResponse(vendedor);
+        VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(201).body(responseDTO);
     }
 }

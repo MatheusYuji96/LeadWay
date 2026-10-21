@@ -1,9 +1,5 @@
 package com.leadway.dto.request;
 
-import com.leadway.entity.Endereco;
-import com.leadway.entity.Etapa;
-import com.leadway.entity.Setor;
-import com.leadway.entity.Vendedor;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 

@@ -26,7 +26,7 @@ public class VendedorService {
         return lista;
     }
     public Vendedor cadastrar(VendedorRequestDTO dto){
-        Vendedor vendedor = vendedorMapper.toEntity(dto);
+        Vendedor vendedor = vendedorMapper.toEntityVendedor(dto);
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }

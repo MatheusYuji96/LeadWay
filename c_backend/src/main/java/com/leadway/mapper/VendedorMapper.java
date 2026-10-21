@@ -7,7 +7,7 @@ import com.leadway.entity.Vendedor;
 
 public class VendedorMapper {
 
-    public static Vendedor toEntity(VendedorRequestDTO dto) {
+    public static Vendedor toEntityVendedor(VendedorRequestDTO dto) {
         Vendedor vendedor = new Vendedor();
 
         vendedor.setNome(dto.getNome());
