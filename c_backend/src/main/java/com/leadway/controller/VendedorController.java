@@ -7,10 +7,9 @@ import com.leadway.mapper.VendedorMapper;
 import com.leadway.service.VendedorService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/vendedores")
@@ -23,6 +22,12 @@ public class VendedorController {
         this.vendedorService = vendedorService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<VendedorResponseDTO>> listar(){
+        List<Vendedor> lista = vendedorService.listarVendedor();
+        List<VendedorResponseDTO> listaResponse = lista.stream().map(vendedorMapper::toResponse).toList();
+        return ResponseEntity.status(200).body(listaResponse);
+    }
     @PostMapping
     public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO){
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);

@@ -15,6 +15,7 @@ import com.leadway.repository.SetorRepository;
 import com.leadway.repository.VendedorRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,6 +32,11 @@ public class CadastroLeadService {
         this.etapaRepository = etapaRepository;
         this.setorRepository = setorRepository;
         this.vendedorRepository = vendedorRepository;
+    }
+
+    public List<Lead> listarLeads(){
+        List<Lead> lista = cadastroLeadRepository.findAll();
+        return lista;
     }
 
     public Lead salvar(CadastroLeadRequestDTO dto) {
