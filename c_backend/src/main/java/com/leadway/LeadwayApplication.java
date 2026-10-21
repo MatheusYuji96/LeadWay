@@ -1,4 +1,4 @@
-package com.leadway.leadway;
+package com.leadway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
