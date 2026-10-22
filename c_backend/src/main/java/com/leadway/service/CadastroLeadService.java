@@ -39,6 +39,11 @@ public class CadastroLeadService {
         return lista;
     }
 
+    public List<Lead> listarPorFiltro(String termo, Long vendedorId, String cadencia){
+        List<Lead> lista = cadastroLeadRepository.findByFiltros(termo, vendedorId, cadencia);
+        return lista;
+    }
+
     public Lead salvar(CadastroLeadRequestDTO dto) {
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
         Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());

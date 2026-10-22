@@ -22,9 +22,15 @@ public class VendedorService {
     }
 
     public List<Vendedor> listarVendedor(){
-        List<Vendedor> lista = vendedorRepository.findAll();
+        List<Vendedor> lista = vendedorRepository.findByFiltros();
         return lista;
     }
+
+    public List<Vendedor> listarPorFiltro(String termo){
+        List<Vendedor> lista = vendedorRepository.findByFiltros(termo);
+        return lista;
+    }
+
     public Vendedor cadastrar(VendedorRequestDTO dto){
         Vendedor vendedor = vendedorMapper.toEntityVendedor(dto);
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){

@@ -22,8 +22,8 @@ public class VendedorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VendedorResponseDTO>> listar(){
-        List<Vendedor> lista = vendedorService.listarVendedor();
+    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo){
+        List<Vendedor> lista = vendedorService.listarPorFiltro(termo);
         List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
