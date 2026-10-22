@@ -23,8 +23,8 @@ public class CadastroLeadController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CadastroLeadResponseDTO>> listar(){
-        List<Lead> lista = cadastroLeadService.listarLeads();
+    public ResponseEntity<List<CadastroLeadResponseDTO>> listar(@RequestParam(required = false) String termo, @RequestParam(required = false) Long vendedorId, @RequestParam(required = false) String cadencia){
+        List<Lead> lista = cadastroLeadService.listarPorFiltro(termo, vendedorId, cadencia);
         List<CadastroLeadResponseDTO> listaResponse = lista.stream().map(cadastroLeadMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
