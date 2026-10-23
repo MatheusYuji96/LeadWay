@@ -6,6 +6,7 @@ import com.leadway.entity.Lead;
 import com.leadway.entity.Setor;
 import com.leadway.entity.Vendedor;
 import com.leadway.exception.EtapaNaoRegistradaException;
+import com.leadway.exception.LeadNaoEncontradoException;
 import com.leadway.exception.SetorNaoExistenteException;
 import com.leadway.exception.VendedorNaoEncontradoException;
 import com.leadway.mapper.CadastroLeadMapper;
@@ -39,8 +40,8 @@ public class CadastroLeadService {
         return lista;
     }
 
-    public List<Lead> listarPorFiltro(String termo, Long vendedorId, String cadencia){
-        List<Lead> lista = cadastroLeadRepository.findByFiltros(termo, vendedorId, cadencia);
+    public List<Lead> listarPorFiltro(String termo, Long vendedorId, String cadencia, String fase){
+        List<Lead> lista = cadastroLeadRepository.findByFiltros(termo, vendedorId, cadencia, fase);
         return lista;
     }
 
@@ -76,5 +77,15 @@ public class CadastroLeadService {
         }
         Lead leadCadastrar = cadastroLeadRepository.save(cadastro);
         return leadCadastrar;
+    }
+
+    public Lead atualizar(Integer id, CadastroLeadRequestDTO dto){
+        Lead lead = cadastroLeadMapper.toEntity(dto);
+        if (!cadastroLeadRepository.existsById(id)){
+            throw new LeadNaoEncontradoException("Lead não consta nos registros");
+        }
+        lead.setId(id);
+        Lead cadastradoNovo = cadastroLeadRepository.save(lead);
+        return cadastradoNovo;
     }
 }

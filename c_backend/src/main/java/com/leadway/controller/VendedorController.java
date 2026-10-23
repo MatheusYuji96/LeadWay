@@ -27,10 +27,18 @@ public class VendedorController {
         List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
+
     @PostMapping
     public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO){
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
         VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody VendedorRequestDTO requestDTO){
+        Vendedor vendedor = vendedorService.atualizar(id, requestDTO);
+        VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
+        return ResponseEntity.status(200).body(responseDTO);
     }
 }

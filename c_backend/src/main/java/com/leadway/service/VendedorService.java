@@ -14,17 +14,16 @@ import java.util.Optional;
 @Service
 public class VendedorService {
 
-    private final VendedorMapper vendedorMapper = new VendedorMapper();
     private final VendedorRepository vendedorRepository;
 
     public VendedorService(VendedorRepository vendedorRepository) {
         this.vendedorRepository = vendedorRepository;
     }
 
-    public List<Vendedor> listarVendedor(){
-        List<Vendedor> lista = vendedorRepository.findByFiltros();
-        return lista;
-    }
+//    public List<Vendedor> listarVendedor(){
+//        List<Vendedor> lista = vendedorRepository.findByFiltros();
+//        return lista;
+//    }
 
     public List<Vendedor> listarPorFiltro(String termo){
         List<Vendedor> lista = vendedorRepository.findByFiltros(termo);
@@ -32,7 +31,7 @@ public class VendedorService {
     }
 
     public Vendedor cadastrar(VendedorRequestDTO dto){
-        Vendedor vendedor = vendedorMapper.toEntityVendedor(dto);
+        Vendedor vendedor = VendedorMapper.toEntityVendedor(dto);
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
@@ -44,5 +43,15 @@ public class VendedorService {
         vendedor.setLider(registrado);
         vendedorRepository.save(vendedor);
         return vendedor;
+    }
+
+    public Vendedor atualizar(Integer id, VendedorRequestDTO dto){
+        Vendedor vendedor = VendedorMapper.toEntityVendedor(dto);
+        if (!vendedorRepository.existsById(id)){
+            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+        }
+        vendedor.setId(id);
+        Vendedor vendedorLocalizado = vendedorRepository.save(vendedor);
+        return vendedorLocalizado;
     }
 }
