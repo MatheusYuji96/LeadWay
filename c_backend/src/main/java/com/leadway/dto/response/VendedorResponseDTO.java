@@ -1,15 +1,27 @@
 package com.leadway.dto.response;
 
 import com.leadway.entity.Vendedor;
+import com.leadway.entity.Vendedor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 public class VendedorResponseDTO {
 
+    private Integer id;
     private Vendedor lider;
     private String nome;
     private String telefone;
     private String email;
     private String codVendedor;
     private Boolean ativo;
+
+    public Integer getId() {
+    	return id;
+    }
+
+    public void setId(Integer id) {
+    	this.id = id;
+    }
 
     public Vendedor getLider() {
         return lider;

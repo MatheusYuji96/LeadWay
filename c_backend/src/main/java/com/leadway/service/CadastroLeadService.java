@@ -15,6 +15,7 @@ import com.leadway.repository.SetorRepository;
 import com.leadway.repository.VendedorRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,6 +34,16 @@ public class CadastroLeadService {
         this.vendedorRepository = vendedorRepository;
     }
 
+    public List<Lead> listarLeads(){
+        List<Lead> lista = cadastroLeadRepository.findAll();
+        return lista;
+    }
+
+    public List<Lead> listarPorFiltro(String termo, Long vendedorId, String cadencia){
+        List<Lead> lista = cadastroLeadRepository.findByFiltros(termo, vendedorId, cadencia);
+        return lista;
+    }
+
     public Lead salvar(CadastroLeadRequestDTO dto) {
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
         Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
@@ -49,7 +60,11 @@ public class CadastroLeadService {
         cadastro.setSetor(setor);
         Etapa etapa;
         if (dto.getEtapaId() == null) {
-            etapa = etapaRepository.findFirstByIdAsc();
+            Optional<Etapa> etapaOpt = etapaRepository.findFirstByOrderByIdAsc();
+            if(etapaOpt.isEmpty()){
+                throw new EtapaNaoRegistradaException("Etapa não registrada");
+            }
+            etapa = etapaOpt.get();
             cadastro.setEtapa(etapa);
         } else {
             Optional<Etapa> etapaOpt = etapaRepository.findById(dto.getEtapaId());

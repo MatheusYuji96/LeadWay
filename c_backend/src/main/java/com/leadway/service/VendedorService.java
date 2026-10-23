@@ -8,6 +8,7 @@ import com.leadway.mapper.VendedorMapper;
 import com.leadway.repository.VendedorRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,8 +21,18 @@ public class VendedorService {
         this.vendedorRepository = vendedorRepository;
     }
 
+    public List<Vendedor> listarVendedor(){
+        List<Vendedor> lista = vendedorRepository.findByFiltros();
+        return lista;
+    }
+
+    public List<Vendedor> listarPorFiltro(String termo){
+        List<Vendedor> lista = vendedorRepository.findByFiltros(termo);
+        return lista;
+    }
+
     public Vendedor cadastrar(VendedorRequestDTO dto){
-        Vendedor vendedor = vendedorMapper.toEntity(dto);
+        Vendedor vendedor = vendedorMapper.toEntityVendedor(dto);
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }

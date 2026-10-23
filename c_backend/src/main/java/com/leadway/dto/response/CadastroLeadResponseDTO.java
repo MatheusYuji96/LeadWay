@@ -1,5 +1,8 @@
 package com.leadway.dto.response;
 
+import com.leadway.entity.Endereco;
+import com.leadway.entity.Setor;
+
 public class CadastroLeadResponseDTO {
 
     private String cnpj;
