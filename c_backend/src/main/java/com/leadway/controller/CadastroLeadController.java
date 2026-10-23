@@ -23,8 +23,8 @@ public class CadastroLeadController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CadastroLeadResponseDTO>> listar(@RequestParam(required = false) String termo, @RequestParam(required = false) Long vendedorId, @RequestParam(required = false) String cadencia){
-        List<Lead> lista = cadastroLeadService.listarPorFiltro(termo, vendedorId, cadencia);
+    public ResponseEntity<List<CadastroLeadResponseDTO>> listar(@RequestParam(required = false) String termo, @RequestParam(required = false) Long vendedorId, @RequestParam(required = false) String cadencia, @RequestParam(required = false) String fase){
+        List<Lead> lista = cadastroLeadService.listarPorFiltro(termo, vendedorId, cadencia, fase);
         List<CadastroLeadResponseDTO> listaResponse = lista.stream().map(cadastroLeadMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
@@ -34,5 +34,12 @@ public class CadastroLeadController {
         Lead leadEntity = cadastroLeadService.salvar(requestDTO);
         CadastroLeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(leadEntity);
         return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<CadastroLeadResponseDTO> atualizar(@PathVariable Integer id, @RequestBody CadastroLeadRequestDTO requestDTO){
+        Lead lead = cadastroLeadService.atualizar(id, requestDTO);
+        CadastroLeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(lead);
+        return ResponseEntity.status(200).body(responseDTO);
     }
 }
