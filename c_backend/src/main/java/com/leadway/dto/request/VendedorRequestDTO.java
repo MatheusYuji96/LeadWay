@@ -2,6 +2,8 @@ package com.leadway.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class VendedorRequestDTO {
 
@@ -11,6 +13,8 @@ public class VendedorRequestDTO {
     private String nome;
 
     @NotBlank
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
     @NotBlank
@@ -23,7 +27,6 @@ public class VendedorRequestDTO {
     @NotBlank
     private String codVendedor;
 
-    @NotBlank
     private Boolean ativo;
 
     public Integer getLiderId() {

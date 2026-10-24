@@ -50,13 +50,13 @@ public class Lead {
     @Column(columnDefinition = "CHAR(11)", nullable = false)
     private String telefone;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String prioridade;
 
     @Column(nullable = false, length = 30)
     private String potencial;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private String farol;
 
     private LocalDateTime dataPrimeiroContato;

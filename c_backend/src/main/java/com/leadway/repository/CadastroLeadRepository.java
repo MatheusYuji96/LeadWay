@@ -10,15 +10,13 @@ import java.util.Optional;
 
 public interface CadastroLeadRepository extends JpaRepository<Lead, Integer> {
 
-    @Query("select l from Lead l left join l.vendedor v left join e.etapa where " +
+    @Query("select l from Lead l left join l.vendedor v left join l.etapa e where " +
             "(:termo is null or :termo = '' or " +
             "lower(l.nomeFantasia) like lower(concat('%', :termo, '%')) or " +
             "l.cnpj like concat('%', :termo, '%') or " +
             "lower(v.nome) like lower(concat('%', :termo, '%'))) and " +
             "(:vendedorId is null or v.id = :vendedorId) and " +
-            "(:cadencia is null or :cadencia = '' or l.cadencia = :cadencia) and " +
-    "(:fase is null or :fase = '' or e.id = :fase)")
-    List<Lead> findByFiltros(@Param("termo") String termo, @Param("vendedorId") Long vendedorId, @Param("cadencia") String cadencia, @Param("fase") String fase);
+    "(:fase is null or :fase = '' or e.nome = :fase)")
+    List<Lead> findByFiltros(@Param("termo") String termo, @Param("vendedorId") Integer vendedorId, @Param("fase") String fase);
 
-    Boolean existsByLongId(Long id);
 }

@@ -35,12 +35,14 @@ public class VendedorService {
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
+        if (dto.getLiderId() != null){
         Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getLiderId());
         if (vendedorOpt.isEmpty()){
-            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+            throw new VendedorNaoEncontradoException("Vendedor líder não consta nos registros");
         }
-        Vendedor registrado = vendedorOpt.get();
-        vendedor.setLider(registrado);
+        Vendedor liderRegistrado = vendedorOpt.get();
+        vendedor.setLider(liderRegistrado);
+        }
         vendedorRepository.save(vendedor);
         return vendedor;
     }

@@ -13,8 +13,6 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Integer> {
     @Query("select v from Vendedor v where " + "(:termo is null or :termo = '' or " + "v.codVendedor like lower(concat('%', :termo, '%')) or " + "lower(v.nome) like lower(concat('%', :termo, '%')))")
     List<Vendedor> findByFiltros(@Param("termo") String termo);
 
-    Optional<Vendedor> findByLongId(Long id);
-
     Boolean existsByEmailIgnoreCase(String email);
 
     boolean existsByEmail(String email);

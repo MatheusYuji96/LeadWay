@@ -1,9 +1,7 @@
 package com.leadway.dto.request;
 
 import com.leadway.entity.ClassificacaoContato;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 public class ContatoRequestDTO {
 
@@ -18,6 +16,8 @@ public class ContatoRequestDTO {
     private String email;
 
     @NotBlank
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String whatsapp;
 
     private Integer leadId;
