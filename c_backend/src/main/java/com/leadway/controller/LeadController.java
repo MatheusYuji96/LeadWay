@@ -38,7 +38,7 @@ public class LeadController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> atualizar(@PathVariable Integer id, @RequestBody AtualizarLeadRequestDTO requestDTO) {
+    public ResponseEntity<LeadResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarLeadRequestDTO requestDTO) {
         Lead lead = leadService.atualizar(id, requestDTO);
         LeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(lead);
         return ResponseEntity.status(200).body(responseDTO);

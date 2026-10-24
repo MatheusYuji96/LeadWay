@@ -1,8 +1,10 @@
 package com.leadway.service;
 
+import com.leadway.dto.request.AtualizarContatoRequestDTO;
 import com.leadway.dto.request.ContatoRequestDTO;
 import com.leadway.entity.Contato;
 import com.leadway.entity.Lead;
+import com.leadway.exception.ContatoNaoExistenteException;
 import com.leadway.exception.EmailJaCadastradoException;
 import com.leadway.exception.LeadNaoEncontradoException;
 import com.leadway.mapper.ContatoMapper;
@@ -43,5 +45,37 @@ public class ContatoService {
         contato.setLead(lead);
         contatoRepository.save(contato);
         return contato;
+    }
+
+    public Contato renovar(Integer id, AtualizarContatoRequestDTO dto){
+        Optional<Contato> contatoOpt = contatoRepository.findById(id);
+        if (contatoOpt.isEmpty()){
+            throw new ContatoNaoExistenteException("Contato não consta nos registros");
+        }
+        Contato contato = contatoOpt.get();
+        if (dto.getCargo() != null){
+            contato.setCargo(dto.getCargo());
+        }
+        if (dto.getEmail() != null){
+            contato.setEmail(dto.getEmail());
+        }
+        if (dto.getWhatsapp() != null){
+            contato.setWhatsapp(dto.getWhatsapp());
+        }
+        if (dto.getAtivo() != null){
+            contato.setAtivo(dto.getAtivo());
+        }
+        if (dto.getContato() != null){
+            contato.setClassificacao(dto.getContato());
+        }
+        Contato contatoRegistrar = contatoRepository.save(contato);
+        return contatoRegistrar;
+    }
+
+    public void apagar(Integer id){
+        if (!contatoRepository.existsById(id)){
+            throw new ContatoNaoExistenteException("Contato não consta nos registros");
+        }
+        contatoRepository.deleteById(id);
     }
 }
