@@ -1,6 +1,7 @@
 package com.leadway.controller;
 
 import com.leadway.dto.response.AtividadeDiariaResponseDTO;
+import com.leadway.dto.response.AtividadesSemanaResponseDTO;
 import com.leadway.dto.response.DashboardIndicadoresResponseDTO;
 import com.leadway.dto.response.ProximosCompromissosResponseDTO;
 import com.leadway.service.DashboardService;
@@ -33,7 +34,7 @@ public class DashboardController {
     }
 
     @GetMapping("/atividades-semana/{id}")
-    public  ResponseEntity<AtividadeDiariaResponseDTO> buscarAtividades(@PathVariable Integer idVendedor) {
-        return ResponseEntity.status(200).body(dashboardService.buscarAtividade(idVendedor));
+    public  ResponseEntity<AtividadesSemanaResponseDTO  > buscarAtividades(@PathVariable Integer idVendedor) {
+        return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(idVendedor));
     }
 }

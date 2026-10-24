@@ -1,6 +1,7 @@
 package com.leadway.service;
 
 import com.leadway.dto.response.AtividadeDiariaResponseDTO;
+import com.leadway.dto.response.AtividadesSemanaResponseDTO;
 import com.leadway.dto.response.DashboardIndicadoresResponseDTO;
 import com.leadway.dto.response.ProximosCompromissosResponseDTO;
 import com.leadway.entity.Tarefa;
@@ -82,7 +83,7 @@ public class DashboardService {
                 )).toList();
     }
 
-    public List<AtividadeDiariaResponseDTO> buscarAtividade(Integer idVendedor) {
+    public AtividadesSemanaResponseDTO buscarAtividadesSemana(Integer idVendedor) {
         LocalDate hoje = LocalDate.now();
 
         Integer diasDesdeSegunda = hoje.getDayOfWeek().getValue() - 1;
@@ -128,7 +129,7 @@ public class DashboardService {
             atividades.add(new AtividadeDiariaResponseDTO(dia, contatos, portfolios, followUps));
         }
 
-        return atividades;
+        return new AtividadesSemanaResponseDTO(inicioDaSemana, fimDaSemana.minusDays(1), atividades);
     }
 
 }
