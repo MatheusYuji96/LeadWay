@@ -1,9 +1,6 @@
 package com.leadway.controller;
 
-import com.leadway.dto.response.AtividadeDiariaResponseDTO;
-import com.leadway.dto.response.AtividadesSemanaResponseDTO;
-import com.leadway.dto.response.DashboardIndicadoresResponseDTO;
-import com.leadway.dto.response.ProximosCompromissosResponseDTO;
+import com.leadway.dto.response.*;
 import com.leadway.service.DashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +31,12 @@ public class DashboardController {
     }
 
     @GetMapping("/atividades-semana/{id}")
-    public  ResponseEntity<AtividadesSemanaResponseDTO  > buscarAtividades(@PathVariable Integer idVendedor) {
+    public ResponseEntity<AtividadesSemanaResponseDTO> buscarAtividades(@PathVariable Integer idVendedor) {
         return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(idVendedor));
+    }
+
+    @GetMapping("leads=-atencao/{id}")
+    public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer idVendeor) {
+        return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(idVendeor));
     }
 }

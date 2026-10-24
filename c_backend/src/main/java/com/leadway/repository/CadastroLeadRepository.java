@@ -18,8 +18,4 @@ public interface CadastroLeadRepository extends JpaRepository<Lead, Integer> {
             "(:vendedorId is null or v.id = :vendedorId) and " +
             "(:cadencia is null or :cadencia = '' or l.cadencia = :cadencia)")
     List<Lead> findByFiltros(@Param("termo") String termo, @Param("vendedorId") Long vendedorId, @Param("cadencia") String cadencia);
-    
-    Integer countByVendedor_IdAndAtivoTrueAndDataPrimeiraVisitaIsNull(Integer vendedorId);
-
-    Integer countByVendedor_IdAndAtivoTrue(Integer idVendedor);
 }
