@@ -1,5 +1,7 @@
 package com.leadway.service;
 
+import com.leadway.dto.request.AtualizarLeadRequestDTO;
+import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
 import com.leadway.entity.Vendedor;
 import com.leadway.exception.EmailJaCadastradoException;
@@ -19,11 +21,6 @@ public class VendedorService {
     public VendedorService(VendedorRepository vendedorRepository) {
         this.vendedorRepository = vendedorRepository;
     }
-
-//    public List<Vendedor> listarVendedor(){
-//        List<Vendedor> lista = vendedorRepository.findByFiltros();
-//        return lista;
-//    }
 
     public List<Vendedor> listarPorFiltro(String termo){
         List<Vendedor> lista = vendedorRepository.findByFiltros(termo);
@@ -47,13 +44,41 @@ public class VendedorService {
         return vendedor;
     }
 
-    public Vendedor atualizar(Integer id, VendedorRequestDTO dto){
-        Vendedor vendedor = VendedorMapper.toEntityVendedor(dto);
+    public Vendedor atualizar(Integer id, AtualizarVendedorRequestDTO dto){
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(id);
+        if (vendedorOpt.isEmpty()){
+            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+        }
+        Vendedor vendedor = vendedorOpt.get();
+        vendedor.setId(id);
+        if (dto.getEmail() != null){
+            vendedor.setEmail(dto.getEmail());
+        }
+        if (dto.getTelefone() != null){
+            vendedor.setTelefone(dto.getTelefone());
+        }
+        if (dto.getSenha() != null){
+            vendedor.setSenha(dto.getSenha());
+        }
+        if (dto.getAtivo() != null){
+            vendedor.setAtivo(dto.getAtivo());
+        }
+        if (dto.getLiderId() != null){
+            Optional<Vendedor> liderOpt = vendedorRepository.findById(dto.getLiderId());
+            if (liderOpt.isEmpty()){
+                throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+            }
+            Vendedor lider = liderOpt.get();
+            vendedor.setLider(lider);
+        }
+        Vendedor vendedorLocalizado = vendedorRepository.save(vendedor);
+        return vendedorLocalizado;
+    }
+
+    public void apagar(Integer id){
         if (!vendedorRepository.existsById(id)){
             throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
         }
-        vendedor.setId(id);
-        Vendedor vendedorLocalizado = vendedorRepository.save(vendedor);
-        return vendedorLocalizado;
+        vendedorRepository.deleteById(id);
     }
 }

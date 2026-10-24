@@ -1,9 +1,6 @@
 package com.leadway.dto.response;
 
-import com.leadway.entity.Endereco;
-import com.leadway.entity.Setor;
-
-public class CadastroLeadResponseDTO {
+public class LeadResponseDTO {
 
     private String cnpj;
     private String razaoSocial;
@@ -17,7 +14,7 @@ public class CadastroLeadResponseDTO {
     private String potencial;
     private Boolean ativo;
 
-    public CadastroLeadResponseDTO() {
+    public LeadResponseDTO() {
     }
 
     public static class VendedorDTO{

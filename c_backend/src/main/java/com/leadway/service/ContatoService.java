@@ -6,22 +6,28 @@ import com.leadway.entity.Lead;
 import com.leadway.exception.EmailJaCadastradoException;
 import com.leadway.exception.LeadNaoEncontradoException;
 import com.leadway.mapper.ContatoMapper;
-import com.leadway.repository.CadastroLeadRepository;
+import com.leadway.repository.LeadRepository;
 import com.leadway.repository.ContatoRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ContatoService {
 
     private final ContatoRepository contatoRepository;
-    private final CadastroLeadRepository cadastroLeadRepository;
+    private final LeadRepository leadRepository;
     private final ContatoMapper contatoMapper = new ContatoMapper();
 
-    public ContatoService(ContatoRepository contatoRepository, CadastroLeadRepository cadastroLeadRepository) {
+    public ContatoService(ContatoRepository contatoRepository, LeadRepository leadRepository) {
         this.contatoRepository = contatoRepository;
-        this.cadastroLeadRepository = cadastroLeadRepository;
+        this.leadRepository = leadRepository;
+    }
+
+    public List<Contato> listarPorFiltro(String termo, Integer leadId){
+        List<Contato> lista = contatoRepository.findByFiltros(termo, leadId);
+        return lista;
     }
 
     public Contato salvar(ContatoRequestDTO dto){
@@ -29,7 +35,7 @@ public class ContatoService {
         if (contatoRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
-        Optional<Lead> leadOpt = cadastroLeadRepository.findById(dto.getLeadId());
+        Optional<Lead> leadOpt = leadRepository.findById(dto.getLeadId());
         if (leadOpt.isEmpty()){
             throw new LeadNaoEncontradoException("Lead informado não existe");
         }
