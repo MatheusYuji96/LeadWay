@@ -15,7 +15,7 @@ public class VendedorMapper {
         vendedor.setEmail(dto.getEmail());
         vendedor.setTelefone(dto.getTelefone());
         vendedor.setSenha(dto.getSenha());
-        vendedor.setAtivo(dto.getAtivo());
+        vendedor.setAtivo(true);
 
         return vendedor;
     }

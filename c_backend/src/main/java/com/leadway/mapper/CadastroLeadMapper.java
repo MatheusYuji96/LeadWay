@@ -14,6 +14,7 @@ public class CadastroLeadMapper {
         lead.setRazaoSocial(cadastroLeadRequestDTO.getRazaoSocial());
         lead.setNomeFantasia(cadastroLeadRequestDTO.getNomeFantasia());
         lead.setEmail(cadastroLeadRequestDTO.getEmail());
+        lead.setTelefone(cadastroLeadRequestDTO.getTelefone());
         lead.setEndereco(toEndereco(cadastroLeadRequestDTO.getEndereco()));
         lead.setPotencial(cadastroLeadRequestDTO.getPotencial());
         lead.setAtivo(true);
@@ -27,6 +28,7 @@ public class CadastroLeadMapper {
         leadResponse.setNomeFantasia(lead.getNomeFantasia());
         leadResponse.setSetor(toSetorResponse(lead.getSetor()));
         leadResponse.setEmail(lead.getEmail());
+        leadResponse.setTelefone(lead.getTelefone());
         leadResponse.setEtapa(toEtapaResponse(lead.getEtapa()));
         leadResponse.setEndereco(toEnderecoResponse(lead.getEndereco()));
         leadResponse.setVendedor(toVendedorResponse(lead.getVendedor()));

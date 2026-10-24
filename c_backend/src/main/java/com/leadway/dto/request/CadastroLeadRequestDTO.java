@@ -1,7 +1,6 @@
 package com.leadway.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 public class CadastroLeadRequestDTO {
 
@@ -22,11 +21,17 @@ public class CadastroLeadRequestDTO {
 
     private Integer etapaId;
 
-    @NotBlank
+    @NotNull
     private EnderecoDto endereco;
 
+    @NotBlank
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
+
+    @NotBlank
     private String potencial;
+
     private Integer vendedorId;
 
     public static class EnderecoDto {
