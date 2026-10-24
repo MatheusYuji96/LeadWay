@@ -16,7 +16,7 @@ public class Lead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "setor_id", nullable = false)
     private Setor setor;
 
@@ -24,7 +24,7 @@ public class Lead {
     @JoinColumn(name = "endereco_id", nullable = false)
     private Endereco endereco;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "vendedor_id")
     private Vendedor vendedor;
 
@@ -50,13 +50,13 @@ public class Lead {
     @Column(columnDefinition = "CHAR(11)", nullable = false)
     private String telefone;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String prioridade;
 
     @Column(nullable = false, length = 30)
     private String potencial;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private String farol;
 
     private LocalDateTime dataPrimeiroContato;
@@ -157,6 +157,8 @@ public class Lead {
         return ativo;
     }
 
+    public void setId(Integer id) { this.id = id; }
+
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
     }
@@ -203,6 +205,14 @@ public class Lead {
 
     public void desativar() {
         this.ativo = false;
+    }
+
+    public void setDataPrimeiroContato(LocalDateTime dataPrimeiroContato) {
+        this.dataPrimeiroContato = dataPrimeiroContato;
+    }
+
+    public void setDataPrimeiraVisita(LocalDateTime dataPrimeiraVisita) {
+        this.dataPrimeiraVisita = dataPrimeiraVisita;
     }
 
     public void setPrioridade(String prioridade) {

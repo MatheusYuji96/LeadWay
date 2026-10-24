@@ -72,6 +72,8 @@ public class Vendedor {
         return lider;
     }
 
+    public void setId(Integer id) { this.id = id; }
+
     public void setLider(Vendedor lider) {
         this.lider = lider;
     }

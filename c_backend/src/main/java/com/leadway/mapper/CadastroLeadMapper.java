@@ -1,7 +1,7 @@
 package com.leadway.mapper;
 
 import com.leadway.dto.request.CadastroLeadRequestDTO;
-import com.leadway.dto.response.CadastroLeadResponseDTO;
+import com.leadway.dto.response.LeadResponseDTO;
 import com.leadway.entity.*;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +14,21 @@ public class CadastroLeadMapper {
         lead.setRazaoSocial(cadastroLeadRequestDTO.getRazaoSocial());
         lead.setNomeFantasia(cadastroLeadRequestDTO.getNomeFantasia());
         lead.setEmail(cadastroLeadRequestDTO.getEmail());
+        lead.setTelefone(cadastroLeadRequestDTO.getTelefone());
         lead.setEndereco(toEndereco(cadastroLeadRequestDTO.getEndereco()));
         lead.setPotencial(cadastroLeadRequestDTO.getPotencial());
         lead.setAtivo(true);
         return lead;
     }
 
-    public CadastroLeadResponseDTO toResponse(Lead lead){
-        CadastroLeadResponseDTO leadResponse = new CadastroLeadResponseDTO();
+    public LeadResponseDTO toResponse(Lead lead){
+        LeadResponseDTO leadResponse = new LeadResponseDTO();
         leadResponse.setCnpj(lead.getCnpj());
         leadResponse.setRazaoSocial(lead.getRazaoSocial());
         leadResponse.setNomeFantasia(lead.getNomeFantasia());
         leadResponse.setSetor(toSetorResponse(lead.getSetor()));
         leadResponse.setEmail(lead.getEmail());
+        leadResponse.setTelefone(lead.getTelefone());
         leadResponse.setEtapa(toEtapaResponse(lead.getEtapa()));
         leadResponse.setEndereco(toEnderecoResponse(lead.getEndereco()));
         leadResponse.setVendedor(toVendedorResponse(lead.getVendedor()));
@@ -35,8 +37,8 @@ public class CadastroLeadMapper {
         return leadResponse;
     }
 
-    public CadastroLeadResponseDTO.VendedorDTO toVendedorResponse(Vendedor vendedor){
-        CadastroLeadResponseDTO.VendedorDTO dto = new CadastroLeadResponseDTO.VendedorDTO();
+    public LeadResponseDTO.VendedorDTO toVendedorResponse(Vendedor vendedor){
+        LeadResponseDTO.VendedorDTO dto = new LeadResponseDTO.VendedorDTO();
         dto.setCodVendedor(vendedor.getCodVendedor());
         dto.setNome(vendedor.getNome());
         dto.setEmail(vendedor.getEmail());
@@ -45,20 +47,20 @@ public class CadastroLeadMapper {
         return dto;
     }
 
-    public CadastroLeadResponseDTO.EtapaDTO toEtapaResponse (Etapa etapa){
-        CadastroLeadResponseDTO.EtapaDTO dto = new CadastroLeadResponseDTO.EtapaDTO();
+    public LeadResponseDTO.EtapaDTO toEtapaResponse (Etapa etapa){
+        LeadResponseDTO.EtapaDTO dto = new LeadResponseDTO.EtapaDTO();
         dto.setNome(etapa.getNome());
         dto.setOrdem(etapa.getOrdem());
         return dto;
     }
-    public CadastroLeadResponseDTO.SetorDTO toSetorResponse(Setor setor){
-        CadastroLeadResponseDTO.SetorDTO setorDTO = new CadastroLeadResponseDTO.SetorDTO();
+    public LeadResponseDTO.SetorDTO toSetorResponse(Setor setor){
+        LeadResponseDTO.SetorDTO setorDTO = new LeadResponseDTO.SetorDTO();
         setorDTO.setNome(setor.getNome());
         return setorDTO;
     }
 
-    public CadastroLeadResponseDTO.EnderecoDTO toEnderecoResponse(Endereco endereco){
-        CadastroLeadResponseDTO.EnderecoDTO enderecoDTO = new CadastroLeadResponseDTO.EnderecoDTO();
+    public LeadResponseDTO.EnderecoDTO toEnderecoResponse(Endereco endereco){
+        LeadResponseDTO.EnderecoDTO enderecoDTO = new LeadResponseDTO.EnderecoDTO();
         enderecoDTO.setRua(endereco.getRua());
         enderecoDTO.setNumero(endereco.getNumero());
         enderecoDTO.setCep(endereco.getCep());
