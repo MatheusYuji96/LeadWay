@@ -74,13 +74,13 @@ public class ContatoService {
         return contatoRegistrar;
     }
 
-    public Contato renovarLead(Integer contatoId, Integer leadId){
+    public Contato renovarLead(Integer contatoId, Integer novoLeadId){
         Optional<Contato> contatoOpt = contatoRepository.findById(contatoId);
         if (contatoOpt.isEmpty()){
             throw new ContatoNaoExistenteException("Contato não consta nos registros");
         }
         Contato contato = contatoOpt.get();
-        Optional<Lead> leadOpt = leadRepository.findById(leadId);
+        Optional<Lead> leadOpt = leadRepository.findById(novoLeadId);
         if (leadOpt.isEmpty()){
             throw new LeadNaoEncontradoException("Lead não consta nos registros");
         }
