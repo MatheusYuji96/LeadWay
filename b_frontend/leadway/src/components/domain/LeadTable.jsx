@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/common/Badge'
+import { Button } from '@/components/common/Button'
 import { Icon } from '@/components/common/Icon'
 import { EmptyState, ErrorState, Skeleton } from '@/components/common/Feedback'
 import { companyInitials, scoreStars } from '@/models/lead'
 import { CADENCE_STATUS } from '@/models/enums'
 import { paths } from '@/routes/paths'
+import { leadsService } from '@/services/leads.service'
 import styles from './LeadTable.module.css'
 
-export function LeadTable({ items, loading, error, compact = false, onRetry, onClearFilters }) {
+export function LeadTable({ items, loading, error, compact = false, onRetry, onClearFilters, onDeleted }) {
   const navigate = useNavigate()
 
   if (loading) return <Skeleton lines={4} />
@@ -24,6 +26,23 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
   }
 
   const rows = compact ? items.slice(0, 4) : items
+
+  const handleDelete = async (e, leadId) => {
+    e.stopPropagation()
+    if (!window.confirm('Tem certeza que deseja excluir este lead?')) {
+      return
+    }
+    try {
+      await leadsService.remove(leadId)
+      if (typeof onDeleted === 'function') {
+        onDeleted(leadId)
+      } else if (typeof onRetry === 'function') {
+        onRetry()
+      }
+    } catch (err) {
+      alert(err?.message || 'Não foi possível excluir o lead.')
+    }
+  }
 
   return (
     <div className={styles.scroll}>
@@ -67,7 +86,15 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
               </span>
               <span>{lead.nextAction}</span>
               <span className={styles.more}>
-                <Icon name="more" size={16} />
+                <Button
+                  kind="ghost"
+                  size="sm"
+                  aria-label="Excluir lead"
+                  title="Excluir lead"
+                  onClick={(e) => handleDelete(e, lead.id)}
+                >
+                  <Icon name="trash" size={16} />
+                </Button>
               </span>
             </div>
           )

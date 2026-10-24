@@ -24,4 +24,12 @@ export const representativesService = {
   async create(payload) {
     return unwrap(await http.post('/representatives', payload))
   },
+
+  /**
+   * DELETE /representatives/:id
+   * @param {string} id
+   */
+  async remove(id) {
+    return unwrap(await http.delete(`/representatives/${id}`))
+  },
 }

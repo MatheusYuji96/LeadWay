@@ -9,7 +9,6 @@ export function StatCard({ icon, label, value, detail, delta, tone = 'brand' }) 
       </div>
       <div className={styles.top}>
         <span>{label}</span>
-        <Icon name="more" size={14} />
       </div>
       <strong className={styles.value}>{value}</strong>
       <small className={styles.detail}>

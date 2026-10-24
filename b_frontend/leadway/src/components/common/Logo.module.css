@@ -4,53 +4,14 @@
   gap: 8px;
   color: var(--ink);
   cursor: default;
+  height: 32px;
+  max-width: 100%;
 }
 
-.logo strong {
-  font-size: 24px;
-  letter-spacing: -0.05em;
-}
-
-.logo strong span {
-  color: var(--brand);
-}
-
-.mark {
-  width: 31px;
-  height: 31px;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  padding: 7px;
-  border-radius: 9px;
-  background: var(--brand);
-  transform: skew(-5deg);
-  flex: 0 0 auto;
-}
-
-.mark i {
+.image {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   display: block;
-  width: 5px;
-  background: var(--surface);
-  border-radius: 4px;
-}
-
-.mark i:nth-child(1) {
-  height: 8px;
-  opacity: 0.65;
-}
-
-.mark i:nth-child(2) {
-  height: 13px;
-  opacity: 0.82;
-}
-
-.mark i:nth-child(3) {
-  height: 19px;
-}
-
-.light strong {
-  color: var(--surface);
+  object-fit: contain;
 }

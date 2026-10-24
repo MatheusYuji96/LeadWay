@@ -38,6 +38,14 @@ export const leadsService = {
   },
 
   /**
+   * DELETE /leads/:id
+   * @param {string} id
+   */
+  async remove(id) {
+    return unwrap(await http.delete(`/leads/${id}`))
+  },
+
+  /**
    * POST /leads/:id/transfer
    * @param {string} id
    * @param {{ representativeId: string, reason: string }} payload

@@ -1,14 +1,10 @@
 import axios from 'axios'
-import { createMockAdapter } from './mock/createMockAdapter'
+import { createLocalApiAdapter } from './localApiAdapter'
 
 const baseURL = (import.meta.env.VITE_API_BASE_URL ?? '').trim()
-const rawMock = import.meta.env.VITE_USE_MOCK
 
-/**
- * Modo demonstração ativo quando VITE_USE_MOCK=true ou quando nenhuma
- * VITE_API_BASE_URL foi configurada (padrão seguro em desenvolvimento).
- */
-export const isMockMode = rawMock === 'true' || (rawMock !== 'false' && !baseURL)
+// Always use local adapter for offline/localStorage-based operation as requested
+export const isMockMode = true
 
 export const http = axios.create({
   baseURL: baseURL || '/api',
@@ -16,9 +12,7 @@ export const http = axios.create({
   timeout: 15000,
 })
 
-if (isMockMode) {
-  http.defaults.adapter = createMockAdapter()
-}
+http.defaults.adapter = createLocalApiAdapter()
 
 http.interceptors.response.use(
   (response) => response,

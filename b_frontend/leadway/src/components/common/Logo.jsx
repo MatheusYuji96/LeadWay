@@ -1,4 +1,5 @@
 import styles from './Logo.module.css'
+import logoSrc from '@/assets/images/LeadWay.svg'
 
 export function Logo({ compact = false, light = false, onClick }) {
   return (
@@ -8,16 +9,12 @@ export function Logo({ compact = false, light = false, onClick }) {
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <span className={styles.mark}>
-        <i />
-        <i />
-        <i />
-      </span>
-      {!compact && (
-        <strong>
-          Lead<span>Way</span>
-        </strong>
-      )}
+      <img
+        src={logoSrc}
+        alt="LeadWay"
+        className={styles.image}
+        style={{ width: 'auto', height: '100%', maxHeight: '32px', display: 'block' }}
+      />
     </span>
   )
 }

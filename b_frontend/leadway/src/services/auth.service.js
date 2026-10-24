@@ -1,12 +1,5 @@
 import { http, unwrap } from './http'
 
-/**
- * Autenticação / sessão.
- *
- * Contrato pendente no backend — ver docs/API_CONTRACTS.md.
- * O fluxo de UI não inventa armazenamento de token: enquanto o backend
- * não define o mecanismo, a sessão vive apenas no estado da aplicação.
- */
 export const authService = {
   /**
    * POST /auth/login
@@ -26,5 +19,14 @@ export const authService = {
   async signup(payload) {
     const { user } = unwrap(await http.post('/auth/signup', payload))
     return user
+  },
+
+  async me() {
+    const { user } = unwrap(await http.get('/auth/me'))
+    return user
+  },
+
+  async logout() {
+    return unwrap(await http.post('/auth/logout'))
   },
 }

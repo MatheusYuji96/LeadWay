@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@/components/common/Avatar'
 import { Badge } from '@/components/common/Badge'
+import { Button } from '@/components/common/Button'
 import { EmptyState, ErrorState, Skeleton } from '@/components/common/Feedback'
 import { Icon } from '@/components/common/Icon'
 import { repDisplayEmail } from '@/models/representative'
 import { paths } from '@/routes/paths'
+import { representativesService } from '@/services/representatives.service'
 import styles from './RepTable.module.css'
 
-export function RepTable({ items, loading, error, onRetry, onClearFilters }) {
+export function RepTable({ items, loading, error, onRetry, onClearFilters, onDeleted }) {
   const navigate = useNavigate()
 
   if (loading) return <Skeleton lines={4} />
@@ -22,6 +24,23 @@ export function RepTable({ items, loading, error, onRetry, onClearFilters }) {
         onAction={onClearFilters}
       />
     )
+  }
+
+  const handleDelete = async (e, repId) => {
+    e.stopPropagation()
+    if (!window.confirm('Tem certeza que deseja excluir este representante?')) {
+      return
+    }
+    try {
+      await representativesService.remove(repId)
+      if (typeof onDeleted === 'function') {
+        onDeleted(repId)
+      } else if (typeof onRetry === 'function') {
+        onRetry()
+      }
+    } catch (err) {
+      alert(err?.message || 'Não foi possível excluir o representante.')
+    }
   }
 
   return (
@@ -56,7 +75,15 @@ export function RepTable({ items, loading, error, onRetry, onClearFilters }) {
             </span>
             <span>{rep.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="neutral">Inativo</Badge>}</span>
             <span className={styles.more}>
-              <Icon name="more" size={16} />
+              <Button
+                kind="ghost"
+                size="sm"
+                aria-label="Excluir representante"
+                title="Excluir representante"
+                onClick={(e) => handleDelete(e, rep.id)}
+              >
+                <Icon name="trash" size={16} />
+              </Button>
             </span>
           </div>
         ))}
