@@ -37,12 +37,14 @@ public class ContatoService {
         if (contatoRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
-        Optional<Lead> leadOpt = leadRepository.findById(dto.getLeadId());
-        if (leadOpt.isEmpty()){
-            throw new LeadNaoEncontradoException("Lead informado não existe");
+        if (dto.getLeadId() != null) {
+            Optional<Lead> leadOpt = leadRepository.findById(dto.getLeadId());
+            if (leadOpt.isEmpty()) {
+                throw new LeadNaoEncontradoException("Lead informado não existe");
+            }
+            Lead lead = leadOpt.get();
+            contato.setLead(lead);
         }
-        Lead lead = leadOpt.get();
-        contato.setLead(lead);
         contatoRepository.save(contato);
         return contato;
     }
@@ -70,6 +72,21 @@ public class ContatoService {
         }
         Contato contatoRegistrar = contatoRepository.save(contato);
         return contatoRegistrar;
+    }
+
+    public Contato renovarLead(Integer contatoId, Integer leadId){
+        Optional<Contato> contatoOpt = contatoRepository.findById(contatoId);
+        if (contatoOpt.isEmpty()){
+            throw new ContatoNaoExistenteException("Contato não consta nos registros");
+        }
+        Contato contato = contatoOpt.get();
+        Optional<Lead> leadOpt = leadRepository.findById(leadId);
+        if (leadOpt.isEmpty()){
+            throw new LeadNaoEncontradoException("Lead não consta nos registros");
+        }
+        Lead lead = leadOpt.get();
+        contato.setLead(lead);
+        return contato;
     }
 
     public void apagar(Integer id){

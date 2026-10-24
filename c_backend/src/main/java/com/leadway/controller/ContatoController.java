@@ -32,16 +32,32 @@ public class ContatoController {
 
     @PostMapping
     public ResponseEntity<ContatoResponseDTO> cadastrar(
-            @PathVariable Integer leadId,
             @Valid @RequestBody ContatoRequestDTO dto) {
-
-        dto.setLeadId(leadId);
 
         Contato contato = contatoService.salvar(dto);
         ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);
 
         return ResponseEntity.status(201).body(responseDTO);
     }
+
+    @PatchMapping("/{contatoId}/vincular-lead/{leadId")
+    public ResponseEntity<ContatoResponseDTO> atualizarLead(@PathVariable Integer contatoId, @PathVariable Integer leadId){
+        Contato contato = contatoService.renovarLead(contatoId, leadId);
+        ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);
+        return ResponseEntity.status(200).body(responseDTO);
+    }
+//    @PostMapping
+//    public ResponseEntity<ContatoResponseDTO> cadastrar(
+//            @PathVariable Integer leadId,
+//            @Valid @RequestBody ContatoRequestDTO dto) {
+//
+//            dto.setLeadId(leadId);
+//
+//        Contato contato = contatoService.criar(dto);
+//        ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);
+//
+//        return ResponseEntity.status(201).body(responseDTO);
+//    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ContatoResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarContatoRequestDTO dto){
