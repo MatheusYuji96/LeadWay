@@ -1,5 +1,6 @@
 package com.leadway.controller;
 
+import com.leadway.dto.request.AtualizarContatoRequestDTO;
 import com.leadway.dto.request.ContatoRequestDTO;
 import com.leadway.dto.response.ContatoResponseDTO;
 import com.leadway.entity.Contato;
@@ -42,7 +43,16 @@ public class ContatoController {
         return ResponseEntity.status(201).body(responseDTO);
     }
 
-//    @PatchMapping("/{id}")
-//
-//    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ContatoResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarContatoRequestDTO dto){
+        Contato contato = contatoService.renovar(id, dto);
+        ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);
+        return ResponseEntity.status(200).body(responseDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id){
+        contatoService.apagar(id);
+        return ResponseEntity.status(204).build();
+    }
 }
