@@ -1,0 +1,142 @@
+.header {
+  height: 72px;
+  padding: 0 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--wire-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.iconButton {
+  position: relative;
+  padding: 8px;
+}
+
+.dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  top: 7px;
+  right: 7px;
+  border: 1px solid white;
+}
+
+.separator {
+  width: 1px;
+  height: 28px;
+  background: var(--line);
+  margin: 0 8px;
+}
+
+.userMenu {
+  position: relative;
+}
+
+.userTrigger {
+  padding: 6px 8px;
+  color: var(--ink);
+  text-align: left;
+  gap: 10px;
+}
+
+.headerUser strong {
+  display: block;
+  font-size: 14px;
+}
+
+.headerUser small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chevron,
+.chevronOpen {
+  display: flex;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.dropdown {
+  position: absolute;
+  z-index: 60;
+  width: 230px;
+  top: calc(100% + 10px);
+  right: 0;
+  padding: 8px;
+  border: 1px solid var(--wire-line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.dropdownHead {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dropdownHead strong {
+  display: block;
+  font-size: 14px;
+}
+
+.dropdownHead small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.menuItem {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 38px;
+  font-size: 14px;
+}
+
+.menuItemLogout {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.mobileMenu {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .mobileMenu {
+    display: inline-flex;
+  }
+
+  .headerUser {
+    display: none;
+  }
+
+  .separator {
+    display: none;
+  }
+}

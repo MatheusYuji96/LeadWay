@@ -1,0 +1,38 @@
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--wire-line);
+  border-radius: var(--radius);
+  padding: 24px;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.headText {
+  min-width: 0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.head p {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}

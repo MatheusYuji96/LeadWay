@@ -1,0 +1,117 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 44%) 1fr;
+  background: var(--surface);
+}
+
+.pitch {
+  background: var(--sidebar-bg);
+  color: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.pitchBody {
+  margin: auto 0;
+  max-width: 420px;
+}
+
+.pitchBody h1 {
+  color: white;
+}
+
+.pitchBody > p {
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.pitchBody ul {
+  list-style: none;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pitchBody li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.pitchBody li svg {
+  color: var(--brand);
+}
+
+.formSide {
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+}
+
+.formBox {
+  width: min(420px, 100%);
+}
+
+.formHead {
+  margin-bottom: 24px;
+}
+
+.formHead h2 {
+  margin-top: 24px;
+}
+
+.formHead p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 20px;
+}
+
+.switch a {
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.back svg {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .pitch {
+    display: none;
+  }
+}
