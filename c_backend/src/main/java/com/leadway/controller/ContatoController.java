@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/leads/{leadId}/contatos")
 public class ContatoController {
@@ -18,6 +20,13 @@ public class ContatoController {
 
     public ContatoController(ContatoService contatoService) {
         this.contatoService = contatoService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ContatoResponseDTO>> listarPorFiltro(@RequestParam(required = false) String termo, @RequestParam(required = false) Integer leadId){
+        List<Contato> listaContatos = contatoService.listarPorFiltro(termo, leadId);
+        List<ContatoResponseDTO> listaResponse = listaContatos.stream().map(contatoMapper::toResponse).toList();
+        return ResponseEntity.status(200).body(listaResponse);
     }
 
     @PostMapping
@@ -32,4 +41,8 @@ public class ContatoController {
 
         return ResponseEntity.status(201).body(responseDTO);
     }
+
+//    @PatchMapping("/{id}")
+//
+//    @DeleteMapping("/{id}")
 }

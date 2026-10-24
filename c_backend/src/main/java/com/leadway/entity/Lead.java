@@ -207,6 +207,14 @@ public class Lead {
         this.ativo = false;
     }
 
+    public void setDataPrimeiroContato(LocalDateTime dataPrimeiroContato) {
+        this.dataPrimeiroContato = dataPrimeiroContato;
+    }
+
+    public void setDataPrimeiraVisita(LocalDateTime dataPrimeiraVisita) {
+        this.dataPrimeiraVisita = dataPrimeiraVisita;
+    }
+
     public void setPrioridade(String prioridade) {
         this.prioridade = prioridade;
     }

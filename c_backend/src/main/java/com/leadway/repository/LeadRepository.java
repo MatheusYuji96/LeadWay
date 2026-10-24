@@ -6,9 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface CadastroLeadRepository extends JpaRepository<Lead, Integer> {
+public interface LeadRepository extends JpaRepository<Lead, Integer> {
 
     @Query("select l from Lead l left join l.vendedor v left join l.etapa e where " +
             "(:termo is null or :termo = '' or " +
