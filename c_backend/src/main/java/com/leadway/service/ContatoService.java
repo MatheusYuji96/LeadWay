@@ -59,6 +59,9 @@ public class ContatoService {
             contato.setCargo(dto.getCargo());
         }
         if (dto.getEmail() != null){
+            if (contatoRepository.existsByEmailIgnoreCase(dto.getEmail())){
+                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+            }
             contato.setEmail(dto.getEmail());
         }
         if (dto.getWhatsapp() != null){

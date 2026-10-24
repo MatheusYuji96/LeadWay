@@ -18,4 +18,7 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     "(:fase is null or :fase = '' or e.nome = :fase)")
     List<Lead> findByFiltros(@Param("termo") String termo, @Param("vendedorId") Integer vendedorId, @Param("fase") String fase);
 
+    Boolean existsByEmailIgnoreCase(String email);
+
+    Boolean existsByCNPJ(String cnpj);
 }

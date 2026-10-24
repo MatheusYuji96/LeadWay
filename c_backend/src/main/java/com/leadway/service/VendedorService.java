@@ -52,6 +52,9 @@ public class VendedorService {
         Vendedor vendedor = vendedorOpt.get();
         vendedor.setId(id);
         if (dto.getEmail() != null){
+            if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
+                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+            }
             vendedor.setEmail(dto.getEmail());
         }
         if (dto.getTelefone() != null){

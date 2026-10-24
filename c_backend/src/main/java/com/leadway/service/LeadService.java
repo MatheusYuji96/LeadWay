@@ -41,6 +41,12 @@ public class LeadService {
 
     public Lead salvar(CadastroLeadRequestDTO dto) {
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
+        if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
+            throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+        }
+        if (leadRepository.existsByCNPJ(dto.getCnpj())){
+            throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
+        }
         if (dto.getVendedorId() != null) {
             Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
             if (vendedorOpt.isEmpty()) {
@@ -91,6 +97,9 @@ public class LeadService {
         Lead lead = leadOpt.get();
         lead.setId(id);
         if (dto.getEmail() != null){
+            if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
+                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+            }
             lead.setEmail(dto.getEmail());
         }
         if (dto.getTelefone() != null){
