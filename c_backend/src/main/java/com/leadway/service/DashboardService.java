@@ -27,7 +27,8 @@ public class DashboardService {
     public DashboardService(
             LeadRepository leadRepository,
             TarefaRepository tarefaRepository,
-            LeadEtapaHistoricoRepository leadEtapaHistoricoRepository, InteracaoRepository interacaoRepository) {
+            LeadEtapaHistoricoRepository leadEtapaHistoricoRepository,
+            InteracaoRepository interacaoRepository) {
         this.leadRepository = leadRepository;
         this.tarefaRepository = tarefaRepository;
         this.leadEtapaHistoricoRepository = leadEtapaHistoricoRepository;

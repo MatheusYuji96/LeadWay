@@ -35,7 +35,7 @@ public class DashboardController {
         return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(idVendedor));
     }
 
-    @GetMapping("leads=-atencao/{id}")
+    @GetMapping("/leads-atencao/{id}")
     public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer idVendeor) {
         return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(idVendeor));
     }
