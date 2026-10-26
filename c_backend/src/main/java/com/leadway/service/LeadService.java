@@ -44,7 +44,7 @@ public class LeadService {
         if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
-        if (leadRepository.existsByCNPJ(dto.getCnpj())){
+        if (leadRepository.existsBycnpj(dto.getCnpj())){
             throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
         }
         if (dto.getVendedorId() != null) {
