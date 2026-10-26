@@ -19,7 +19,7 @@ public class Vendedor {
     @OneToMany(mappedBy = "lider")
     private List<Vendedor> liderados = new ArrayList<>();
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String codVendedor;
 
     @Column(nullable = false, length = 190)
