@@ -1,0 +1,42 @@
+package com.leadway.controller;
+
+import com.leadway.dto.response.*;
+import com.leadway.service.DashboardService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/dashboard")
+public class DashboardController {
+
+    private final DashboardService dashboardService;
+
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping("/indicadores/{id}")
+    public ResponseEntity<DashboardIndicadoresResponseDTO> buscarIndicadores(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarIndicadores(id));
+    }
+
+    @GetMapping("/proximos-compromissos/{id}")
+    public ResponseEntity<List<ProximosCompromissosResponseDTO>> buscarProximosCompromissos(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarProximosCompromissos(id));
+    }
+
+    @GetMapping("/atividades-semana/{id}")
+    public ResponseEntity<AtividadesSemanaResponseDTO> buscarAtividades(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(id));
+    }
+
+    @GetMapping("/leads-atencao/{id}")
+    public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(id));
+    }
+}

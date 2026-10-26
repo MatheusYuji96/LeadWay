@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface LeadRepository extends JpaRepository<Lead, Integer> {
@@ -17,8 +18,10 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
             "(:vendedorId is null or v.id = :vendedorId) and " +
     "(:fase is null or :fase = '' or e.nome = :fase)")
     List<Lead> findByFiltros(@Param("termo") String termo, @Param("vendedorId") Integer vendedorId, @Param("fase") String fase);
+    Integer countByVendedor_IdAndAtivoTrueAndDataPrimeiraVisitaIsNull(Integer vendedorId);
 
     Boolean existsByEmailIgnoreCase(String email);
+    Integer countByVendedor_IdAndAtivoTrue(Integer idVendedor);
 
     Boolean existsBycnpj(String cnpj);
 }
