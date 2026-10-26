@@ -37,9 +37,10 @@ public class ContatoController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Contato cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos."),
+            @ApiResponse(responseCode = "400", description = "Dados de cadastro inválidos, ausentes ou em formato incorreto"),
             @ApiResponse(responseCode = "404", description = "Lead não consta no sistema"),
-            @ApiResponse(responseCode = "409", description = "E-mail de contato já cadastrado no sistema")
+            @ApiResponse(responseCode = "409", description = "E-mail de contato já cadastrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
     public ResponseEntity<ContatoResponseDTO> cadastrar(@Valid @RequestBody ContatoRequestDTO dto){

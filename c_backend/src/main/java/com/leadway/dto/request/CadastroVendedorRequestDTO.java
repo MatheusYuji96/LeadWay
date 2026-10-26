@@ -1,21 +1,35 @@
 package com.leadway.dto.request;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@Schema(description = "Dados necessários para cadastrar um usuário vendedor no sistema")
 public class CadastroVendedorRequestDTO {
 
+    @Schema(
+            description = "Nome do usuário vendedor",
+            example = "Maria Rocha"
+    )
     @NotBlank
     @Size(min = 3)
     private String nome;
 
+    @Schema(
+            description = "E-mail do usuário vendedor",
+            example = "mariarocha@outlook.com"
+    )
     @NotBlank
     @Email
     private String email;
 
+    @Schema(
+            description = "Senha utilizada no cadastro e login do usuário",
+            example = "Senhamuitosegura123!"
+    )
     @NotBlank
     @Size(min = 8)
     @Pattern(
@@ -24,9 +38,17 @@ public class CadastroVendedorRequestDTO {
     )
     private String senha;
 
+    @Schema(
+            description = "Confirmação de senha utilizada no cadastro e login do usuário",
+            example = "Senhamuitosegura123!"
+    )
     @NotBlank
     private String confirmarSenha;
 
+    @Schema(
+            description = "Telefone utilizado pelo usuário vendedor",
+            example = "1199899799"
+    )
     @NotBlank
     @Size(min = 11, max = 11)
     @Pattern(regexp = "^[0-9]+$")

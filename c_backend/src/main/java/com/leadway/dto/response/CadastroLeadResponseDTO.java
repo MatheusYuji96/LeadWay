@@ -2,29 +2,109 @@ package com.leadway.dto.response;
 
 import com.leadway.entity.Endereco;
 import com.leadway.entity.Setor;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Dados retornados após o cadastro de um Lead")
 public class CadastroLeadResponseDTO {
 
+    @Schema(
+            description = "CNPJ da empresa",
+            example = "12345678000199"
+    )
     private String cnpj;
+
+    @Schema(
+            description = "Razão social da empresa",
+            example = "Empresa Exemplo LTDA"
+    )
     private String razaoSocial;
+
+    @Schema(
+            description = "Nome fantasia da empresa",
+            example = "Empresa Exemplo"
+    )
     private String nomeFantasia;
+
+    @Schema(
+            description = "Dados consolidados do setor da empresa"
+    )
     private SetorDTO setor;
+
+    @Schema(
+            description = "E-mail principal da empresa",
+            example = "empresaexemplo@email.com"
+    )
     private String email;
+
+    @Schema(
+            description = "Dados consolidados de endereço da empresa"
+    )
     private EnderecoDTO endereco;
+
+    @Schema(
+            description = "Dados consolidados da etapa do funíl de vendas do lead"
+    )
     private EtapaDTO etapa;
+
+    @Schema(
+            description = "Dados consolidados do vendedor do lead"
+    )
     private VendedorDTO vendedor;
+
+    @Schema(
+            description = "Telefone principal da empresa",
+            example = "11991110000"
+    )
     private String telefone;
+
+    @Schema(
+            description = "Potencial do Lead definido pelo usuário",
+            example = "ALTO"
+    )
     private String potencial;
+
+    @Schema(
+            description = "Status de atividade do Lead",
+            example = "1"
+    )
     private Boolean ativo;
 
     public CadastroLeadResponseDTO() {
     }
 
+    @Schema(
+            description = "Dados do vendedor responsável pelo Lead"
+    )
     public static class VendedorDTO{
+
+        @Schema(
+                description = "Código de vendedor cadastrado pelo líder de equipe",
+                example = "VEN-001"
+        )
         private String codVendedor;
+
+        @Schema(
+                description = "Nome do usuário vendedor",
+                example = "Maria Rocha"
+        )
         private String nome;
+
+        @Schema(
+                description = "E-mail do usuário vendedor",
+                example = "mariarocha@outlook.com"
+        )
         private String email;
+
+        @Schema(
+                description = "Telefone de contato do usuário vendedor",
+                example = "1199899799"
+        )
         private String telefone;
+
+        @Schema(
+                description = "Status de atividade do usuário vendedor",
+                example = "1"
+        )
         private Boolean ativo;
 
         public String getCodVendedor() {
@@ -68,7 +148,15 @@ public class CadastroLeadResponseDTO {
         }
     }
 
+    @Schema(
+            description = "Dados do setor empresarial do Lead"
+    )
     public static class SetorDTO{
+
+        @Schema(
+                description = "Nome do setor empresarial do Lead",
+                example = "Têxtil"
+        )
         private String nome;
 
         public String getNome() {
@@ -80,8 +168,21 @@ public class CadastroLeadResponseDTO {
         }
     }
 
+    @Schema(
+            description = "Dados da etapa do funíl de vendas do Lead"
+    )
     public static class EtapaDTO{
+
+        @Schema(
+                description = "Nome da etapa do funíl de vendas",
+                example = "Qualificação"
+        )
         private String nome;
+
+        @Schema(
+                description = "Ordem em número da etapa do funíl de vendas",
+                example = "1"
+        )
         private Integer ordem;
 
         public String getNome() {
@@ -101,14 +202,57 @@ public class CadastroLeadResponseDTO {
         }
     }
 
+    @Schema(
+            description = "Dados de endereço do Lead"
+    )
     public static class EnderecoDTO{
+
+        @Schema(
+                description = "Rua do endereço",
+                example = "Rua Oscar Freire"
+        )
         private String rua;
+
+        @Schema(
+                description = "CEP do endereço",
+                example = "01310100"
+        )
         private String cep;
+
+        @Schema(
+                description = "Número do imóvel",
+                example = "110"
+        )
         private String numero;
+
+        @Schema(
+                description = "Complemento do endereço",
+                example = "Sala 4"
+        )
         private String complemento;
+
+        @Schema(
+                description = "Bairro do endereço",
+                example = "Centro"
+        )
         private String bairro;
+
+        @Schema(
+                description = "Cidade do endereço",
+                example = "São Paulo"
+        )
         private String cidade;
+
+        @Schema(
+                description = "Estado do endereço",
+                example = "São Paulo"
+        )
         private String estado;
+
+        @Schema(
+                description = "País",
+                example = "Brasil"
+        )
         private String pais;
 
         public String getRua() {

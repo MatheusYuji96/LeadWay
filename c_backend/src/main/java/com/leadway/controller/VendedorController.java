@@ -33,6 +33,14 @@ public class VendedorController {
         this.vendedorService = vendedorService;
     }
 
+    @Operation(
+            summary = "Lista vendedores cadastrados",
+            description = "Lista representantes comerciais no sistema, com ou sem filtros."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vendedores listados com sucesso"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping
     public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo){
         List<Vendedor> lista = vendedorService.listarPorFiltro(termo);
@@ -45,9 +53,10 @@ public class VendedorController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Vendedor cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos."),
+            @ApiResponse(responseCode = "400", description = "Dados de cadastro inválidos, ausentes ou em formato incorreto"),
             @ApiResponse(responseCode = "404", description = "Vendedor líder não consta no sistema"),
-            @ApiResponse(responseCode = "409", description = "E-mail de vendedor já cadastrado no sistema")
+            @ApiResponse(responseCode = "409", description = "E-mail de vendedor já cadastrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
     public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO){

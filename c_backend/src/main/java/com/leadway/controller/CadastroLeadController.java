@@ -37,9 +37,8 @@ public class CadastroLeadController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Lead cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos."),
+            @ApiResponse(responseCode = "400", description = "Dados de cadastro inválidos, ausentes ou em formato incorreto"),
             @ApiResponse(responseCode = "404", description = "Dados não encontrados.")
-            // procurar forma de registrar os outros 404
     })
     @PostMapping
     public ResponseEntity<CadastroLeadResponseDTO> cadastrar(@Valid @RequestBody CadastroLeadRequestDTO requestDTO){
