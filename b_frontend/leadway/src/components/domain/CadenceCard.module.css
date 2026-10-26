@@ -1,0 +1,111 @@
+.card {
+  min-width: 0;
+}
+
+.meter > div:first-child,
+.meter > div:last-child {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.meter strong {
+  color: var(--ink);
+}
+
+.track {
+  height: 6px;
+  border-radius: 4px;
+  background: var(--line);
+  margin: 8px 0;
+}
+
+.track i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--brand);
+}
+
+.nextAction {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 10px;
+  margin-top: 16px;
+  background: var(--brand-soft);
+  border: 1px solid var(--wire-line);
+}
+
+.nextAction > span {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-light);
+  color: var(--brand-dark);
+  border-radius: 8px;
+  flex: 0 0 auto;
+}
+
+.nextAction small,
+.nextAction strong {
+  display: block;
+}
+
+.nextAction small {
+  font-size: 11px;
+  color: var(--brand-dark);
+  letter-spacing: 0.07em;
+  font-weight: 600;
+}
+
+.nextAction strong {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.nextAction p {
+  font-size: 13px;
+}
+
+.plan {
+  margin-top: 24px;
+  border-top: 1px solid var(--wire-line);
+  padding-top: 16px;
+}
+
+.plan > div {
+  display: grid;
+  grid-template-columns: 25px 1fr auto;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.plan > div > span {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.plan > div.complete > span {
+  background: var(--brand);
+  color: white;
+}
+
+.plan > div.active > span {
+  color: var(--brand-dark);
+  border-color: var(--brand);
+}
+
+.plan small {
+  color: var(--muted);
+  font-size: 13px;
+}

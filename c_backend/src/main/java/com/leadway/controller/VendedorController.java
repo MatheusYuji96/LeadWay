@@ -1,5 +1,6 @@
 package com.leadway.controller;
 
+import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
 import com.leadway.dto.response.VendedorResponseDTO;
 import com.leadway.entity.Vendedor;
@@ -42,11 +43,12 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping
-    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo){
+    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo) {
         List<Vendedor> lista = vendedorService.listarPorFiltro(termo);
         List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
+
     @Operation(
             summary = "Cadastra um novo vendedor",
             description = "Cria um novo representante comercial, podendo ser designado à acompanhar um lead específico."
@@ -59,9 +61,22 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
-    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO){
+    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO) {
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
         VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO) {
+        Vendedor vendedor = vendedorService.atualizar(id, requestDTO);
+        VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
+        return ResponseEntity.status(200).body(responseDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        vendedorService.apagar(id);
+        return ResponseEntity.status(204).build();
     }
 }

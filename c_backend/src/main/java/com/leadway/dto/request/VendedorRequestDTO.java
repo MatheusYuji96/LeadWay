@@ -3,6 +3,8 @@ package com.leadway.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Schema(description = "Dados necessários para cadastrar um representante comercial no sistema, supervisionado por um usuário principal/líder de equipe no sistema")
 public class VendedorRequestDTO {
@@ -25,6 +27,8 @@ public class VendedorRequestDTO {
             example = "1177977877"
     )
     @NotBlank
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
     @Schema(

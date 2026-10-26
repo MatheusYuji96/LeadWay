@@ -5,7 +5,8 @@ import com.leadway.entity.Setor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Dados retornados após o cadastro de um Lead")
-public class CadastroLeadResponseDTO {
+
+public class LeadResponseDTO {
 
     @Schema(
             description = "CNPJ da empresa",
@@ -69,7 +70,7 @@ public class CadastroLeadResponseDTO {
     )
     private Boolean ativo;
 
-    public CadastroLeadResponseDTO() {
+    public LeadResponseDTO() {
     }
 
     @Schema(
@@ -148,15 +149,7 @@ public class CadastroLeadResponseDTO {
         }
     }
 
-    @Schema(
-            description = "Dados do setor empresarial do Lead"
-    )
     public static class SetorDTO{
-
-        @Schema(
-                description = "Nome do setor empresarial do Lead",
-                example = "Têxtil"
-        )
         private String nome;
 
         public String getNome() {
@@ -168,21 +161,8 @@ public class CadastroLeadResponseDTO {
         }
     }
 
-    @Schema(
-            description = "Dados da etapa do funíl de vendas do Lead"
-    )
     public static class EtapaDTO{
-
-        @Schema(
-                description = "Nome da etapa do funíl de vendas",
-                example = "Qualificação"
-        )
         private String nome;
-
-        @Schema(
-                description = "Ordem em número da etapa do funíl de vendas",
-                example = "1"
-        )
         private Integer ordem;
 
         public String getNome() {
@@ -202,57 +182,14 @@ public class CadastroLeadResponseDTO {
         }
     }
 
-    @Schema(
-            description = "Dados de endereço do Lead"
-    )
     public static class EnderecoDTO{
-
-        @Schema(
-                description = "Rua do endereço",
-                example = "Rua Oscar Freire"
-        )
         private String rua;
-
-        @Schema(
-                description = "CEP do endereço",
-                example = "01310100"
-        )
         private String cep;
-
-        @Schema(
-                description = "Número do imóvel",
-                example = "110"
-        )
         private String numero;
-
-        @Schema(
-                description = "Complemento do endereço",
-                example = "Sala 4"
-        )
         private String complemento;
-
-        @Schema(
-                description = "Bairro do endereço",
-                example = "Centro"
-        )
         private String bairro;
-
-        @Schema(
-                description = "Cidade do endereço",
-                example = "São Paulo"
-        )
         private String cidade;
-
-        @Schema(
-                description = "Estado do endereço",
-                example = "São Paulo"
-        )
         private String estado;
-
-        @Schema(
-                description = "País",
-                example = "Brasil"
-        )
         private String pais;
 
         public String getRua() {

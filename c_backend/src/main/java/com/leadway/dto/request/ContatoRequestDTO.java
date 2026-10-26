@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 @Schema(description = "Dados necessários para cadastrar o contato de um Lead no sistema")
 public class ContatoRequestDTO {
@@ -36,6 +37,8 @@ public class ContatoRequestDTO {
             example = "1188988788"
     )
     @NotBlank
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String whatsapp;
 
     @Schema(

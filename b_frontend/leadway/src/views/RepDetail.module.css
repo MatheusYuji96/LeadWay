@@ -1,0 +1,162 @@
+.page {
+  padding: 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.backRow {
+  margin-top: 16px;
+}
+
+.header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.headerText {
+  flex: 1;
+  min-width: 220px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleRow h1 {
+  font-size: 30px;
+  letter-spacing: -0.03em;
+}
+
+.headerText > p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.evolution {
+  padding: 16px;
+}
+
+.evolutionBars {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  height: 240px;
+  align-items: end;
+}
+
+.evoItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+}
+
+.evoBar {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.evoBar i {
+  width: 100%;
+  max-width: 46px;
+  background: var(--brand);
+  border-radius: 6px 6px 0 0;
+  min-height: 6px;
+  display: block;
+}
+
+.evoBar b {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.evoItem small {
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--wire-line);
+  width: 100%;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--wire-line);
+  font-size: 14px;
+}
+
+.summary span:first-child {
+  border-top: 0;
+}
+
+.summary small {
+  color: var(--muted);
+}
+
+.tableCard {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--wire-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+@media (max-width: 1000px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 20px 16px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

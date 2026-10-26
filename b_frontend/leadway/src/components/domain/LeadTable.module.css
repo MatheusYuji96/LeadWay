@@ -1,0 +1,90 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 900px;
+  padding: 0 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr 0.9fr 0.8fr 0.9fr 1fr 25px;
+  min-height: 58px;
+  align-items: center;
+  border-top: 1px solid var(--wire-line);
+  font-size: 14px;
+  color: var(--muted);
+  gap: 8px;
+}
+
+.head {
+  min-height: 37px;
+  color: #8c98a6;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-top: 0;
+}
+
+.companyCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: none;
+  padding: 8px 0;
+  text-align: left;
+  min-width: 0;
+  border: 0;
+}
+
+.companyCell:hover strong {
+  color: var(--brand-dark);
+}
+
+.companyIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--wire-line);
+  background: var(--brand-light);
+  color: var(--brand-dark);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
+.companyText {
+  min-width: 0;
+}
+
+.companyText strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.companyText small {
+  display: block;
+  font-size: 13px;
+  color: var(--yellow-dark);
+  letter-spacing: 1px;
+}
+
+.companyText small i {
+  color: #d7dfe4;
+  font-style: normal;
+}
+
+.more {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
