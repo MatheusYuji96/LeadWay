@@ -20,5 +20,5 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
 
     Boolean existsByEmailIgnoreCase(String email);
 
-    Boolean existsByCNPJ(String cnpj);
+    Boolean existsBycnpj(String cnpj);
 }
