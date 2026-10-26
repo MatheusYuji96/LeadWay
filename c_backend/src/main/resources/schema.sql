@@ -50,7 +50,7 @@ CREATE TABLE etapa (
 CREATE TABLE vendedor (
     id INT AUTO_INCREMENT PRIMARY KEY,
     lider_id INT,
-    cod_vendedor VARCHAR(30) NOT NULL,
+    cod_vendedor VARCHAR(30),
     nome VARCHAR(190) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(50) NOT NULL,
