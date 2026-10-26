@@ -67,6 +67,16 @@ public class VendedorController {
         return ResponseEntity.status(201).body(responseDTO);
     }
 
+    @Operation(
+            summary = "Atualiza um vendedor",
+            description = "Atualiza uma ou mais informações de um vendedor no sistema."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vendedor atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Vendedor não encontrado no sistema"),
+            @ApiResponse(responseCode = "409", description = "E-mail de vendedor já cadastrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @PatchMapping("/{id}")
     public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO) {
         Vendedor vendedor = vendedorService.atualizar(id, requestDTO);
@@ -74,6 +84,15 @@ public class VendedorController {
         return ResponseEntity.status(200).body(responseDTO);
     }
 
+    @Operation(
+            summary = "Deleta um vendedor",
+            description = "Apaga um vendedor do sistema."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Vendedor excluído com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Vendedor não encontrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         vendedorService.apagar(id);

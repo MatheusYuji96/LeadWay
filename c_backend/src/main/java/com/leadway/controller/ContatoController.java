@@ -35,6 +35,14 @@ public class ContatoController {
         this.contatoService = contatoService;
     }
 
+    @Operation(
+            summary = "Lista contatos cadastrados no sistema",
+            description = "Lista representantes comerciais no sistema, com ou sem filtros."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contatos listados com sucesso"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping
     public ResponseEntity<List<ContatoResponseDTO>> listarPorFiltro(@RequestParam(required = false) String termo, @RequestParam(required = false) Integer leadId){
         List<Contato> listaContatos = contatoService.listarPorFiltro(termo, leadId);
@@ -62,6 +70,15 @@ public class ContatoController {
         return ResponseEntity.status(201).body(responseDTO);
     }
 
+    @Operation(
+            summary = "Altera o Lead associado ao contato",
+            description = "Altera o id do Lead associado ao contato cadastrado, para caso ele mude de empresa."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contato atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Contato ou Lead não encontrados no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @PatchMapping("/{contatoId}/mudar-lead/{novoLeadId}")
     public ResponseEntity<ContatoResponseDTO> atualizarLead(@PathVariable Integer contatoId, @PathVariable Integer novoLeadId){
         Contato contato = contatoService.renovarLead(contatoId, novoLeadId);
@@ -82,6 +99,16 @@ public class ContatoController {
 //        return ResponseEntity.status(201).body(responseDTO);
 //    }
 
+    @Operation(
+            summary = "Atualiza dados do contato",
+            description = "Altera informações relacionadas ao contato, como cargo ou e-mail."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contato atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Contato não encontrado no sistema"),
+            @ApiResponse(responseCode = "409", description = "E-mail já registrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @PatchMapping("/{id}")
     public ResponseEntity<ContatoResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarContatoRequestDTO dto){
         Contato contato = contatoService.renovar(id, dto);
@@ -89,6 +116,15 @@ public class ContatoController {
         return ResponseEntity.status(200).body(responseDTO);
     }
 
+    @Operation(
+            summary = "Deleta dados do contato",
+            description = "Apaga informações relacionadas ao contato."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Contato deletado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Contato não encontrado no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id){
         contatoService.apagar(id);

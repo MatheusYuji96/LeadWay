@@ -6,7 +6,6 @@ import com.leadway.dto.response.VendedorResponseDTO;
 import com.leadway.mapper.VendedorMapper;
 import com.leadway.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +31,8 @@ public class AuthController {
     }
 
     @Operation(
-
+            summary = "Cadastra um usuário",
+            description = "Registra informações de um usuário principal no sistema."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso"),
@@ -41,7 +41,6 @@ public class AuthController {
     })
     @PostMapping
     public ResponseEntity<VendedorResponseDTO> cadastrar(
-            @Parameter(description = "Informações completas de cadastro do usuário principal")
             @Valid @RequestBody CadastroVendedorRequestDTO dto) {
 
         VendedorResponseDTO vendedor = VendedorMapper.toResponse(
@@ -56,7 +55,8 @@ public class AuthController {
     }
 
     @Operation(
-
+            summary = "Realiza o login do usuário",
+            description = "Realiza a autenticação de um usuário previamente cadastrado no sistema."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "400", description = "Erro do cliente"),
