@@ -1,0 +1,50 @@
+.owner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.owner strong {
+  display: block;
+  font-size: 14px;
+}
+
+.owner span {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--wire-line);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.meta span + span {
+  border-left: 1px solid var(--wire-line);
+  padding-left: 16px;
+}
+
+.meta small,
+.meta strong {
+  display: block;
+}
+
+.meta small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.meta strong {
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.fallback {
+  margin-top: 12px;
+  font-size: 13px;
+}
