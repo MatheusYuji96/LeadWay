@@ -5,7 +5,6 @@ import com.leadway.entity.Setor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Dados retornados após o cadastro de um Lead")
-
 public class LeadResponseDTO {
 
     @Schema(
