@@ -27,22 +27,22 @@ public class DashboardController {
     }
 
     @GetMapping("/indicadores/{id}")
-    public ResponseEntity<DashboardIndicadoresResponseDTO> buscarIndicadores(@PathVariable Integer idVendedor) {
-        return ResponseEntity.status(200).body(dashboardService.buscarIndicadores(idVendedor));
+    public ResponseEntity<DashboardIndicadoresResponseDTO> buscarIndicadores(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarIndicadores(id));
     }
 
     @GetMapping("/proximos-compromissos/{id}")
-    public ResponseEntity<List<ProximosCompromissosResponseDTO>> buscarProximosCompromissos(@PathVariable Integer idVendedor) {
-        return ResponseEntity.status(200).body(dashboardService.buscarProximosCompromissos(idVendedor));
+    public ResponseEntity<List<ProximosCompromissosResponseDTO>> buscarProximosCompromissos(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarProximosCompromissos(id));
     }
 
     @GetMapping("/atividades-semana/{id}")
-    public ResponseEntity<AtividadesSemanaResponseDTO> buscarAtividades(@PathVariable Integer idVendedor) {
-        return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(idVendedor));
+    public ResponseEntity<AtividadesSemanaResponseDTO> buscarAtividades(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarAtividadesSemana(id));
     }
 
     @GetMapping("/leads-atencao/{id}")
-    public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer idVendeor) {
-        return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(idVendeor));
+    public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(id));
     }
 }

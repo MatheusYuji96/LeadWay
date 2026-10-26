@@ -16,7 +16,7 @@ public interface LeadEtapaHistoricoRepository extends JpaRepository<LeadEtapaHis
           h.etapa_id,
           COUNT(*)
       FROM lead_etapa_historico h
-      INNER JOIN lead l ON l.id = h.lead_id
+      INNER JOIN leads l ON l.id = h.lead_id
       WHERE l.vendedor_id = :vendedorId
         AND h.criado_em >= :inicio
         AND h.criado_em < :fim

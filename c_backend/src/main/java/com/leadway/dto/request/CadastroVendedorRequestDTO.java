@@ -33,7 +33,7 @@ public class CadastroVendedorRequestDTO {
     @NotBlank
     @Size(min = 8)
     @Pattern(
-            regexp = "^(?=.[A-Za-z])(?=.\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
             message = "A senha deve conter letras, números e caracteres especiais"
     )
     private String senha;
@@ -71,14 +71,14 @@ public class CadastroVendedorRequestDTO {
     }
 
     public @NotBlank @Size(min = 8) @Pattern(
-            regexp = "^(?=.[A-Za-z])(?=.\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
             message = "A senha deve conter letras, números e caracteres especiais"
     ) String getSenha() {
         return senha;
     }
 
     public void setSenha(@NotBlank @Size(min = 8) @Pattern(
-            regexp = "^(?=.[A-Za-z])(?=.\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
             message = "A senha deve conter letras, números e caracteres especiais"
     ) String senha) {
         this.senha = senha;
