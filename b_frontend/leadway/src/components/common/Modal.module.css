@@ -1,0 +1,71 @@
+.backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  background: rgba(16, 40, 48, 0.58);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.modal {
+  width: min(600px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--wire-line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.lg {
+  width: min(1050px, 100%);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--wire-line);
+}
+
+.success {
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.success p {
+  margin: 8px auto 24px;
+  max-width: 340px;
+}
+
+.successIcon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #157c58;
+  background: #e8f7f1;
+  margin: 0 auto 24px;
+}
+
+@media (max-width: 600px) {
+  .backdrop {
+    padding: 8px;
+  }
+
+  .modal {
+    padding: 16px;
+  }
+}

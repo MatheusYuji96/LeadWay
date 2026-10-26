@@ -1,0 +1,74 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 940px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.7fr 0.7fr 1fr 0.5fr 0.6fr 0.6fr 0.6fr 25px;
+  min-height: 58px;
+  align-items: center;
+  border-top: 1px solid var(--wire-line);
+  font-size: 14px;
+  color: var(--muted);
+  gap: 8px;
+}
+
+.head {
+  min-height: 37px;
+  color: #8c98a6;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-top: 0;
+}
+
+.personCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  text-align: left;
+  min-width: 0;
+}
+
+.personCell:hover strong {
+  color: var(--brand-dark);
+}
+
+.personText {
+  min-width: 0;
+}
+
+.personText strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.personText small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.more {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
