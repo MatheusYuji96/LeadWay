@@ -23,6 +23,5 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     Boolean existsByEmailIgnoreCase(String email);
     Integer countByVendedor_IdAndAtivoTrue(Integer idVendedor);
 
-    Boolean existsByCnpj(String cnpj);
-    List<Lead> findByVendedor_IdAndAtivoTrue(Integer vendedorId);
+    Boolean existsBycnpj(String cnpj);
 }
