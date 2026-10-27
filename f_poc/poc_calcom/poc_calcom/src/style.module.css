@@ -1,0 +1,11 @@
+.all{
+font-family: sans-serif;
+max-width: 900px;
+margin: 0 auto;
+padding: 20px
+}
+
+.aba{
+display: flex; gap: 10px;
+margin-bottom: 20px
+}
