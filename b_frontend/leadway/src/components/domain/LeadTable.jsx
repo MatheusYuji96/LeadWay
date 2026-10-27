@@ -7,6 +7,7 @@ import { companyInitials, scoreStars } from '@/models/lead'
 import { CADENCE_STATUS } from '@/models/enums'
 import { paths } from '@/routes/paths'
 import { leadsService } from '@/services/leads.service'
+import { isMockMode } from '@/services/http'
 import styles from './LeadTable.module.css'
 
 export function LeadTable({ items, loading, error, compact = false, onRetry, onClearFilters, onDeleted }) {
@@ -34,6 +35,7 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
     }
     try {
       await leadsService.remove(leadId)
+      window.dispatchEvent(new Event('leadway:leads-changed'))
       if (typeof onDeleted === 'function') {
         onDeleted(leadId)
       } else if (typeof onRetry === 'function') {
@@ -86,7 +88,7 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
               </span>
               <span>{lead.nextAction}</span>
               <span className={styles.more}>
-                <Button
+                {(isMockMode || /^\d+$/.test(String(lead.id)) && String(lead.id).length < 10) && <Button
                   kind="ghost"
                   size="sm"
                   aria-label="Excluir lead"
@@ -94,7 +96,7 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
                   onClick={(e) => handleDelete(e, lead.id)}
                 >
                   <Icon name="trash" size={16} />
-                </Button>
+                </Button>}
               </span>
             </div>
           )

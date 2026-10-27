@@ -22,11 +22,14 @@ export function Leads() {
     setWizardError(null)
     try {
       await leadsService.create(values)
-      vm.reload()
+      // Refresh the listing to reflect the real backend state
+      await vm.reload()
+      window.dispatchEvent(new Event('leadway:leads-changed'))
       return true
     } catch (err) {
-      setWizardError(err?.message || 'Não foi possível criar a empresa.')
-      return false
+      // Propagate the error to the caller so the form can map field errors
+      setWizardError(null) // O próprio formulário apresenta a mensagem detalhada
+      throw err
     } finally {
       setSaving(false)
     }
@@ -35,9 +38,7 @@ export function Leads() {
   const stats = vm.stats
     ? [
         { key: 'total', icon: 'building', label: 'Total de leads', value: vm.stats.total, detail: 'na sua carteira', tone: 'brand' },
-        { key: 'prospecting', icon: 'trend', label: 'Em prospecção', value: vm.stats.prospecting, detail: 'em andamento', tone: 'purple' },
-        { key: 'followUp', icon: 'clock', label: 'Em follow-up', value: vm.stats.followUp, detail: 'aguardando retorno', tone: 'blue' },
-        { key: 'attention', icon: 'bell', label: 'Precisam de atenção', value: vm.stats.needAttention, detail: 'cadência vencida', tone: 'danger' },
+        
       ]
     : []
 
@@ -55,9 +56,9 @@ export function Leads() {
       />
 
       <div className={styles.stats}>
-        {stats.map((stat) => (
-          <StatCard key={stat.key} {...stat} />
-        ))}
+        {stats.map(({ key, ...props }) => (
+  <StatCard key={key} {...props} />
+))}
       </div>
 
       <div className={styles.toolbar}>

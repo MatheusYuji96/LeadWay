@@ -32,6 +32,7 @@ export function useSettingsViewModel() {
 
   useEffect(() => {
     loadProfile()
+    settingsService.getPreferences().then((saved) => { if (saved) setPreferences(saved) }).catch(() => {})
   }, [loadProfile])
 
   const values = useMemo(() => draft ?? profile.data ?? {}, [draft, profile.data])
@@ -70,7 +71,7 @@ export function useSettingsViewModel() {
     try {
       const updated = await settingsService.updateProfile(values)
       setDraft(updated)
-      setFeedback({ type: 'success', message: 'Dados pessoais atualizados com sucesso.' })
+      setFeedback({ type: 'success', message: 'Dados salvos neste navegador. O backend ainda não oferece atualização de perfil.' })
     } catch (err) {
       setFeedback({ type: 'error', message: err?.message || 'Não foi possível salvar.' })
     } finally {
@@ -83,7 +84,7 @@ export function useSettingsViewModel() {
     setFeedback(null)
     try {
       await settingsService.updatePreferences(prefs)
-      setFeedback({ type: 'success', message: 'Preferências salvas com sucesso.' })
+      setFeedback({ type: 'success', message: 'Preferências salvas neste navegador (notificações automáticas dependem do backend).' })
     } catch (err) {
       setFeedback({ type: 'error', message: err?.message || 'Não foi possível salvar as preferências.' })
     } finally {

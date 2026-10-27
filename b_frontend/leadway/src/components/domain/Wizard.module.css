@@ -11,8 +11,9 @@
 }
 
 .shell {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  /* Use flex layout so we can reliably control the column sizes and
+     allow the main column to shrink so its inner area can scroll. */
+  display: flex;
   width: min(960px, 100%);
   background: var(--surface);
   border: 1px solid var(--wire-line);
@@ -36,6 +37,8 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  /* fixed column width in the flex layout */
+  flex: 0 0 260px;
 }
 
 .steps {
@@ -108,6 +111,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  /* allow this flex item to shrink so its child .body can get a constrained
+     height and perform its own scrolling (requires min-height: 0 on flex
+     children to enable overflow). */
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .head {
@@ -136,6 +144,8 @@
   flex: 1;
   overflow-y: auto;
   padding: 0 32px;
+  /* necessary to make overflow-y on this element work inside a flex column */
+  min-height: 0;
 }
 
 .form {
@@ -177,6 +187,12 @@
   font-size: 13px;
   font-weight: 600;
   padding: 0 32px;
+}
+
+.fieldError {
+  color: var(--red-dark);
+  font-size: 13px;
+  margin-top: 4px;
 }
 
 .footer {

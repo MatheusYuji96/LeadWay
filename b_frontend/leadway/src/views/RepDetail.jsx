@@ -7,7 +7,6 @@ import { Breadcrumb } from '@/components/common/PagePrimitives'
 import { Panel, PanelHead } from '@/components/common/Panel'
 import { StatCard } from '@/components/common/StatCard'
 import { LeadTable } from '@/components/domain/LeadTable'
-import { repDisplayEmail } from '@/models/representative'
 import { useRepDetailViewModel } from '@/viewmodels/useRepDetailViewModel'
 import { paths } from '@/routes/paths'
 import styles from './RepDetail.module.css'
@@ -59,7 +58,7 @@ export function RepDetail() {
             {rep.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="neutral">Inativo</Badge>}
           </div>
           <p>
-            {rep.code} • {rep.region} • {repDisplayEmail(rep.name)}
+            {rep.code} • {rep.region} • {rep.email || '—'}
           </p>
         </div>
         <div className={styles.headerActions}>
@@ -114,11 +113,11 @@ export function RepDetail() {
             </span>
             <span>
               <small>Contatos realizados</small>
-              <strong>{rep.contacts}</strong>
+              <strong>—</strong>
             </span>
             <span>
               <small>Pendências</small>
-              <strong>{rep.pending}</strong>
+              <strong>—</strong>
             </span>
           </div>
         </Panel>

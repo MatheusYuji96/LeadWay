@@ -11,14 +11,47 @@ export function isRequired(value = '') {
 }
 
 export function passwordRules(value = '') {
+  const hasUppercase = /[A-Z]/.test(value)
+  const hasNumber = /\d/.test(value)
+  const hasSpecial = /[^A-Za-z0-9]/.test(value)
+  const noSpaces = !/\s/.test(value)
+  const minLength = value.length >= 8
   return {
-    minLength: value.length >= 8,
-    hasUppercase: /[A-Z]/.test(value),
-    hasNumber: /\d/.test(value),
+    minLength,
+    hasUppercase,
+    hasNumber,
+    hasSpecial,
+    noSpaces,
     get valid() {
-      return this.minLength && this.hasUppercase && this.hasNumber
+      // Require: min length, uppercase, number, special char and no spaces
+      return minLength && hasUppercase && hasNumber && hasSpecial && noSpaces
     },
   }
+}
+
+export function isPhone11(value = '') {
+  const digits = String(value || '').replace(/\D/g, '')
+  return /^\d{11}$/.test(digits)
+}
+
+export function isCEP(value = '') {
+  const digits = String(value || '').replace(/\D/g, '')
+  return /^\d{8}$/.test(digits)
+}
+
+// Validação matemática de CNPJ (dígitos verificadores).
+export function isCNPJ(value = '') {
+  const c = String(value ?? '').replace(/\D/g, '')
+  if (!/^\d{14}$/.test(c) || /^(\d)\1{13}$/.test(c)) return false
+  const digit = (length) => {
+    const weights = length === 12
+      ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+      : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    const sum = weights.reduce((acc, weight, i) => acc + Number(c[i]) * weight, 0)
+    const rest = sum % 11
+    return rest < 2 ? 0 : 11 - rest
+  }
+  return digit(12) === Number(c[12]) && digit(13) === Number(c[13])
 }
 
 /**

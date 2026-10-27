@@ -14,38 +14,46 @@ export function Team() {
   const [wizardOpen, setWizardOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [wizardError, setWizardError] = useState(null)
-  const [extraReps, setExtraReps] = useState([])
 
   const createRep = async (values) => {
     setSaving(true)
     setWizardError(null)
     try {
       await representativesService.create(values)
-      setExtraReps((prev) => [
-        {
-          id: `rep-local-${Date.now()}`,
-          name: values.name,
-          code: values.code || 'SEM-CÓD',
-          region: values.region || '—',
-          email: values.email,
-          phone: values.phone,
-          initials: values.name
-            .trim()
-            .split(/\s+/)
-            .slice(0, 2)
-            .map((part) => part[0])
-            .join('')
-            .toUpperCase(),
-          leads: 0,
-          contacts: 0,
-          pending: 0,
-          active: values.active,
-        },
-        ...prev,
-      ])
+      await vm.reload()
       return true
     } catch (err) {
-      setWizardError(err?.message || 'Não foi possível adicionar o representante.')
+      // Prepare a user-facing message based on error type and preserve
+      // technical details in the console for diagnosis (but strip sensitive fields).
+      const status = err?.status
+      let userMessage = 'Não foi possível adicionar o representante.'
+      if (status === undefined) {
+        userMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'
+      } else if (status >= 500) {
+        userMessage = 'Erro no servidor. Tente novamente mais tarde.'
+      } else if (err?.details?.message) {
+        userMessage = String(err.details.message)
+      } else if (err?.message) {
+        userMessage = String(err.message)
+      }
+
+      // sanitize details before logging (remove password/senha)
+      const sanitize = (obj) => {
+        if (!obj || typeof obj !== 'object') return obj
+        try {
+          const copy = Array.isArray(obj) ? obj.map((i) => sanitize(i)) : Object.fromEntries(
+            Object.entries(obj).map(([k, v]) => [k, k === 'senha' || k === 'password' ? '***REDACTED***' : sanitize(v)]),
+          )
+          return copy
+        } catch (e) {
+          return obj
+        }
+      }
+
+      if (err?.details) console.error('Representative creation failed (details):', sanitize(err.details))
+      else console.error('Representative creation failed:', err)
+
+      setWizardError(userMessage)
       return false
     } finally {
       setSaving(false)
@@ -53,7 +61,7 @@ export function Team() {
   }
 
   const term = vm.search.trim().toLowerCase()
-  const base = [...extraReps, ...vm.representatives]
+  const base = vm.representatives
   const representatives = term
     ? base.filter((r) => [r.name, r.code, r.region].some((field) => String(field).toLowerCase().includes(term)))
     : base

@@ -56,13 +56,18 @@ export function useLeadsViewModel() {
   const items = useMemo(() => data?.items ?? [], [data])
   const stats = data?.stats ?? null
 
+  const filteredItems = useMemo(() => {
+    if (!cadence) return items
+    return items.filter((item) => item.cadenceStatus === cadence)
+  }, [items, cadence])
+
   const visibleItems = useMemo(() => {
     const start = (page - 1) * pageSize
-    return items.slice(start, start + pageSize)
-  }, [items, page, pageSize])
+    return filteredItems.slice(start, start + pageSize)
+  }, [filteredItems, page, pageSize])
 
-  const rangeStart = items.length === 0 ? 0 : (page - 1) * pageSize + 1
-  const rangeEnd = Math.min(page * pageSize, items.length)
+  const rangeStart = filteredItems.length === 0 ? 0 : (page - 1) * pageSize + 1
+  const rangeEnd = Math.min(page * pageSize, filteredItems.length)
 
   const activeFilters = [stage && `Fase: ${stage}`, cadence && 'Cadência: personalizada'].filter(Boolean)
 
@@ -73,7 +78,7 @@ export function useLeadsViewModel() {
     page,
     pageSize,
     items: visibleItems,
-    total: items.length,
+    total: filteredItems.length,
     rangeStart,
     rangeEnd,
     stats,

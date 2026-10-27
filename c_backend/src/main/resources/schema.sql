@@ -154,3 +154,6 @@ INSERT INTO etapa (id, nome, ordem) VALUES (2, 'Qualificação', 2);
 INSERT INTO etapa (id, nome, ordem) VALUES (3, 'Apresentação / Proposta', 3);
 INSERT INTO etapa (id, nome, ordem) VALUES (4, 'Negociação', 4);
 INSERT INTO etapa (id, nome, ordem) VALUES (5, 'Fechado / Ganho', 5) ENGINE=InnoDB;
+
+ALTER TABLE leads
+    MODIFY COLUMN farol VARCHAR(20) NULL DEFAULT NULL;

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useSession } from './sessionContext'
-import { firstError, isEmail, isRequired, passwordRules } from './validators'
+import { firstError, isEmail, isRequired, passwordRules, isPhone11 } from './validators'
 
 /**
  * ViewModel das telas de login e cadastro.
@@ -28,11 +28,15 @@ export function useAuthViewModel(mode) {
   const validate = useCallback(() => {
     const next = {}
     if (mode === 'signup' && !isRequired(values.name)) next.name = 'Informe seu nome completo.'
-    if (mode === 'signup' && !isRequired(values.whatsapp)) next.whatsapp = 'Informe um WhatsApp para contato.'
+    if (mode === 'signup') {
+      if (!isRequired(values.whatsapp)) next.whatsapp = 'Informe um WhatsApp para contato.'
+      else if (!isPhone11(values.whatsapp)) next.whatsapp = 'Informe um WhatsApp válido com 11 dígitos (somente números).'
+    }
     if (!isEmail(values.email)) next.email = 'Informe um e-mail válido.'
     if (!isRequired(values.password)) next.password = 'Informe sua senha.'
     if (mode === 'signup') {
-      if (!passwordRules(values.password).valid) next.password = 'Use ao menos 8 caracteres, uma maiúscula e um número.'
+      const rules = passwordRules(values.password)
+      if (!rules.valid) next.password = 'Senha fraca. Use ao menos 8 caracteres, uma maiúscula, um número e um caractere especial. Sem espaços.'
       if (values.password !== values.confirmPassword) next.confirmPassword = 'As senhas não coincidem.'
     }
     setErrors(next)

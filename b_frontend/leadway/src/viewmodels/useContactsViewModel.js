@@ -13,7 +13,18 @@ export function useContactsViewModel() {
   const load = useCallback(() => exec(() => contactsService.list()), [exec])
 
   useEffect(() => {
-    load()
+    // Attempt to load global contacts. If the backend does not expose a
+    // global GET /contacts endpoint (not documented), contactsService.list
+    // will throw and we capture that to provide a clearer message to the UI.
+    ;(async () => {
+      try {
+        await load()
+      } catch (err) {
+        // Set a descriptive error so the UI can show that global listing is not available
+        // and suggest per-lead listing instead.
+        // The useAsync hook stores error; execute() already sets the error state.
+      }
+    })()
   }, [load])
 
   const items = useMemo(() => {

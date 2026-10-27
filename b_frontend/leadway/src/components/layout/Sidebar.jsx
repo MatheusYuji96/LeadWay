@@ -5,10 +5,12 @@ import { Logo } from '@/components/common/Logo'
 import { paths } from '@/routes/paths'
 import { useSession } from '@/viewmodels/sessionContext'
 import styles from './Sidebar.module.css'
+import { useEffect, useState } from 'react'
+import { leadsService } from '@/services/leads.service'
 
 const navItems = [
   { to: paths.app, icon: 'home', label: 'Inicial', end: true },
-  { to: paths.leads, icon: 'briefcase', label: 'Leads', badge: 12 },
+  { to: paths.leads, icon: 'briefcase', label: 'Leads' },
   { to: paths.team, icon: 'users', label: 'Funcionários' },
   { to: paths.agenda, icon: 'calendar', label: 'Agenda' },
   { to: paths.settings, icon: 'settings', label: 'Configurações' },
@@ -17,6 +19,16 @@ const navItems = [
 export function Sidebar({ open, onClose, onNavigate }) {
   const location = useLocation()
   const { logout } = useSession()
+  const [leadCount, setLeadCount] = useState(null)
+  useEffect(() => {
+    let mounted = true
+    const refresh = () => leadsService.list().then((result) => {
+      if (mounted) setLeadCount(result.total ?? result.items?.length ?? null)
+    }).catch(() => { if (mounted) setLeadCount(null) })
+    refresh()
+    window.addEventListener('leadway:leads-changed', refresh)
+    return () => { mounted = false; window.removeEventListener('leadway:leads-changed', refresh) }
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -47,7 +59,7 @@ export function Sidebar({ open, onClose, onNavigate }) {
           >
             <Icon name={item.icon} />
             <span>{item.label}</span>
-            {item.badge && <small>{item.badge}</small>}
+            {item.to === paths.leads && leadCount !== null && <small>{leadCount}</small>}
           </NavLink>
         ))}
       </nav>

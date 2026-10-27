@@ -1,44 +1,56 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/common/Button'
 import { Field, SelectField } from '@/components/common/Field'
 import { Modal } from '@/components/common/Modal'
 import { PageHeading } from '@/components/common/PagePrimitives'
 import { ContactCards } from '@/components/domain/ContactCards'
-import { mockCompanies } from '@/services/mock/fixtures'
+import { leadsService } from '@/services/leads.service'
+import { contactsService } from '@/services/contacts.service'
 import { useContactsViewModel } from '@/viewmodels/useContactsViewModel'
 import styles from './Contacts.module.css'
 
 export function Contacts() {
   const vm = useContactsViewModel()
   const [newOpen, setNewOpen] = useState(false)
-  const [form, setForm] = useState({ name: '', role: '', email: '', whatsapp: '', companyId: mockCompanies[0]?.id ?? '' })
+  const [form, setForm] = useState({ name: '', role: '', email: '', whatsapp: '', companyId: '' })
   const [localItems, setLocalItems] = useState(null)
+  const [companies, setCompanies] = useState([])
+  const [saving, setSaving] = useState(false)
 
   const setField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
 
-  const save = () => {
+  const save = async () => {
     if (!form.name.trim()) return
-    const company = mockCompanies.find((c) => c.id === form.companyId)
-    const created = {
-      id: `contact-local-${Date.now()}`,
-      name: form.name,
-      role: form.role || 'Contato',
-      email: form.email,
-      whatsapp: form.whatsapp,
-      companyId: form.companyId,
-      companyName: company?.name ?? '—',
-      initials: form.name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join('')
-        .toUpperCase(),
-      status: 'active',
+    setSaving(true)
+    try {
+      // Prepare payload according to API: { nome, cargo, email, whatsapp, leadId, contato, ativo }
+      // client-side validation
+      if (!form.whatsapp || !/^[0-9]{11}$/.test(String(form.whatsapp).replace(/\D/g, ''))) {
+        // simple inline feedback: keep modal open and log error
+        console.error('WhatsApp deve ter 11 dígitos (somente números)')
+        setSaving(false)
+        return
+      }
+      const payload = {
+        nome: form.name,
+        cargo: form.role,
+        email: form.email,
+        whatsapp: String(form.whatsapp || '').replace(/\D/g, ''),
+        leadId: form.companyId,
+        contato: 'PADRAO',
+        ativo: 1,
+      }
+      await contactsService.create(form.companyId, payload)
+      await vm.reload()
+      setNewOpen(false)
+      setForm({ name: '', role: '', email: '', whatsapp: '', companyId: companies[0]?.id ?? '' })
+    } catch (err) {
+      // show error via vm.reload side-effects or keep modal open
+      // For now, surface error by leaving modal open and logging
+      console.error(err)
+    } finally {
+      setSaving(false)
     }
-    setLocalItems((prev) => [created, ...(prev ?? vm.contacts)])
-    setNewOpen(false)
-    setForm({ name: '', role: '', email: '', whatsapp: '', companyId: mockCompanies[0]?.id ?? '' })
   }
 
   const base = localItems ?? vm.contacts
@@ -46,6 +58,23 @@ export function Contacts() {
   const contacts = term
     ? base.filter((c) => [c.name, c.companyName, c.role].some((field) => String(field).toLowerCase().includes(term)))
     : base
+
+  // Load companies for the "Empresa" select
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await leadsService.list()
+        const items = res?.items ?? res?.items ?? []
+        if (mounted) setCompanies(items)
+        // initialize default company if not set
+        if (mounted && !form.companyId && items[0]) setForm((f) => ({ ...f, companyId: items[0].id }))
+      } catch (e) {
+        // ignore
+      }
+    })()
+    return () => (mounted = false)
+  }, [])
 
   return (
     <div className={styles.page}>
@@ -93,7 +122,7 @@ export function Contacts() {
             <Field label="E-mail" type="email" placeholder="ana@empresa.com" value={form.email} onChange={(v) => setField('email', v)} />
             <Field label="WhatsApp" placeholder="(11) 99999-0000" value={form.whatsapp} onChange={(v) => setField('whatsapp', v)} />
             <SelectField label="Empresa" value={form.companyId} onChange={(v) => setField('companyId', v)}>
-              {mockCompanies.map((company) => (
+              {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.name}
                 </option>

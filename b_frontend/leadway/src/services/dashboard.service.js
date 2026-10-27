@@ -1,20 +1,23 @@
-import { http, unwrap } from './http'
+// Dashboard de demonstração: indicadores e gráficos NÃO são dados do MySQL.
+// Mantidos locais até existir um contrato de API apropriado para o painel.
+import {
+  mockDashboardStats, mockWeekActivity, mockTodayAppointments,
+  mockTeamStats, mockTeamPerformance, mockStaleLeads, mockRepresentatives,
+} from './mock/fixtures'
 
 export const dashboardService = {
-  /**
-   * GET /dashboard/overview
-   * Resumo pessoal: stats, compromissos de hoje, atividade da semana e
-   * leads que precisam de atenção.
-   */
   async getOverview() {
-    return unwrap(await http.get('/dashboard/overview'))
+    return {
+      stats: mockDashboardStats, weekActivity: mockWeekActivity,
+      appointments: mockTodayAppointments,
+      leadsNeedingAttention: mockStaleLeads.map((lead) => ({ ...lead, daysInStage: lead.days, lastContact: `${lead.days} dias` })),
+    }
   },
-
-  /**
-   * GET /dashboard/team
-   * Aba "Acompanhamento da equipe": stats, desempenho e leads parados.
-   */
   async getTeamOverview() {
-    return unwrap(await http.get('/dashboard/team'))
+    return {
+      stats: mockTeamStats, performance: mockTeamPerformance,
+      staleLeads: mockStaleLeads.map((lead) => ({ ...lead, daysInStage: lead.days, lastContact: `${lead.days} dias` })),
+      representatives: mockRepresentatives,
+    }
   },
 }

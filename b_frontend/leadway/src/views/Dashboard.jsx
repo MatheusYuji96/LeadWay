@@ -25,7 +25,7 @@ export function Dashboard() {
   const navigate = useNavigate()
   const vm = useDashboardViewModel()
 
-  const todayLabel = 'Quinta-feira, 15 de maio de 2025'
+  const todayLabel = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date())
 
   if (vm.overviewLoading && vm.tab === 'overview') {
     return (
@@ -52,7 +52,7 @@ export function Dashboard() {
       <PageHeading
         eyebrow={todayLabel}
         title="Visão geral"
-        description="Acompanhe sua carteira, seus compromissos e o desempenho da equipe."
+        description="Painel demonstrativo: KPIs e gráficos com dados fictícios."
         actions={
           <>
             <Button icon="calendar" onClick={() => navigate(paths.agenda)}>
@@ -71,7 +71,7 @@ export function Dashboard() {
         <div className={styles.content}>
           <div className={styles.statsGrid}>
             {overview.stats.map((stat) => (
-              <StatCard key={stat.key} {...stat} />
+              <StatCard key={stat.key} {...Object.fromEntries(Object.entries(stat).filter(([key]) => key !== 'key'))} />
             ))}
           </div>
 
@@ -182,7 +182,7 @@ function TeamPanel({ vm, onOpenLead, onOpenRep }) {
     <div className={styles.content}>
       <div className={styles.statsGrid}>
         {stats.map((stat) => (
-          <StatCard key={stat.key} {...stat} />
+          <StatCard key={stat.key} {...Object.fromEntries(Object.entries(stat).filter(([key]) => key !== 'key'))} />
         ))}
       </div>
 
