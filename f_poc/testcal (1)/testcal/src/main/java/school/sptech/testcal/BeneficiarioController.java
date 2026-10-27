@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/beneficiarios")
-@CrossOrigin(origins = "http://localhost:5173") // Habilita o CORS para o Vite React
+@CrossOrigin(origins = "http://localhost:5174") // Habilita o CORS para o Vite React
 public class BeneficiarioController {
 
     private final BeneficiarioService beneficiarioService;
