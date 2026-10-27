@@ -37,7 +37,10 @@ export function Leads() {
 
   const stats = vm.stats
     ? [
-        { key: 'total', icon: 'building', label: 'Total de leads', value: vm.stats.total, detail: 'na sua carteira', tone: 'brand' },
+        { key: 'total', icon: 'building', label: 'Todos os leads', value: vm.stats.total, detail: 'na sua carteira', tone: 'brand' },
+        { key: 'prospecting', icon: 'trend', label: 'Em prospecção', value: vm.stats.prospecting ?? 0, detail: 'ainda não fechados', tone: 'purple' },
+        { key: 'followup', icon: 'clock', label: 'Follow-up', value: vm.stats.followUp ?? 0, detail: 'na etapa Negociação', tone: 'brand' },
+        { key: 'attention', icon: 'alert', label: 'Precisam de atenção', value: vm.stats.attention ?? 0, detail: 'cadência demonstrativa', tone: 'red' },
         
       ]
     : []

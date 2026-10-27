@@ -62,6 +62,13 @@ export function LeadDetail() {
   const stars = scoreStars(lead.score)
   const cadence = CADENCE_STATUS[lead.cadenceStatus] ?? CADENCE_STATUS.ON_TRACK
 
+  const demoCadence = {
+    status: 'ON_TRACK',
+    lastContactLabel: 'Há 2 dias (exemplo)',
+    nextContactLabel: 'Em 3 dias (exemplo)',
+    progress: 45,
+  }
+
   const miniStats = [
     { label: 'Último contato', value: lead.lastContact },
     { label: 'Cadência', value: cadence.label },
@@ -95,7 +102,7 @@ export function LeadDetail() {
         </div>
         <div className={styles.headerActions}>
           <Button icon="plus" onClick={() => setNoteOpen(true)}>
-            Nova anotação
+            Nova interação
           </Button>
           <Button icon="users" onClick={() => setTransferOpen(true)}>
             Alterar responsável
@@ -113,14 +120,14 @@ export function LeadDetail() {
       <div className={styles.columns}>
         <div className={styles.main}>
           <FunnelCard large funnel={vm.funnel} lead={lead} owner={vm.owner} onUpdateStage={() => openEdit(2)} />
-          <CadenceCard large cadence={vm.cadence} />
+          <CadenceCard large cadence={demoCadence} />
           <Panel>
             <PanelHead
               title="Histórico de interações"
               subtitle="Contatos, reuniões e anotações registrados"
               actions={
                 <Button size="sm" icon="plus" onClick={() => setNoteOpen(true)}>
-                  Nova anotação
+                  Nova interação
                 </Button>
               }
             />
@@ -180,6 +187,7 @@ export function LeadDetail() {
       {noteOpen && (
         <NewNoteModal
           leadName={lead.name}
+          contacts={vm.contacts}
           saving={vm.saving}
           error={vm.actionError}
           onClose={() => setNoteOpen(false)}

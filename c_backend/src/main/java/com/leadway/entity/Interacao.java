@@ -2,6 +2,7 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -33,10 +34,10 @@ public class Interacao {
     private LocalDateTime criadoEm;
 
     @Column(nullable = false)
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDateTime atualizadoEm;
 
-    protected Interacao() {
+    public Interacao() {
     }
 
     public Integer getId() {
@@ -65,6 +66,10 @@ public class Interacao {
 
     public LocalDateTime getCriadoEm() {
         return criadoEm;
+    }
+
+    public LocalDateTime getAtualizadoEm() {
+        return atualizadoEm;
     }
 
     public void setContato(Contato contato) {

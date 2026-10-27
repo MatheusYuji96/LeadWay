@@ -2,6 +2,7 @@ package com.leadway.controller;
 
 import com.leadway.dto.response.*;
 import com.leadway.service.DashboardService;
+import com.leadway.service.DashboardEquipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,9 +24,11 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final DashboardEquipeService dashboardEquipeService;
 
-    public DashboardController(DashboardService dashboardService) {
+    public DashboardController(DashboardService dashboardService, DashboardEquipeService dashboardEquipeService) {
         this.dashboardService = dashboardService;
+        this.dashboardEquipeService = dashboardEquipeService;
     }
 
     @Operation(
@@ -78,5 +81,10 @@ public class DashboardController {
     @GetMapping("/leads-atencao/{id}")
     public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer id) {
         return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(id));
+    }
+    @Operation(summary = "Resumo real do acompanhamento da equipe")
+    @GetMapping("/equipe")
+    public ResponseEntity<DashboardEquipeResponseDTO> buscarEquipe() {
+        return ResponseEntity.ok(dashboardEquipeService.buscarResumo());
     }
 }
