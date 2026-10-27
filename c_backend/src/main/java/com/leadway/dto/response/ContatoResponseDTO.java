@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Dados retornados após o cadastro de um contato")
 public class ContatoResponseDTO {
+    private Integer id;
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     @Schema(
             description = "Nome do contato do Lead",
@@ -34,7 +37,7 @@ public class ContatoResponseDTO {
     @Schema(
             description = "Dados consolidados do Lead que o contato pertence"
     )
-    private Lead lead;
+    private Integer leadId;
 
     @Schema(
             description = "Enumerador responsável pela classificação devida do contato",
@@ -80,13 +83,8 @@ public class ContatoResponseDTO {
         this.whatsapp = whatsapp;
     }
 
-    public Lead getLead() {
-        return lead;
-    }
-
-    public void setLead(Lead lead) {
-        this.lead = lead;
-    }
+    public Integer getLeadId() { return leadId; }
+    public void setLeadId(Integer leadId) { this.leadId = leadId; }
 
     public ClassificacaoContato getContato() {
         return contato;

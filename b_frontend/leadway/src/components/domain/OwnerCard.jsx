@@ -1,5 +1,4 @@
 import { Avatar } from '@/components/common/Avatar'
-import { Icon } from '@/components/common/Icon'
 import { Panel, PanelHead } from '@/components/common/Panel'
 import styles from './OwnerCard.module.css'
 
@@ -15,13 +14,13 @@ export function OwnerCard({ owner, lead }) {
 
   return (
     <Panel>
-      <PanelHead title="Responsável" actions={<Icon name="more" size={16} />} />
+      <PanelHead title="Responsável" />
       <div className={styles.owner}>
         <Avatar initials={owner.initials} size="lg" />
         <div>
           <strong>{owner.name}</strong>
           <span>
-            {owner.code} • {owner.region}
+            {owner.email || 'E-mail não informado'}
           </span>
         </div>
       </div>

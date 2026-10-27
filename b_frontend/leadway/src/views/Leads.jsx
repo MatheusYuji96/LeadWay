@@ -21,11 +21,11 @@ export function Leads() {
     setSaving(true)
     setWizardError(null)
     try {
-      await leadsService.create(values)
+      const created = await leadsService.create(values)
       // Refresh the listing to reflect the real backend state
       await vm.reload()
       window.dispatchEvent(new Event('leadway:leads-changed'))
-      return true
+      return created
     } catch (err) {
       // Propagate the error to the caller so the form can map field errors
       setWizardError(null) // O próprio formulário apresenta a mensagem detalhada

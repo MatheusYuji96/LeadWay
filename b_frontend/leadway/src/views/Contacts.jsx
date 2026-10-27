@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/common/Button'
 import { Field, SelectField } from '@/components/common/Field'
 import { Modal } from '@/components/common/Modal'
@@ -11,6 +12,8 @@ import styles from './Contacts.module.css'
 
 export function Contacts() {
   const vm = useContactsViewModel()
+  const [searchParams] = useSearchParams()
+  const leadFilter = searchParams.get('leadId')
   const [newOpen, setNewOpen] = useState(false)
   const [form, setForm] = useState({ name: '', role: '', email: '', whatsapp: '', companyId: '' })
   const [localItems, setLocalItems] = useState(null)
@@ -55,9 +58,10 @@ export function Contacts() {
 
   const base = localItems ?? vm.contacts
   const term = vm.search.trim().toLowerCase()
+  const filteredByLead = leadFilter ? base.filter((c) => String(c.companyId) === String(leadFilter)) : base
   const contacts = term
-    ? base.filter((c) => [c.name, c.companyName, c.role].some((field) => String(field).toLowerCase().includes(term)))
-    : base
+    ? filteredByLead.filter((c) => [c.name, c.companyName, c.role].some((field) => String(field).toLowerCase().includes(term)))
+    : filteredByLead
 
   // Load companies for the "Empresa" select
   useEffect(() => {
@@ -65,7 +69,7 @@ export function Contacts() {
     ;(async () => {
       try {
         const res = await leadsService.list()
-        const items = res?.items ?? res?.items ?? []
+        const items = res?.items ?? []
         if (mounted) setCompanies(items)
         // initialize default company if not set
         if (mounted && !form.companyId && items[0]) setForm((f) => ({ ...f, companyId: items[0].id }))

@@ -28,6 +28,9 @@ public class Lead {
     @JoinColumn(name = "vendedor_id")
     private Vendedor vendedor;
 
+    @Column(name = "vinculado_em")
+    private LocalDateTime vinculadoEm;
+
     @ManyToOne
     @JoinColumn(name = "etapa_id", nullable = false)
     private Etapa etapa;
@@ -92,6 +95,10 @@ public class Lead {
     public Endereco getEndereco() {
         return endereco;
     }
+
+    public LocalDateTime getVinculadoEm() { return vinculadoEm; }
+
+    public void setVinculadoEm(LocalDateTime vinculadoEm) { this.vinculadoEm = vinculadoEm; }
 
     public Vendedor getVendedor() {
         return vendedor;

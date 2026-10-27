@@ -54,6 +54,7 @@ public class LeadService {
             }
             Vendedor vendedor = vendedorOpt.get();
             cadastro.setVendedor(vendedor);
+            cadastro.setVinculadoEm(java.time.LocalDateTime.now());
         }
         if (dto.getSetorId() == null){
             throw new SetorObrigatorioException("Obrigatório informar um setor de mercado");
@@ -96,10 +97,15 @@ public class LeadService {
         }
         Lead lead = leadOpt.get();
         lead.setId(id);
-        if (dto.getEmail() != null){
-            if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
-                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+        if (dto.getEmail() != null) {
+
+            if (!dto.getEmail().equalsIgnoreCase(lead.getEmail())) {
+
+                if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+                    throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+                }
             }
+
             lead.setEmail(dto.getEmail());
         }
         if (dto.getTelefone() != null){
@@ -146,15 +152,21 @@ public class LeadService {
                 endereco.setEstado(enderecoDto.getEstado());
             }
         }
-        if (dto.getVendedorId() != null){
-            Optional<Vendedor> vendedorOpt = vendedorRepository.findById(id);
-            if (vendedorOpt.isEmpty()){
+        if (dto.getVendedorId() != null) {
+
+            Optional<Vendedor> vendedorOpt =
+                    vendedorRepository.findById(dto.getVendedorId());
+
+            if (vendedorOpt.isEmpty()) {
                 throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
             }
+
             Vendedor vendedor = vendedorOpt.get();
-            vendedor.setId(id);
+
+            if (lead.getVendedor() == null || !lead.getVendedor().getId().equals(vendedor.getId())) {
+                lead.setVinculadoEm(java.time.LocalDateTime.now());
+            }
             lead.setVendedor(vendedor);
-            return lead;
         }
         if (dto.getEtapaId() != null){
             Optional<Etapa> etapaOpt = etapaRepository.findById(dto.getEtapaId());

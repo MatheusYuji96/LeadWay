@@ -1,4 +1,5 @@
 import { http, unwrap, isMockMode } from './http'
+import { contactsService } from './contacts.service'
 
 const digits = (value) => String(value ?? '').replace(/\D/g, '')
 
@@ -10,7 +11,7 @@ export function normalizeLead(raw) {
   return {
     ...raw,
     // A resposta atual do backend não expõe o ID interno; CNPJ identifica a linha para navegação.
-    id: raw.id ?? raw.cnpj,
+    id: raw.id ?? null,
     name, cnpj: raw.cnpj ?? '',
     sector: raw.sector ?? raw.setor?.nome ?? '—',
     segment: raw.segment ?? raw.setor?.nome ?? '',
@@ -57,7 +58,21 @@ export const leadsService = {
     const rows = (await this.list()).items
     const found = rows.find((row) => String(row.id) === String(id))
     if (!found) throw new Error('Empresa não encontrada.')
-    return { lead: found, contacts: [], timeline: [], owner: found.vendedor ? { name: found.vendedor.nome, email: found.vendedor.email, phone: found.vendedor.telefone } : null, funnel: null, cadence: null }
+    const contactResponse = await contactsService.listByLead(id)
+    const contacts = (Array.isArray(contactResponse) ? contactResponse : contactResponse?.items ?? []).map((item) => ({
+      ...item, name: item.name ?? item.nome, role: item.role ?? item.cargo,
+      initials: (item.nome ?? item.name ?? '?').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+    }))
+    const ownerId = found.vendedor?.id
+    const activeCount = ownerId == null ? null : rows.filter((row) =>
+      String(row.vendedor?.id ?? row.representativeId) === String(ownerId) && row.ativo !== false,
+    ).length
+    const owner = found.vendedor ? {
+      name: found.vendedor.nome, email: found.vendedor.email, phone: found.vendedor.telefone,
+      initials: (found.vendedor.nome ?? '?').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+      since: found.vinculadoEm ?? null, leads: activeCount,
+    } : null
+    return { lead: found, contacts, timeline: [], owner, funnel: null, cadence: null }
   },
 
   /**
@@ -73,12 +88,20 @@ export const leadsService = {
    * PUT /leads/:id
    * @param {string} id
    * @param {object} payload
-   */
+   */ 
   async update(id, payload) {
-    if (!isMockMode && (!Number.isSafeInteger(Number(id)) || String(id).length > 10)) {
-      throw new Error('O backend retorna o CNPJ, mas a rota PATCH exige o ID numérico do Lead. É necessário expor o ID no LeadResponseDTO para atualizar com segurança.')
+    if (
+      !isMockMode &&
+      (!Number.isSafeInteger(Number(id)) || Number(id) <= 0)
+    ) {
+      throw new Error('ID do Lead inválido para atualização.')
     }
-    return unwrap(await http.patch(`/leads/${id}`, payload))
+
+    const response = unwrap(
+      await http.patch(`/leads/${id}`, payload)
+    )
+
+    return isMockMode ? response : normalizeLead(response)
   },
 
   /**

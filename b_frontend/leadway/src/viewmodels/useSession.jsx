@@ -4,6 +4,12 @@ import { SessionContext } from './sessionContext'
 
 const SESSION_KEY = 'leadway_session_v1'
 
+function normalizeUser(value) {
+  if (!value) return null
+  const name = value.name ?? value.nome ?? value.user?.name ?? value.user?.nome ?? ''
+  return { ...value, name: name || value.email || 'Usuário', initials: name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase(), role: value.role ?? 'Usuário' }
+}
+
 /**
  * Sessão da aplicação com persistência em localStorage.
  */
@@ -12,7 +18,7 @@ export function SessionProvider({ children }) {
     try {
       const raw = localStorage.getItem(SESSION_KEY)
       if (raw) {
-        return JSON.parse(raw)
+        return normalizeUser(JSON.parse(raw))
       }
     } catch (e) {
       // ignore
@@ -34,13 +40,13 @@ export function SessionProvider({ children }) {
 
   const login = useCallback(async (credentials) => {
     const logged = await authService.login(credentials)
-    setUser(logged)
+    setUser(normalizeUser(logged))
     return logged
   }, [])
 
   const signup = useCallback(async (payload) => {
     const created = await authService.signup(payload)
-    setUser(created)
+    setUser(normalizeUser(created))
     return created
   }, [])
 

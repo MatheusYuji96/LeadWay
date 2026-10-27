@@ -44,7 +44,7 @@ public class ContatoController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping
-    public ResponseEntity<List<ContatoResponseDTO>> listarPorFiltro(@RequestParam(required = false) String termo, @RequestParam(required = false) Integer leadId){
+    public ResponseEntity<List<ContatoResponseDTO>> listarPorFiltro(@RequestParam(required = false) String termo, @PathVariable Integer leadId){
         List<Contato> listaContatos = contatoService.listarPorFiltro(termo, leadId);
         List<ContatoResponseDTO> listaResponse = listaContatos.stream().map(contatoMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
@@ -63,7 +63,8 @@ public class ContatoController {
     })
     @PostMapping
     public ResponseEntity<ContatoResponseDTO> cadastrar(
-            @Valid @RequestBody ContatoRequestDTO dto) {
+            @PathVariable Integer leadId, @Valid @RequestBody ContatoRequestDTO dto) {
+        dto.setLeadId(leadId);
 
         Contato contato = contatoService.salvar(dto);
         ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);

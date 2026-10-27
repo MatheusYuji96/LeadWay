@@ -50,12 +50,18 @@ public class VendedorRequestDTO {
     @NotBlank
     private String codVendedor;
 
+    private String regiao;
+
     @Schema(
             description = "Status de atividade do usuário vendedor",
             example = "1"
     )
     @NotNull
     private Boolean ativo;
+
+    public String getRegiao() { return regiao; }
+
+    public void setRegiao(String regiao) { this.regiao = regiao; }
 
     public Integer getLiderId() {
         return liderId;

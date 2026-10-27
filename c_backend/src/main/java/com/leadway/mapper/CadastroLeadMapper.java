@@ -23,6 +23,8 @@ public class CadastroLeadMapper {
 
     public LeadResponseDTO toResponse(Lead lead){
         LeadResponseDTO leadResponse = new LeadResponseDTO();
+        leadResponse.setId(lead.getId());
+        leadResponse.setVinculadoEm(lead.getVinculadoEm());
         leadResponse.setCnpj(lead.getCnpj());
         leadResponse.setRazaoSocial(lead.getRazaoSocial());
         leadResponse.setNomeFantasia(lead.getNomeFantasia());
@@ -38,7 +40,9 @@ public class CadastroLeadMapper {
     }
 
     public LeadResponseDTO.VendedorDTO toVendedorResponse(Vendedor vendedor){
+        if (vendedor == null) return null;
         LeadResponseDTO.VendedorDTO dto = new LeadResponseDTO.VendedorDTO();
+        dto.setId(vendedor.getId());
         dto.setCodVendedor(vendedor.getCodVendedor());
         dto.setNome(vendedor.getNome());
         dto.setEmail(vendedor.getEmail());
