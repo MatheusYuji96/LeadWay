@@ -19,7 +19,7 @@ function App() {
     e.preventDefault();
     setCarregar(true);
 
-    fetch("http://localhost:8080/api/beneficiarios", {
+    fetch("http://localhost:8081/api/beneficiarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome, email, usuario })
