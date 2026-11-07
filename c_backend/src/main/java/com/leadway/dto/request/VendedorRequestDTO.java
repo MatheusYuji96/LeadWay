@@ -10,6 +10,7 @@ public class VendedorRequestDTO {
             description = "Identificador estrangeiro do vendedor responsável pelo Lead",
             example = "2"
     )
+    @NotNull
     private Integer liderId;
 
     @Schema(
@@ -34,6 +35,7 @@ public class VendedorRequestDTO {
     )
     @NotBlank
     @Email
+    @Size(max = 255)
     private String email;
 
     @Schema(
@@ -41,6 +43,7 @@ public class VendedorRequestDTO {
             example = "Urubu100!"
     )
     @NotBlank
+    @Size(max = 50)
     private String senha;
 
     @Schema(
@@ -50,12 +53,18 @@ public class VendedorRequestDTO {
     @NotBlank
     private String codVendedor;
 
+    private String regiao;
+
     @Schema(
             description = "Status de atividade do usuário vendedor",
             example = "1"
     )
     @NotNull
     private Boolean ativo;
+
+    public String getRegiao() { return regiao; }
+
+    public void setRegiao(String regiao) { this.regiao = regiao; }
 
     public Integer getLiderId() {
         return liderId;

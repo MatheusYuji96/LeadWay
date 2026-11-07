@@ -82,11 +82,11 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
                 <Badge tone="neutral">{lead.stage}</Badge>
               </span>
               <span>{lead.representativeName}</span>
-              <span>{lead.lastContact}</span>
+              <span>{lead.lastContact || '—'}</span>
               <span>
                 <Badge tone={cadence.tone}>{cadence.label}</Badge>
               </span>
-              <span>{lead.nextAction}</span>
+              <span>{lead.nextAction || '—'}</span>
               <span className={styles.more}>
                 {(isMockMode || /^\d+$/.test(String(lead.id)) && String(lead.id).length < 10) && <Button
                   kind="ghost"

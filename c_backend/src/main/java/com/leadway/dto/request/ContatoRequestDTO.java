@@ -22,6 +22,7 @@ public class ContatoRequestDTO {
             example = "Consultor de Vendas"
     )
     @NotBlank
+    @Size(max = 45)
     private String cargo;
 
     @Schema(

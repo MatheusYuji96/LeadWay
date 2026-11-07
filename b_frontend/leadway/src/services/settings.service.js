@@ -18,12 +18,15 @@ export const settingsService = {
   },
   async getPreferences() {
     if (isMockMode) return null
-    return read().preferences ?? null
+    const user = getUser()
+    if (!user?.id) return read().preferences ?? null
+    return unwrap(await http.get(`/vendedores/${user.id}/preferencias`))
   },
   async updatePreferences(preferences) {
     if (isMockMode) return unwrap(await http.put('/me/preferences', preferences))
-    write({ preferences })
-    return preferences
+    const user = getUser()
+    if (!user?.id) throw new Error('Faça login novamente para salvar as preferências.')
+    return unwrap(await http.put(`/vendedores/${user.id}/preferencias`, preferences))
   },
   async updatePassword(payload) {
     if (isMockMode) return unwrap(await http.put('/me/password', payload))

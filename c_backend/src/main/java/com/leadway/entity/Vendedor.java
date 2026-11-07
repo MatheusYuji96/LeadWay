@@ -22,6 +22,9 @@ public class Vendedor {
     @Column(length = 30)
     private String codVendedor;
 
+    @Column(length = 100)
+    private String regiao;
+
     @Column(nullable = false, length = 190)
     private String nome;
 
@@ -47,6 +50,10 @@ public class Vendedor {
     public String getCodVendedor() {
         return codVendedor;
     }
+
+    public String getRegiao() { return regiao; }
+
+    public void setRegiao(String regiao) { this.regiao = regiao; }
 
     public String getNome() {
         return nome;

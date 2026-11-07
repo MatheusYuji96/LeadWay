@@ -28,6 +28,8 @@ export function LeadDetail() {
   const [noteOpen, setNoteOpen] = useState(false)
   const [transferOpen, setTransferOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [editStartStep, setEditStartStep] = useState(0)
+  const openEdit = (step = 0) => { setEditStartStep(step); setEditOpen(true) }
 
   if (vm.loading) {
     return (
@@ -59,6 +61,13 @@ export function LeadDetail() {
   const lead = vm.lead
   const stars = scoreStars(lead.score)
   const cadence = CADENCE_STATUS[lead.cadenceStatus] ?? CADENCE_STATUS.ON_TRACK
+
+  const demoCadence = {
+    status: 'ON_TRACK',
+    lastContactLabel: 'Há 2 dias (exemplo)',
+    nextContactLabel: 'Em 3 dias (exemplo)',
+    progress: 45,
+  }
 
   const miniStats = [
     { label: 'Último contato', value: lead.lastContact },
@@ -93,12 +102,12 @@ export function LeadDetail() {
         </div>
         <div className={styles.headerActions}>
           <Button icon="plus" onClick={() => setNoteOpen(true)}>
-            Nova anotação
+            Nova interação
           </Button>
           <Button icon="users" onClick={() => setTransferOpen(true)}>
             Alterar responsável
           </Button>
-          <Button kind="primary" icon="settings" onClick={() => setEditOpen(true)}>
+          <Button kind="primary" icon="settings" onClick={() => openEdit(0)}>
             Editar empresa
           </Button>
         </div>
@@ -110,15 +119,15 @@ export function LeadDetail() {
 
       <div className={styles.columns}>
         <div className={styles.main}>
-          <FunnelCard large funnel={vm.funnel} lead={lead} owner={vm.owner} />
-          <CadenceCard large cadence={vm.cadence} />
+          <FunnelCard large funnel={vm.funnel} lead={lead} owner={vm.owner} onUpdateStage={() => openEdit(2)} />
+          <CadenceCard large cadence={demoCadence} />
           <Panel>
             <PanelHead
               title="Histórico de interações"
               subtitle="Contatos, reuniões e anotações registrados"
               actions={
                 <Button size="sm" icon="plus" onClick={() => setNoteOpen(true)}>
-                  Nova anotação
+                  Nova interação
                 </Button>
               }
             />
@@ -136,7 +145,7 @@ export function LeadDetail() {
               title="Contatos"
               subtitle={`${vm.contacts.length} pessoa(s) vinculada(s)`}
               actions={
-                <Button kind="ghost" size="sm" onClick={() => navigate(paths.contacts)}>
+                <Button kind="ghost" size="sm" onClick={() => navigate(`${paths.contacts}?leadId=${lead.id}`)}>
                   Ver todos
                 </Button>
               }
@@ -178,6 +187,7 @@ export function LeadDetail() {
       {noteOpen && (
         <NewNoteModal
           leadName={lead.name}
+          contacts={vm.contacts}
           saving={vm.saving}
           error={vm.actionError}
           onClose={() => setNoteOpen(false)}
@@ -188,6 +198,7 @@ export function LeadDetail() {
       {transferOpen && (
         <TransferModal
           lead={lead}
+          initialStep={editStartStep}
           saving={vm.saving}
           error={vm.actionError}
           onClose={() => setTransferOpen(false)}
@@ -198,9 +209,10 @@ export function LeadDetail() {
       {editOpen && (
         <CreateCompanyWizard
           lead={lead}
+          initialStep={editStartStep}
           saving={vm.saving}
           error={vm.actionError}
-          onClose={() => setEditOpen(false)}
+          onClose={() => { setEditOpen(false); window.location.reload() }}
           onSubmit={(values) => vm.update(values)}
         />
       )}

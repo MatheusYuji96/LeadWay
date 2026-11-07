@@ -28,6 +28,9 @@ public class Lead {
     @JoinColumn(name = "vendedor_id")
     private Vendedor vendedor;
 
+    @Column(name = "vinculado_em")
+    private LocalDateTime vinculadoEm;
+
     @ManyToOne
     @JoinColumn(name = "etapa_id", nullable = false)
     private Etapa etapa;
@@ -53,8 +56,8 @@ public class Lead {
     @Column(length = 30)
     private String prioridade;
 
-    @Column(nullable = false, length = 30)
-    private String potencial;
+    @Column(nullable = false)
+    private Integer potencial;
 
     @Column(length = 20)
     private String farol;
@@ -93,6 +96,10 @@ public class Lead {
         return endereco;
     }
 
+    public LocalDateTime getVinculadoEm() { return vinculadoEm; }
+
+    public void setVinculadoEm(LocalDateTime vinculadoEm) { this.vinculadoEm = vinculadoEm; }
+
     public Vendedor getVendedor() {
         return vendedor;
     }
@@ -125,7 +132,7 @@ public class Lead {
         return prioridade;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
@@ -219,7 +226,7 @@ public class Lead {
         this.prioridade = prioridade;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 

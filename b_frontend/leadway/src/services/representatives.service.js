@@ -1,11 +1,13 @@
 import { http, unwrap, isMockMode } from './http'
 import { repInitials } from '@/models/representative'
+import { leadsService } from './leads.service'
+import { contactsService } from './contacts.service'
 
 function normalizeRepresentative(rep) {
   const name = rep.name ?? rep.nome ?? ''
   return {
     ...rep, id: rep.id, name, code: rep.code ?? rep.codVendedor ?? '',
-    region: rep.region ?? '—', email: rep.email ?? '',
+    region: rep.region ?? rep.regiao ?? '—', email: rep.email ?? '',
     phone: rep.phone ?? rep.telefone ?? '',
     initials: rep.initials ?? repInitials(name),
     leads: rep.leads ?? 0, contacts: rep.contacts ?? 0, pending: rep.pending ?? 0,
@@ -13,6 +15,25 @@ function normalizeRepresentative(rep) {
   }
 }
 
+
+export function belongsToRepresentative(lead, rep) {
+  const owner = lead.vendedor ?? {}
+  if (owner.id != null && rep.id != null) return String(owner.id) === String(rep.id)
+  return Boolean((owner.codVendedor && rep.code && owner.codVendedor === rep.code) || (owner.email && rep.email && owner.email.toLowerCase() === rep.email.toLowerCase()))
+}
+
+export function isProposalStage(lead) {
+  const stage = lead.etapa ?? {}
+  return Number(stage.ordem) === 3 || /apresenta[cç][aã]o\s*\/\s*proposta/i.test(String(stage.nome ?? lead.stage ?? ''))
+}
+
+// Considera pendente o Lead cuja próxima ação esteja vencida (antes de hoje).
+export function isOverdue(lead) {
+  const raw = lead.proximoContato ?? lead.proximaAcao ?? lead.nextActionDate ?? lead.dataProximoContato
+  if (!raw) return false
+  const date = new Date(raw)
+  return !Number.isNaN(date.getTime()) && date.getTime() < Date.now()
+}
 
 export const representativesService = {
   /**
@@ -24,7 +45,23 @@ export const representativesService = {
     // will handle '/vendedores' or we may use '/representatives' depending on setup.
     const result = unwrap(await http.get(isMockMode ? '/representatives' : '/vendedores'))
     const rows = Array.isArray(result) ? result : (result?.items ?? [])
-    return { items: rows.map(normalizeRepresentative), stats: Array.isArray(result?.stats) ? result.stats : [] }
+    const items = rows.map(normalizeRepresentative)
+    if (!isMockMode && items.length) {
+      const leads = (await leadsService.list()).items
+      const groups = await Promise.allSettled(leads.map(async (lead) => {
+        const response = await contactsService.listByLead(lead.id)
+        return { leadId: lead.id, count: (Array.isArray(response) ? response : response?.items ?? []).length }
+      }))
+      const contactsByLead = new Map(groups.filter((r) => r.status === 'fulfilled').map((r) => [String(r.value.leadId), r.value.count]))
+      for (const rep of items) {
+        const portfolio = leads.filter((lead) => belongsToRepresentative(lead, rep))
+        rep.leads = portfolio.length
+        rep.contacts = portfolio.reduce((sum, lead) => sum + (contactsByLead.get(String(lead.id)) ?? 0), 0)
+        rep.completed = portfolio.filter(isProposalStage).length
+        rep.pending = portfolio.filter(isOverdue).length
+      }
+    }
+    return { items, stats: Array.isArray(result?.stats) ? result.stats : [] }
   },
 
   /**
@@ -60,6 +97,7 @@ export const representativesService = {
       codVendedor: payload.code || payload.codVendedor || '',
       // ativo is expected as a boolean in the backend DTO
       ativo: payload.active === undefined ? true : !!payload.active,
+      regiao: payload.region ?? payload.regiao ?? null,
     }
     // include liderId only when provided and a valid integer
     if (liderIdRaw !== undefined && liderIdRaw !== null && String(liderIdRaw).trim() !== '') {

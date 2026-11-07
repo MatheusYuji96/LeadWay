@@ -8,9 +8,21 @@ export const contactsService = {
    */
   async list() {
     if (isMockMode) return unwrap(await http.get('/contacts'))
-    // Global listing of contacts is not documented in the Swagger.
-    // Use per-lead endpoints: GET /leads/{leadId}/contatos when available.
-    throw new Error('GET /contacts não é um endpoint documentado. Use GET /leads/{leadId}/contatos')
+    const { leadsService } = await import('./leads.service')
+    const leads = (await leadsService.list()).items
+    const groups = await Promise.allSettled(leads.filter((lead) => lead.id != null).map(async (lead) => {
+      const result = await this.listByLead(lead.id)
+      const rows = Array.isArray(result) ? result : result?.items ?? []
+      return rows.map((item) => ({
+        ...item, name: item.name ?? item.nome ?? '', role: item.role ?? item.cargo ?? '',
+        companyId: lead.id, companyName: lead.name,
+        initials: (item.nome ?? item.name ?? '?').split(' ').slice(0, 2).map((x) => x[0]).join('').toUpperCase(),
+        status: item.status ?? 'ON_TRACK',
+      }))
+    }))
+    const rejected = groups.filter((group) => group.status === 'rejected')
+    if (rejected.length) throw new Error(`Não foi possível consultar os contatos de ${rejected.length} empresa(s). Confira a API.`)
+    return { items: groups.flatMap((group) => group.value) }
   },
   /**
    * GET /leads/:leadId/contatos

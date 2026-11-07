@@ -63,7 +63,7 @@ export function RepTable({ items, loading, error, onRetry, onClearFilters, onDel
               <Avatar initials={rep.initials} />
               <span className={styles.personText}>
                 <strong>{rep.name}</strong>
-                <small>{repDisplayEmail(rep.name)}</small>
+                <small>{rep.email || repDisplayEmail(rep.name)}</small>
               </span>
             </button>
             <span>{rep.code}</span>
