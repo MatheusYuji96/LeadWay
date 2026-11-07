@@ -10,6 +10,7 @@ public class VendedorRequestDTO {
             description = "Identificador estrangeiro do vendedor responsável pelo Lead",
             example = "2"
     )
+    @NotNull
     private Integer liderId;
 
     @Schema(
@@ -34,6 +35,7 @@ public class VendedorRequestDTO {
     )
     @NotBlank
     @Email
+    @Size(max = 255)
     private String email;
 
     @Schema(
@@ -41,6 +43,7 @@ public class VendedorRequestDTO {
             example = "Urubu100!"
     )
     @NotBlank
+    @Size(max = 50)
     private String senha;
 
     @Schema(

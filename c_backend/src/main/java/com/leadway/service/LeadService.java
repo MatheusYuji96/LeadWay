@@ -40,21 +40,23 @@ public class LeadService {
     }
 
     public Lead salvar(CadastroLeadRequestDTO dto) {
-        Lead cadastro = cadastroLeadMapper.toEntity(dto);
         if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
         if (leadRepository.existsBycnpj(dto.getCnpj())){
             throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
         }
+        Lead cadastro = cadastroLeadMapper.toEntity(dto);
         if (dto.getVendedorId() != null) {
             Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
             if (vendedorOpt.isEmpty()) {
                 throw new VendedorNaoEncontradoException("Vendedor não encontrado");
             }
             Vendedor vendedor = vendedorOpt.get();
+            if (vendedor.getAtivo()){
             cadastro.setVendedor(vendedor);
             cadastro.setVinculadoEm(java.time.LocalDateTime.now());
+            }
         }
         if (dto.getSetorId() == null){
             throw new SetorObrigatorioException("Obrigatório informar um setor de mercado");
@@ -91,6 +93,9 @@ public class LeadService {
     }
 
     public Lead atualizar(Integer id, AtualizarLeadRequestDTO dto) {
+        if (dto == null){
+            throw new LeadVazioException("Os campos estão vazios");
+        }
         Optional<Lead> leadOpt = leadRepository.findById(id);
         if (leadOpt.isEmpty()){
             throw new LeadNaoEncontradoException("Lead não consta nos registros");
@@ -98,14 +103,11 @@ public class LeadService {
         Lead lead = leadOpt.get();
         lead.setId(id);
         if (dto.getEmail() != null) {
-
             if (!dto.getEmail().equalsIgnoreCase(lead.getEmail())) {
-
                 if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())) {
                     throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
                 }
             }
-
             lead.setEmail(dto.getEmail());
         }
         if (dto.getTelefone() != null){
@@ -118,6 +120,9 @@ public class LeadService {
             lead.setDataPrimeiroContato(dto.getDataPrimeiroContato());
         }
         if (dto.getDataPrimeiraVisita() != null){
+            if (dto.getDataPrimeiraVisita().isBefore(lead.getDataPrimeiroContato())){
+                throw new DataInvalidaException("Data informada não pode ser anterior à data do primeiro contato");
+            }
             lead.setDataPrimeiraVisita(dto.getDataPrimeiraVisita());
         }
         if (dto.getMotivoPerda() != null){
@@ -153,16 +158,15 @@ public class LeadService {
             }
         }
         if (dto.getVendedorId() != null) {
-
             Optional<Vendedor> vendedorOpt =
                     vendedorRepository.findById(dto.getVendedorId());
-
             if (vendedorOpt.isEmpty()) {
                 throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
             }
-
             Vendedor vendedor = vendedorOpt.get();
-
+            if (!vendedor.getAtivo()){
+                throw new InativoException("Vendedor solicitado está inativo");
+            }
             if (lead.getVendedor() == null || !lead.getVendedor().getId().equals(vendedor.getId())) {
                 lead.setVinculadoEm(java.time.LocalDateTime.now());
             }

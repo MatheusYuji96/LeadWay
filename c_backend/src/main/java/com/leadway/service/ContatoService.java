@@ -2,11 +2,10 @@ package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarContatoRequestDTO;
 import com.leadway.dto.request.ContatoRequestDTO;
+import com.leadway.entity.ClassificacaoContato;
 import com.leadway.entity.Contato;
 import com.leadway.entity.Lead;
-import com.leadway.exception.ContatoNaoExistenteException;
-import com.leadway.exception.EmailJaCadastradoException;
-import com.leadway.exception.LeadNaoEncontradoException;
+import com.leadway.exception.*;
 import com.leadway.mapper.ContatoMapper;
 import com.leadway.repository.LeadRepository;
 import com.leadway.repository.ContatoRepository;
@@ -49,20 +48,28 @@ public class ContatoService {
         return contato;
     }
 
-    public Contato renovar(Integer id, AtualizarContatoRequestDTO dto){
+    public Contato renovar(Integer leadId ,Integer id, AtualizarContatoRequestDTO dto){
         Optional<Contato> contatoOpt = contatoRepository.findById(id);
         if (contatoOpt.isEmpty()){
             throw new ContatoNaoExistenteException("Contato não consta nos registros");
         }
         Contato contato = contatoOpt.get();
+        if (leadId == null || !leadId.equals(contato.getLead().getId())){
+            throw new LeadDiferenteException("Lead diferente do registrado anteriormente");
+        }
+        if (!contato.getLead().getAtivo()){
+            throw new InativoException("Lead está inativo no momento");
+        }
         if (dto.getCargo() != null){
             contato.setCargo(dto.getCargo());
         }
         if (dto.getEmail() != null){
-            if (contatoRepository.existsByEmailIgnoreCase(dto.getEmail())){
-                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+            if (!contato.getEmail().equalsIgnoreCase(dto.getEmail())) {
+                if (contatoRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+                    throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
+                }
+                contato.setEmail(dto.getEmail());
             }
-            contato.setEmail(dto.getEmail());
         }
         if (dto.getWhatsapp() != null){
             contato.setWhatsapp(dto.getWhatsapp());
@@ -71,6 +78,13 @@ public class ContatoService {
             contato.setAtivo(dto.getAtivo());
         }
         if (dto.getContato() != null){
+            if (!dto.getContato().equals(ClassificacaoContato.DECISOR)){
+                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
+            } else if (!dto.getContato().equals(ClassificacaoContato.INFLUENCIADOR)){
+                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
+            } else if (!dto.getContato().equals(ClassificacaoContato.PADRAO)){
+                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
+            }
             contato.setClassificacao(dto.getContato());
         }
         Contato contatoRegistrar = contatoRepository.save(contato);

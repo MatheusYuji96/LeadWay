@@ -4,6 +4,8 @@ import com.leadway.entity.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,13 +42,15 @@ public class AtualizarLeadRequestDTO {
             description = "Telefone principal da empresa",
             example = "11992220000"
     )
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
     @Schema(
             description = "Potencial do Lead definido pelo usuário",
-            example = "BAIXO"
+            example = "5"
     )
-    private String potencial;
+    private Integer potencial;
 
     @Schema(
             description = "Data de primeiro contato com o cliente",
@@ -78,42 +82,49 @@ public class AtualizarLeadRequestDTO {
                 description = "Rua do endereço",
                 example = "Avenida Cardeal da Silva"
         )
+        @Size(max = 200)
         private String rua;
 
         @Schema(
                 description = "CEP do endereço",
                 example = "40225610"
         )
+        @Size(max = 20)
         private String cep;
 
         @Schema(
                 description = "Número do imóvel",
                 example = "50"
         )
+        @Size(max = 20)
         private String numero;
 
         @Schema(
                 description = "Complemento do endereço",
                 example = "Sala 2"
         )
+        @Size(max = 100)
         private String complemento;
 
         @Schema(
                 description = "Bairro do endereço",
                 example = "Rio Vermelho"
         )
+        @Size(max = 100)
         private String bairro;
 
         @Schema(
                 description = "Cidade do endereço",
                 example = "Salvador"
         )
+        @Size(max = 100)
         private String cidade;
 
         @Schema(
                 description = "Estado do endereço",
                 example = "Bahia"
         )
+        @Size(max = 100)
         private String estado;
 
 
@@ -214,11 +225,11 @@ public class AtualizarLeadRequestDTO {
         this.telefone = telefone;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 

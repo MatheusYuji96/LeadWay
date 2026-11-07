@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.br.CNPJ;
 
 @Schema(description = "Dados necessários para cadastrar um Lead no sistema")
 public class CadastroLeadRequestDTO {
@@ -15,6 +16,7 @@ public class CadastroLeadRequestDTO {
             example = "12345678000199"
     )
     @NotBlank
+    @CNPJ
     private String cnpj;
 
     @Schema(
@@ -71,9 +73,9 @@ public class CadastroLeadRequestDTO {
 
     @Schema(
             description = "Potencial do Lead definido pelo usuário",
-            example = "ALTO"
+            example = "1"
     )
-    private String potencial;
+    private Integer potencial;
 
 
     @Schema(
@@ -274,11 +276,11 @@ public class CadastroLeadRequestDTO {
         this.telefone = telefone;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 

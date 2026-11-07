@@ -111,8 +111,9 @@ public class ContatoController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<ContatoResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarContatoRequestDTO dto){
-        Contato contato = contatoService.renovar(id, dto);
+    public ResponseEntity<ContatoResponseDTO> atualizar(
+            @PathVariable Integer leadId, @PathVariable Integer id, @Valid @RequestBody AtualizarContatoRequestDTO dto){
+        Contato contato = contatoService.renovar(leadId ,id, dto);
         ContatoResponseDTO responseDTO = contatoMapper.toResponse(contato);
         return ResponseEntity.status(200).body(responseDTO);
     }

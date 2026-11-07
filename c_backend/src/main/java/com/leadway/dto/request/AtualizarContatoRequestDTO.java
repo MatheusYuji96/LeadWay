@@ -11,6 +11,7 @@ public class AtualizarContatoRequestDTO {
             description = "Cargo do contato na empresa",
             example = "Gerente Comercial"
     )
+    @Size(max = 45)
     private String cargo;
 
     @Schema(

@@ -56,8 +56,8 @@ public class Lead {
     @Column(length = 30)
     private String prioridade;
 
-    @Column(nullable = false, length = 30)
-    private String potencial;
+    @Column(nullable = false)
+    private Integer potencial;
 
     @Column(length = 20)
     private String farol;
@@ -132,7 +132,7 @@ public class Lead {
         return prioridade;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
@@ -226,7 +226,7 @@ public class Lead {
         this.prioridade = prioridade;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 
