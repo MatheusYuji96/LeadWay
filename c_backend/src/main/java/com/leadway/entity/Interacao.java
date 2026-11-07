@@ -40,7 +40,7 @@ public class Interacao {
     @UpdateTimestamp
     private LocalDateTime atualizadoEm;
 
-    protected Interacao() {
+    public Interacao() {
     }
 
     public Integer getId() {

@@ -25,7 +25,7 @@ public class LeadEtapaHistorico {
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
-    protected LeadEtapaHistorico() {
+    public LeadEtapaHistorico() {
     }
 
     public Integer getId() {

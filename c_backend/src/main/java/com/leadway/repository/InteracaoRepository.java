@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface InteracaoRepository extends JpaRepository<Interacao, Integer> {
     List<Interacao> findByLead_Id(Integer leadId);
+
+    List<Interacao> findByLead_IdOrderByDataHoraDesc(Integer leadId);
 }
