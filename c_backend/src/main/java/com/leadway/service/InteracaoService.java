@@ -4,7 +4,6 @@ import com.leadway.dto.request.CadastroInteracaoRequestDTO;
 import com.leadway.entity.*;
 import com.leadway.exception.EntidadeNaoEncontradaException;
 import com.leadway.exception.LeadNaoEncontradoException;
-import com.leadway.exception.VendedorNaoEncontradoException;
 import com.leadway.repository.*;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +26,11 @@ public class InteracaoService {
         this.historicoRepository = historicoRepository;
     }
 
-    public Interacao cadastrar(Integer leadId, Integer vendedorId, CadastroInteracaoRequestDTO dto) {
+    public Interacao cadastrar(Integer leadId, CadastroInteracaoRequestDTO dto) {
         Lead lead = leadRepository.findById(leadId)
                 .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
 
-        Vendedor vendedor = vendedorRepository.findById(vendedorId)
-                .orElseThrow(() -> new VendedorNaoEncontradoException("Vendedor não consta nos registros"));
+        Vendedor vendedor = lead.getVendedor();
 
         Interacao interacao = new Interacao();
         interacao.setLead(lead);
@@ -61,15 +59,20 @@ public class InteracaoService {
     public List<Interacao> listarPorLead(Integer leadId) {
 
         if (!leadRepository.existsById(leadId)) {
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
+            throw new EntidadeNaoEncontradaException("Lead não consta nos registros");
         }
 
         return interacaoRepository.findByLead_IdOrderByDataHoraDesc(leadId);
     }
 
-    public void excluir(Integer id) {
-        if (!interacaoRepository.existsById(id)) {
-            throw new EntidadeNaoEncontradaException("Interação não consta nos registros");
+    public void excluir(Integer leadId, Integer id) {
+
+        if (!leadRepository.existsById(leadId)) {
+            throw new EntidadeNaoEncontradaException("Lead não consta nos registros");
+        }
+
+        if (!interacaoRepository.existsByIdAndLead_Id(id, leadId)) {
+           throw new EntidadeNaoEncontradaException("Interação não consta nos registros desse lead");
         }
 
         interacaoRepository.deleteById(id);
