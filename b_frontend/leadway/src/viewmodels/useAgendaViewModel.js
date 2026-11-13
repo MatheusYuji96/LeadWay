@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { agendaService } from '@/services/agenda.service'
+import { isMockMode } from '@/services/http'
 import { useAsync } from './useAsync'
+import { useSession } from './sessionContext'
 
-const REFERENCE_TODAY = new Date(2025, 4, 15) // 15/05/2025, data-base do protótipo
+// No modo demonstração os dados são fixos em 15/05/2025; com a API real vale a data de hoje.
+const REFERENCE_TODAY = isMockMode ? new Date(2025, 4, 15) : new Date()
 
 function toKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
@@ -14,9 +17,12 @@ function monthKey(date) {
 
 /**
  * ViewModel da agenda comercial: visões mês/semana/dia, dia selecionado,
- * formato de horário e criação de compromissos.
+ * formato de horário, conexão com o Cal.com e criação/cancelamento de compromissos.
+ * Os compromissos vêm do Cal.com (via backend), não do banco do LeadWay.
  */
 export function useAgendaViewModel() {
+  const { user } = useSession()
+  const vendedorId = user?.id ?? user?.vendedorId ?? user?.vendedor?.id
   const [view, setView] = useState('Mês')
   const [cursor, setCursor] = useState(new Date(REFERENCE_TODAY.getFullYear(), REFERENCE_TODAY.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState(toKey(REFERENCE_TODAY))
@@ -27,17 +33,38 @@ export function useAgendaViewModel() {
   const exec = execute
 
   const load = useCallback(
-    () => exec(() => agendaService.list({ month: monthKey(cursor) })),
-    [exec, cursor],
+    () => exec(() => agendaService.list({ month: monthKey(cursor), vendedorId })),
+    [exec, cursor, vendedorId],
   )
 
   useEffect(() => {
     load()
   }, [load])
 
+  // `connected` só é false quando o backend diz que o vendedor não conectou o Cal.com.
+  const ready = data != null
+  const connected = data?.connected !== false
+
+  // Horários livres do dia selecionado (consulta a disponibilidade real no Cal.com).
+  const slotsAsync = useAsync()
+  const execSlots = slotsAsync.execute
+  const isPastDay = selectedDate < toKey(REFERENCE_TODAY)
+  const loadSlots = useCallback(
+    () => execSlots(() => agendaService.slots({ vendedorId, date: selectedDate })),
+    [execSlots, vendedorId, selectedDate],
+  )
+
+  useEffect(() => {
+    if (ready && connected && !isPastDay) loadSlots()
+  }, [ready, connected, isPastDay, loadSlots])
+
+  const freeSlots = useMemo(
+    () => (connected && !isPastDay && slotsAsync.data?.date === selectedDate ? (slotsAsync.data.slots ?? []).map((slot) => slot.label) : []),
+    [connected, isPastDay, slotsAsync.data, selectedDate],
+  )
+
   const appointments = useMemo(() => data?.items ?? [], [data])
   const overview = data?.overview ?? []
-  const freeSlots = data?.freeSlots ?? []
 
   const monthLabel = useMemo(
     () =>
@@ -137,12 +164,33 @@ export function useAgendaViewModel() {
 
   const createAppointment = useCallback(
     async (payload) => {
-      await agendaService.create(payload)
-      await load()
+      await agendaService.create({ ...payload, vendedorId })
+      await Promise.all([load(), loadSlots()])
       return true
     },
-    [load],
+    [load, loadSlots, vendedorId],
   )
+
+  const cancelAppointment = useCallback(
+    async (id) => {
+      await agendaService.cancel(id, { vendedorId })
+      await Promise.all([load(), loadSlots()])
+    },
+    [load, loadSlots, vendedorId],
+  )
+
+  const connectCal = useCallback(
+    async (apiKey) => {
+      await agendaService.connect({ vendedorId, apiKey })
+      await load()
+    },
+    [load, vendedorId],
+  )
+
+  const disconnectCal = useCallback(async () => {
+    await agendaService.disconnect(vendedorId)
+    await load()
+  }, [load, vendedorId])
 
   const periodLabel =
     view === 'Mês'
@@ -185,6 +233,9 @@ export function useAgendaViewModel() {
     periodLabel,
     loading,
     error,
+    vendedorId,
+    connected,
+    slotsLoading: slotsAsync.loading,
     eventModalOpen,
     openEventModal: () => setEventModalOpen(true),
     closeEventModal: () => setEventModalOpen(false),
@@ -193,6 +244,9 @@ export function useAgendaViewModel() {
     goToNextMonth,
     goToday,
     createAppointment,
+    cancelAppointment,
+    connectCal,
+    disconnectCal,
     reload: load,
     referenceToday: toKey(REFERENCE_TODAY),
   }

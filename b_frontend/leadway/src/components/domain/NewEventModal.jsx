@@ -1,27 +1,67 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/common/Button'
 import { Field, SelectField, TextArea } from '@/components/common/Field'
 import { Modal, SuccessContent } from '@/components/common/Modal'
 import { APPOINTMENT_TYPES } from '@/models/enums'
-import { mockCompanies, mockContacts, mockRepresentatives } from '@/services/mock/fixtures'
+import { agendaService } from '@/services/agenda.service'
+import { useAsync } from '@/viewmodels/useAsync'
+import { useSession } from '@/viewmodels/sessionContext'
 import styles from './ActionModals.module.css'
 
 export function NewEventModal({ defaultDate, saving, error, onClose, onSubmit }) {
+  // O responsável é sempre quem está logado: a reunião vai para o Cal.com DELE.
+  const { user } = useSession()
+  const vendedorId = user?.id
+
   const [values, setValues] = useState({
     companyId: '',
     contactId: '',
     date: defaultDate ?? '2025-05-17',
-    startTime: '10:00',
+    slotStart: '', // horário livre escolhido (vem do Cal.com)
     type: 'Reunião',
-    representativeId: mockRepresentatives[0]?.id ?? '',
+    representativeId: vendedorId ?? '',
     notes: '',
   })
   const [done, setDone] = useState(false)
 
-  const setField = (field, value) => setValues((prev) => ({ ...prev, [field]: value }))
+  const companiesAsync = useAsync()
+  const contactsAsync = useAsync()
+  const slotsAsync = useAsync()
+  const { execute: loadCompanies } = companiesAsync
+  const { execute: loadContacts } = contactsAsync
+  const { execute: loadSlots } = slotsAsync
+
+  // Empresas reais (antes eram sempre as de teste).
+  useEffect(() => {
+    loadCompanies(() => agendaService.listCompanyOptions(vendedorId))
+  }, [loadCompanies, vendedorId])
+
+  // Sempre que a data muda, busca de novo os horários livres no Cal.com.
+  useEffect(() => {
+    if (!values.date) return
+    loadSlots(() => agendaService.slots({ vendedorId, date: values.date }))
+  }, [loadSlots, vendedorId, values.date])
+
+  const setField = (field, value) =>
+    setValues((prev) => ({ ...prev, [field]: value, ...(field === 'date' ? { slotStart: '' } : {}) }))
+
+  const changeCompany = (companyId) => {
+    setValues((prev) => ({ ...prev, companyId, contactId: '' }))
+    if (companyId) loadContacts(() => agendaService.listContactOptions(companyId))
+  }
+
+  const companies = companiesAsync.data ?? []
+  // Ignora resposta atrasada de outra empresa (o usuário trocou antes de ela chegar).
+  const contacts = (contactsAsync.data ?? []).filter((contact) => String(contact.companyId) === String(values.companyId))
+  const slotsReady = slotsAsync.data?.date === values.date && !slotsAsync.loading
+  const slots = slotsReady ? (slotsAsync.data.slots ?? []) : []
+
+  let slotPlaceholder = 'Selecione um horário'
+  if (!slotsReady && !slotsAsync.error) slotPlaceholder = 'Buscando horários...'
+  else if (slotsReady && slots.length === 0) slotPlaceholder = 'Sem horários livres neste dia'
 
   const submit = async () => {
-    const ok = await onSubmit(values)
+    const ok = await onSubmit({ ...values, vendedorId })
     if (ok) setDone(true)
   }
 
@@ -45,31 +85,43 @@ export function NewEventModal({ defaultDate, saving, error, onClose, onSubmit })
       footer={
         <>
           <Button onClick={onClose}>Cancelar</Button>
-          <Button kind="primary" onClick={submit} loading={saving} disabled={!values.companyId}>
+          <Button
+            kind="primary"
+            onClick={submit}
+            loading={saving}
+            disabled={!values.companyId || !values.contactId || !values.slotStart}
+          >
             Criar compromisso
           </Button>
         </>
       }
     >
       <div className={styles.formGrid}>
-        <SelectField label="Empresa" value={values.companyId} onChange={(v) => setField('companyId', v)}>
-          <option value="">Selecione uma empresa</option>
-          {mockCompanies.map((company) => (
+        <SelectField label="Empresa" value={values.companyId} onChange={changeCompany}>
+          <option value="">{companiesAsync.loading ? 'Carregando empresas...' : 'Selecione uma empresa'}</option>
+          {companies.map((company) => (
             <option key={company.id} value={company.id}>
               {company.name}
             </option>
           ))}
         </SelectField>
         <SelectField label="Contato" value={values.contactId} onChange={(v) => setField('contactId', v)}>
-          <option value="">Selecione um contato</option>
-          {mockContacts.map((contact) => (
+          <option value="">{values.companyId ? 'Selecione um contato' : 'Escolha a empresa primeiro'}</option>
+          {contacts.map((contact) => (
             <option key={contact.id} value={contact.id}>
-              {contact.name}
+              {contact.email ? `${contact.name} (${contact.email})` : contact.name}
             </option>
           ))}
         </SelectField>
         <Field label="Data" type="date" value={values.date} onChange={(v) => setField('date', v)} />
-        <Field label="Horário" type="time" value={values.startTime} onChange={(v) => setField('startTime', v)} />
+        <SelectField label="Horário" value={values.slotStart} onChange={(v) => setField('slotStart', v)}>
+          <option value="">{slotPlaceholder}</option>
+          {slots.map((slot) => (
+            <option key={slot.start} value={slot.start}>
+              {slot.label}
+            </option>
+          ))}
+        </SelectField>
         <SelectField label="Tipo" value={values.type} onChange={(v) => setField('type', v)}>
           {APPOINTMENT_TYPES.map((type) => (
             <option key={type} value={type}>
@@ -82,11 +134,7 @@ export function NewEventModal({ defaultDate, saving, error, onClose, onSubmit })
           value={values.representativeId}
           onChange={(v) => setField('representativeId', v)}
         >
-          {mockRepresentatives.map((rep) => (
-            <option key={rep.id} value={rep.id}>
-              {rep.name}
-            </option>
-          ))}
+          <option value={user?.id ?? ''}>{user?.name ?? 'Você'}</option>
         </SelectField>
         <TextArea
           className={styles.spanTwo}
@@ -95,6 +143,7 @@ export function NewEventModal({ defaultDate, saving, error, onClose, onSubmit })
           value={values.notes}
           onChange={(v) => setField('notes', v)}
         />
+        {slotsAsync.error && <p className={[styles.error, styles.spanTwo].join(' ')}>{slotsAsync.error}</p>}
         {error && <p className={[styles.error, styles.spanTwo].join(' ')}>{error}</p>}
       </div>
     </Modal>
