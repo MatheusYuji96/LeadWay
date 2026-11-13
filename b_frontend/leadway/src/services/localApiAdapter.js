@@ -460,6 +460,31 @@ function buildRoutes() {
       },
     ],
     ['post', /^\/appointments$/, () => ({ id: 'evt-new' })],
+    // Horários livres e conexão com o Cal.com (no modo demonstração tudo é simulado).
+    [
+      'get',
+      /^\/agenda\/slots$/,
+      (params) => ({
+        date: params?.date,
+        slots: (getStore().stats?.freeSlots || []).map((label) => ({
+          start: `${params?.date}T${label}:00-03:00`,
+          label,
+        })),
+      }),
+    ],
+    [
+      'delete',
+      /^\/appointments\/([^/]+)$/,
+      (params, config, matches) => {
+        const id = decodeURIComponent(matches[1])
+        updateStore((s) => {
+          s.appointments = (s.appointments || []).filter((a) => a.id !== id)
+        })
+        return {}
+      },
+    ],
+    ['put', /^\/integracoes\/calcom$/, () => ({ conectado: true, username: 'demo' })],
+    ['delete', /^\/integracoes\/calcom$/, () => ({})],
 
     // Notifications
     ['get', /^\/notifications$/, () => ({ items: getStore().notifications || [], unread: (getStore().notifications || []).filter((n) => !n.read).length })],

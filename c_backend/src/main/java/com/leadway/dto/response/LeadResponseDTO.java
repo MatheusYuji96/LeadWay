@@ -67,9 +67,9 @@ public class LeadResponseDTO {
 
     @Schema(
             description = "Potencial do Lead definido pelo usuário",
-            example = "ALTO"
+            example = "5"
     )
-    private String potencial;
+    private Integer potencial;
 
     @Schema(
             description = "Status de atividade do Lead",
@@ -344,11 +344,11 @@ public class LeadResponseDTO {
         this.telefone = telefone;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 

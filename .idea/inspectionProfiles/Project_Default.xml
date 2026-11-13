@@ -1,0 +1,17 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="ClassWithTooManyDependents" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ClassWithTooManyTransitiveDependencies" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConfusingElse" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="MissortedModifiers" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="ModuleWithTooFewClasses" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PackageWithTooFewClasses" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PublicField" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="ReplaceAssignmentWithOperatorAssignment" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="TooBroadScope" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="UnnecessarilyQualifiedInnerClassAccess" enabled="true" level="INFORMATION" enabled_by_default="true" />
+    <inspection_tool class="UnnecessaryFullyQualifiedName" enabled="true" level="INFORMATION" enabled_by_default="true" />
+  </profile>
+</component>
