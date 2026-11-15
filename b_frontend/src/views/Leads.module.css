@@ -1,0 +1,24 @@
+ .page { padding: 32px; max-width: 1320px; margin: 0 auto; }
+.breadcrumb { color: #7788a0; font-size: 13px; margin-bottom: 22px; }
+.breadcrumb span { margin: 0 10px; } .breadcrumb strong { color: #16283e; }
+.heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+.heading h1 { margin: 0 0 5px; font-size: 30px; color: #16283e; }
+.heading p { margin: 0; color: #788ba7; font-size: 14px; }
+.stats { display: flex; align-items: stretch; border: 1px solid var(--wire-line); border-radius: 8px; padding: 14px 18px; background: var(--surface); margin-bottom: 14px; }
+.stat { min-width: 130px; padding: 0 20px; border-right: 1px solid var(--wire-line); }
+.stat:first-child { padding-left: 0; } .stat:last-child { border-right: 0; }
+.stat span { display: block; font-size: 13px; color: #7588a1; margin-bottom: 5px; }
+.stat strong { font-size: 21px; color: #18283b; } .stat strong.attention { color: #cc3046; }
+.tableCard { background: var(--surface); border: 1px solid var(--wire-line); border-radius: 8px; overflow: visible; }
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 14px; }
+.search { flex: 1; min-width: 220px; } .filter { min-width: 160px; }
+.filterWrapper { position: relative; } .filterCount { background: #d9f6f4; border: 1px solid #36b6ba; border-radius: 50%; padding: 3px 7px; color: #087f81; }
+.filterPopover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; width: 285px; display: grid; gap: 12px; padding: 16px; border-radius: 10px; background: white; box-shadow: 0 10px 30px #15293c25; border: 1px solid var(--wire-line); }
+.filterPopover small { color: #788ba7; line-height: 1.4; }
+.chips { display: flex; gap: 7px; flex-wrap: wrap; padding: 0 14px 12px; align-items: center; }
+.chips span { padding: 7px 10px; border-radius: 5px; background: #def7f5; color: #078387; font-size: 12px; }
+.chips button { border: 0; background: transparent; color: #e04d61; cursor: pointer; font-size: 12px; }
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border-top: 1px solid var(--wire-line); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.pagination strong { color: var(--ink); } .pageButtons { display: flex; align-items: center; gap: 8px; }
+.pageNumber { width: 32px; height: 32px; display: grid; place-items: center; background: var(--brand-light); color: var(--brand-dark); border-radius: 8px; font-weight: 700; }
+@media(max-width:800px) { .page { padding: 20px 16px; } .heading { align-items: flex-start; flex-direction: column; } .stats { overflow-x: auto; } .stat { min-width: 125px; } .toolbar { flex-wrap: wrap; } }
