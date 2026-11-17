@@ -14,12 +14,15 @@ public class Interacao {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "contato_id")
-    private Contato contato;
+    @JoinColumn(name = "vendedor_id")
+    private Vendedor vendedor;
 
     @ManyToOne
     @JoinColumn(name = "lead_id")
     private Lead lead;
+
+    @Column(nullable = false, length = 100)
+    private String titulo;
 
     @Column(nullable = false, length = 45)
     private String tipo;
@@ -29,7 +32,7 @@ public class Interacao {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime criadoEm;
 
@@ -44,12 +47,16 @@ public class Interacao {
         return id;
     }
 
-    public Contato getContato() {
-        return contato;
+    public Vendedor getVendedor() {
+        return vendedor;
     }
 
     public Lead getLead() {
         return lead;
+    }
+
+    public String getTitulo() {
+        return titulo;
     }
 
     public String getTipo() {
@@ -72,12 +79,18 @@ public class Interacao {
         return atualizadoEm;
     }
 
+    public void setVendedor(Vendedor vendedor) {
+        this.vendedor = vendedor;
     public void setContato(Contato contato) {
         this.contato = contato;
     }
 
     public void setLead(Lead lead) {
         this.lead = lead;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
     }
 
     public void setTipo(String tipo) {
