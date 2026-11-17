@@ -8,6 +8,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class LeadResponseDTO {
 
     @Schema(
+            description = "Identificador numérico do Lead",
+            example = "1"
+    )
+    private Integer id;
+
+    private java.time.LocalDateTime vinculadoEm;
+
+    @Schema(
             description = "CNPJ da empresa",
             example = "12345678000199"
     )
@@ -59,9 +67,9 @@ public class LeadResponseDTO {
 
     @Schema(
             description = "Potencial do Lead definido pelo usuário",
-            example = "ALTO"
+            example = "5"
     )
-    private String potencial;
+    private Integer potencial;
 
     @Schema(
             description = "Status de atividade do Lead",
@@ -72,10 +80,26 @@ public class LeadResponseDTO {
     public LeadResponseDTO() {
     }
 
+    public java.time.LocalDateTime getVinculadoEm() { return vinculadoEm; }
+
+    public void setVinculadoEm(java.time.LocalDateTime vinculadoEm) { this.vinculadoEm = vinculadoEm; }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     @Schema(
             description = "Dados do vendedor responsável pelo Lead"
     )
     public static class VendedorDTO{
+        private Integer id;
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
 
         @Schema(
                 description = "Código de vendedor cadastrado pelo líder de equipe",
@@ -320,11 +344,11 @@ public class LeadResponseDTO {
         this.telefone = telefone;
     }
 
-    public String getPotencial() {
+    public Integer getPotencial() {
         return potencial;
     }
 
-    public void setPotencial(String potencial) {
+    public void setPotencial(Integer potencial) {
         this.potencial = potencial;
     }
 

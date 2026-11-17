@@ -4,6 +4,8 @@ import com.leadway.entity.Vendedor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +24,22 @@ public class AtualizarVendedorRequestDTO {
             example = "mariarocha@gmail.com"
     )
     @Email
+    @Size(max = 255)
     private String email;
 
     @Schema(
             description = "Senha de acesso do vendedor",
             example = "Senhaalterada123@"
     )
+    @Size(max = 50)
     private String senha;
 
     @Schema(
             description = "Telefone de contato do usuário vendedor",
             example = "1155855755"
     )
+    @Size(min = 11, max = 11)
+    @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
     @Schema(

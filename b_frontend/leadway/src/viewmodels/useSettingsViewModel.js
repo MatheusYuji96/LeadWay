@@ -84,7 +84,7 @@ export function useSettingsViewModel() {
     setFeedback(null)
     try {
       await settingsService.updatePreferences(prefs)
-      setFeedback({ type: 'success', message: 'Preferências salvas neste navegador (notificações automáticas dependem do backend).' })
+      setFeedback({ type: 'success', message: 'Preferências salvas no banco de dados. O envio de notificações automáticas ainda depende do backend.' })
     } catch (err) {
       setFeedback({ type: 'error', message: err?.message || 'Não foi possível salvar as preferências.' })
     } finally {

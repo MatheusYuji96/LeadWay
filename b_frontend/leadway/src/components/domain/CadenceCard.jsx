@@ -10,7 +10,7 @@ export function CadenceCard({ cadence, large = false }) {
 
   return (
     <Panel className={[styles.card, large ? styles.large : ''].filter(Boolean).join(' ')}>
-      <PanelHead title="Cadência" actions={<Badge tone={status.tone}>{status.label}</Badge>} />
+      <PanelHead title="Cadência (demonstrativo)" actions={<Badge tone={status.tone}>{status.label}</Badge>} />
 
       <div className={styles.meter}>
         <div>

@@ -12,6 +12,7 @@ public class VendedorMapper {
 
         vendedor.setNome(dto.getNome());
         vendedor.setCodVendedor(dto.getCodVendedor());
+        vendedor.setRegiao(dto.getRegiao());
         vendedor.setEmail(dto.getEmail());
         vendedor.setTelefone(dto.getTelefone());
         vendedor.setSenha(dto.getSenha());
@@ -39,6 +40,7 @@ public class VendedorMapper {
         dto.setEmail(vendedor.getEmail());
         dto.setTelefone(vendedor.getTelefone());
         dto.setCodVendedor(vendedor.getCodVendedor());
+        dto.setRegiao(vendedor.getRegiao());
         dto.setLider(vendedor.getLider());
         dto.setAtivo(vendedor.getAtivo());
 

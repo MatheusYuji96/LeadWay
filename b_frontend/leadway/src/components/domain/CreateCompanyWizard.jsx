@@ -8,10 +8,11 @@ import { Title } from '@/components/common/Title'
 import { isMockMode } from '@/services/http'
 import { representativesService } from '@/services/representatives.service'
 import { lookupService } from '@/services/lookup.service'
+import { contactsService } from '@/services/contacts.service'
 import { isEmail, isCNPJ, isCEP, isPhone11 } from '@/viewmodels/validators'
 import styles from './Wizard.module.css'
 
-const STEPS = ['Empresa', 'Endereço', 'Responsável e qualificação', 'Revisão']
+const STEPS = ['Empresa', 'Endereço', 'Responsável e qualificação', 'Contatos', 'Revisão']
 const initial = {
   cnpj: '', razaoSocial: '', nomeFantasia: '', setorId: '', email: '', telefone: '',
   etapaId: '', potencial: 'ALTO', farol: '', vendedorId: '',
@@ -81,6 +82,13 @@ function editPayloadOf(v, original) {
   }
   if (Object.keys(endereco).length) payload.endereco = endereco
   if (v.etapaId && String(v.etapaId) !== String(original.etapa?.id ?? original.etapaId ?? '')) payload.etapaId = Number(v.etapaId)
+  if (
+    v.vendedorId &&
+    String(v.vendedorId) !==
+    String(original.vendedorId ?? original.vendedor?.id ?? '')
+  ) {
+    payload.vendedorId = Number(v.vendedorId)
+  }
   // Backend tem erro conhecido na atualização de vendedor; não enviar vendedorId.
   return payload
 }
@@ -91,9 +99,12 @@ function validateEdit(v, setores, etapas, reps) {
   return errors
 }
 
-export function CreateCompanyWizard({ lead = null, saving = false, error = null, onClose, onSubmit }) {
+export function CreateCompanyWizard({ lead = null, initialStep = 0, saving = false, error = null, onClose, onSubmit }) {
   const isEdit = Boolean(lead)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(initialStep)
+  const [contacts, setContacts] = useState([])
+  const [contactError, setContactError] = useState('')
+  const [savedLeadId, setSavedLeadId] = useState(null)
   const [values, setValues] = useState(() => lead ? {
     ...initial, ...lead,
     cnpj: lead.cnpj ?? '', razaoSocial: lead.razaoSocial ?? '',
@@ -110,6 +121,11 @@ export function CreateCompanyWizard({ lead = null, saving = false, error = null,
   const [etapas, setEtapas] = useState([])
   const [reps, setReps] = useState([])
   const [lookupError, setLookupError] = useState('')
+
+  useEffect(() => {
+    if (!isEdit || !lead?.id || isMockMode) return
+    contactsService.listByLead(lead.id).then((items) => setContacts(items.map((item) => ({ ...item, contato: item.contato ?? 'PADRAO' })))).catch((err) => setContactError(err.message))
+  }, [isEdit, lead?.id])
 
   useEffect(() => {
     let alive = true
@@ -150,11 +166,23 @@ export function CreateCompanyWizard({ lead = null, saving = false, error = null,
       setNotice('Há campos que precisam de correção. Selecione “Corrigir” ao lado do erro.')
       return
     }
+    if (contacts.some((c) => !c._removed && (!c.nome.trim() || !c.cargo.trim() || !isEmail(c.email) || !isPhone11(c.whatsapp)))) { setNotice('Preencha nome, cargo, e-mail válido e WhatsApp com 11 dígitos de todos os contatos.'); setStep(3); return }
     if (isMockMode && !isEdit) { setNotice('Desative VITE_USE_MOCK para cadastrar no banco de dados.'); return }
     setNotice('')
     try {
-      const ok = await onSubmit(isEdit ? editPayloadOf(values, lead) : payloadOf(values), { isEdit, lead })
-      if (ok) setDone(true)
+      const result = savedLeadId ? { id: savedLeadId } : await onSubmit(isEdit ? editPayloadOf(values, lead) : payloadOf(values), { isEdit, lead })
+      if (!result) { setNotice('Não foi possível atualizar a empresa. Confira a mensagem de erro e tente novamente.'); return }
+      const leadId = isEdit ? lead?.id : result?.id
+      if (leadId) setSavedLeadId(leadId)
+      if (contacts.length && !leadId) throw new Error('O backend não retornou o ID da empresa. Não foi possível cadastrar os contatos.')
+      for (const item of contacts) {
+        if (item._removed && item.id) { await contactsService.remove(leadId, item.id); continue }
+        if (item._removed) continue
+        const data = { nome: item.nome.trim(), cargo: item.cargo.trim(), email: item.email.trim(), whatsapp: digits(item.whatsapp), contato: item.contato || 'PADRAO', ativo: true }
+        if (item.id) await contactsService.update(leadId, item.id, data)
+        else { const saved = await contactsService.create(leadId, data); item.id = saved.id }
+      }
+      setDone(true)
     } catch (err) {
       const detail = err?.details ?? err?.response?.data ?? {}
       const mapped = {}
@@ -165,6 +193,9 @@ export function CreateCompanyWizard({ lead = null, saving = false, error = null,
         : (detail.message && detail.message !== 'Bad Request' ? detail.message : err?.message || 'Não foi possível salvar a empresa.'))
     }
   }
+  const addContact = () => setContacts((prev) => [...prev, { nome: '', cargo: '', email: '', whatsapp: '', contato: 'PADRAO' }])
+  const changeContact = (index, key, value) => setContacts((prev) => prev.map((c, i) => i === index ? { ...c, [key]: value } : c))
+  const removeContact = (index) => setContacts((prev) => prev.map((c, i) => i === index ? { ...c, _removed: true } : c))
   const input = (path, label, placeholder = '', type = 'text') => (
     <Field key={path} label={`${label} *`} placeholder={placeholder} type={type} value={valueAt(values, path)}
       onChange={(v) => setField(path, v)} error={errors[path]} required />
@@ -188,7 +219,7 @@ export function CreateCompanyWizard({ lead = null, saving = false, error = null,
     ['potencial', 'Potencial'], ['farol', 'Farol'],
   ]
   if (done) return <div className={styles.backdrop}><div className={styles.modalPane}>
-    <SuccessContent title={isEdit ? 'Empresa atualizada' : 'Empresa criada'} description="Dados salvos. A listagem será atualizada." actionLabel="Fechar" onAction={onClose} />
+    <SuccessContent title={isEdit ? 'Empresa atualizada com sucesso!' : 'Empresa cadastrada com sucesso!'} description="Dados salvos. A listagem será atualizada." actionLabel="Fechar" onAction={onClose} />
   </div></div>
   return <div className={styles.backdrop}><div className={styles.shell}>
     <aside className={styles.aside}><Logo /><div className={styles.steps}>
@@ -200,50 +231,61 @@ export function CreateCompanyWizard({ lead = null, saving = false, error = null,
       <Title level={1}>{isEdit ? 'Editar empresa' : 'Criar nova empresa'}</Title><p>{STEPS[step]}</p></div>
       <Button kind="ghost" aria-label="Fechar" onClick={onClose}><Icon name="close" size={16} /></Button>
     </header><div className={styles.body}>
-      {step === 0 && <div className={styles.form}>
-        <div className={styles.grid}>{input('cnpj', 'CNPJ', '00.000.000/0000-00')}{select('setorId', 'Setor', setores, true)}</div>
-        <div className={styles.grid}>{input('razaoSocial', 'Razão social')}{input('nomeFantasia', 'Nome fantasia')}</div>
-        <div className={styles.grid}>{input('email', 'E-mail corporativo', 'empresa@exemplo.com', 'email')}{input('telefone', 'Telefone', '(11) 99999-9999')}</div>
-        {lookupError && <p className={styles.fieldError} role="alert">{lookupError}</p>}
-      </div>}
-      {step === 1 && <div className={styles.form}>
-        <div className={styles.grid}>{input('endereco.rua', 'Rua')}{input('endereco.numero', 'Número')}</div>
-        <div className={styles.grid}>{input('endereco.cep', 'CEP', '00000-000')}{input('endereco.bairro', 'Bairro')}</div>
-        <div className={styles.grid}>{input('endereco.cidade', 'Cidade')}
-          {input('endereco.estado', 'Estado', 'Ex.: SP ou São Paulo')}
-        </div><div className={styles.grid}>{input('endereco.pais', 'País')}
-          <Field label="Complemento (opcional)" value={values.endereco.complemento} onChange={(v) => setField('endereco.complemento', v)} /></div>
-      </div>}
-      {step === 2 && <div className={styles.form}>
-        {select('vendedorId', 'Vendedor responsável', reps.map((r) => ({ id: r.id, nome: r.nome ?? r.name ?? r.email })))}
-        {select('etapaId', 'Etapa do funil', etapas)}
-        <div><SelectField label="Potencial *" value={values.potencial} onChange={(v) => setField('potencial', v)}>
-          <option value="ALTO">Alto</option><option value="MEDIO">Médio</option><option value="BAIXO">Baixo</option>
-        </SelectField>{errors.potencial && <div className={styles.fieldError} role="alert">{errors.potencial}</div>}</div>
-        <div><SelectField label="Farol (opcional)" value={values.farol} onChange={(v) => setField('farol', v)}>
-          <option value="">Selecione</option>
-          <option value="VERDE">Verde</option>
-          <option value="AMARELO">Amarelo</option>
-          <option value="VERMELHO">Vermelho</option>
-        </SelectField>{errors.farol && <div className={styles.fieldError} role="alert">{errors.farol}</div>}</div>
-        <p>Farol é opcional no cadastro. A API atual não permite atualizar Farol, razão social, nome fantasia, setor ou CNPJ pela rota de edição.</p>
-      </div>}
-      {step === 3 && <div className={styles.review}>
-        <p>Confira as informações. Para corrigir um campo, clique em “Corrigir”.</p>
-        {review.map(([path, label, display]) => <div key={path} className={styles.reviewRow}>
-          <span>{label}</span><strong>{display || valueAt(values, path) || '—'}</strong>
-          <button type="button" onClick={() => { setStep(stepFor(path)); setNotice('') }} style={{ cursor: 'pointer', color: 'var(--brand-dark)', background: 'transparent', border: 0 }}>Corrigir</button>
-        </div>)}
-        {Object.keys(errors).length > 0 && <div role="alert" className={styles.fieldError}>
-          <strong>Corrija antes de salvar:</strong>
-          {Object.entries(errors).map(([path, message]) => <p key={path}><button type="button" onClick={() => setStep(stepFor(path))} style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer', border: 0, background: 'none' }}>{fieldNames[path] ?? path}: {message} — Corrigir</button></p>)}
+        {step === 0 && <div className={styles.form}>
+          <div className={styles.grid}>{input('cnpj', 'CNPJ', '00.000.000/0000-00')}{select('setorId', 'Setor', setores, true)}</div>
+          <div className={styles.grid}>{input('razaoSocial', 'Razão social')}{input('nomeFantasia', 'Nome fantasia')}</div>
+          <div className={styles.grid}>{input('email', 'E-mail corporativo', 'empresa@exemplo.com', 'email')}{input('telefone', 'Telefone', '(11) 99999-9999')}</div>
+          {lookupError && <p className={styles.fieldError} role="alert">{lookupError}</p>}
         </div>}
-      </div>}
-    </div>
-    {(notice || (error && !notice)) && <p className={styles.error} role="alert">{notice || error}</p>}
-    <footer className={styles.footer}><Button onClick={step === 0 ? onClose : () => { setStep(step - 1); setNotice('') }}>{step === 0 ? 'Cancelar' : 'Voltar'}</Button>
-      {step < 3 ? <Button kind="primary" onClick={next}>Continuar</Button> : <Button kind="primary" onClick={submit} loading={saving}>{isEdit ? 'Atualizar empresa' : 'Criar empresa'}</Button>}
-    </footer></main>
+        {step === 1 && <div className={styles.form}>
+          <div className={styles.grid}>{input('endereco.rua', 'Rua')}{input('endereco.numero', 'Número')}</div>
+          <div className={styles.grid}>{input('endereco.cep', 'CEP', '00000-000')}{input('endereco.bairro', 'Bairro')}</div>
+          <div className={styles.grid}>{input('endereco.cidade', 'Cidade')}
+            {input('endereco.estado', 'Estado', 'Ex.: SP ou São Paulo')}
+          </div><div className={styles.grid}>{input('endereco.pais', 'País')}
+            <Field label="Complemento (opcional)" value={values.endereco.complemento} onChange={(v) => setField('endereco.complemento', v)} /></div>
+        </div>}
+        {step === 2 && <div className={styles.form}>
+          {select('vendedorId', 'Vendedor responsável', reps.map((r) => ({ id: r.id, nome: r.nome ?? r.name ?? r.email })))}
+          {select('etapaId', 'Etapa do funil', etapas)}
+          <div><SelectField label="Potencial *" value={values.potencial} onChange={(v) => setField('potencial', v)}>
+            <option value="ALTO">Alto</option><option value="MEDIO">Médio</option><option value="BAIXO">Baixo</option>
+          </SelectField>{errors.potencial && <div className={styles.fieldError} role="alert">{errors.potencial}</div>}</div>
+          <div><SelectField label="Farol (opcional)" value={values.farol} onChange={(v) => setField('farol', v)}>
+            <option value="">Selecione</option>
+            <option value="VERDE">Verde</option>
+            <option value="AMARELO">Amarelo</option>
+            <option value="VERMELHO">Vermelho</option>
+          </SelectField>{errors.farol && <div className={styles.fieldError} role="alert">{errors.farol}</div>}</div>
+          <p>Farol é opcional no cadastro. A API atual não permite atualizar Farol, razão social, nome fantasia, setor ou CNPJ pela rota de edição.</p>
+        </div>}
+        {step === 3 && <div className={styles.form}>
+          <p>Contatos vinculados a esta empresa. Você pode cadastrar mais de um contato.</p>
+          {contactError && <p role="alert" className={styles.fieldError}>{contactError}</p>}
+          {contacts.map((contact, index) => contact._removed ? null : <div key={contact.id ?? `novo-${index}`} style={{ border: '1px solid #d9e3e8', borderRadius: 10, padding: 16, marginBottom: 12 }}>
+            <div className={styles.grid}><Field label="Nome do contato *" value={contact.nome} onChange={(v) => changeContact(index, 'nome', v)} /><Field label="Cargo *" value={contact.cargo} onChange={(v) => changeContact(index, 'cargo', v)} /></div>
+            <div className={styles.grid}><Field label="E-mail *" type="email" value={contact.email} onChange={(v) => changeContact(index, 'email', v)} /><Field label="WhatsApp *" value={contact.whatsapp} onChange={(v) => changeContact(index, 'whatsapp', v)} /></div>
+            <SelectField label="Classificação" value={contact.contato} onChange={(v) => changeContact(index, 'contato', v)}><option value="PADRAO">Padrão</option><option value="INFLUENCIADOR">Influenciador</option><option value="DECISOR">Decisor</option></SelectField>
+            <Button onClick={() => removeContact(index)}>Remover contato</Button>
+          </div>)}
+          <Button onClick={addContact}>Adicionar contato</Button>
+        </div>}
+        {step === 4 && <div className={styles.review}>
+          <p>Confira as informações. Para corrigir um campo, clique em “Corrigir”.</p>
+          {review.map(([path, label, display]) => <div key={path} className={styles.reviewRow}>
+            <span>{label}</span><strong>{display || valueAt(values, path) || '—'}</strong>
+            <button type="button" onClick={() => { setStep(stepFor(path)); setNotice('') }} style={{ cursor: 'pointer', color: 'var(--brand-dark)', background: 'transparent', border: 0 }}>Corrigir</button>
+          </div>)}
+          {Object.keys(errors).length > 0 && <div role="alert" className={styles.fieldError}>
+            <strong>Corrija antes de salvar:</strong>
+            {Object.entries(errors).map(([path, message]) => <p key={path}><button type="button" onClick={() => setStep(stepFor(path))} style={{ color: 'inherit', textDecoration: 'underline', cursor: 'pointer', border: 0, background: 'none' }}>{fieldNames[path] ?? path}: {message} — Corrigir</button></p>)}
+          </div>}
+        </div>}
+      </div>
+      {(notice || (error && !notice)) && <p className={styles.error} role="alert">{notice || error}</p>}
+      <footer className={styles.footer}><Button onClick={step === 0 ? onClose : () => { setStep(step - 1); setNotice('') }}>{step === 0 ? 'Cancelar' : 'Voltar'}</Button>
+        {step < STEPS.length - 1 ? <Button kind="primary" onClick={next}>Continuar</Button> : <Button kind="primary" onClick={submit} loading={saving}>{isEdit ? 'Atualizar empresa' : 'Criar empresa'}</Button>}
+      </footer></main>
   </div></div>
 }
 export default CreateCompanyWizard

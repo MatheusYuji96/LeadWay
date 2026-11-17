@@ -17,7 +17,7 @@ const TABS = [
 
 const LEGEND = [
   { key: 'contacts', label: 'Contatos', tone: 'brand' },
-  { key: 'meetings', label: 'Reuniões', tone: 'blue' },
+  { key: 'meetings', label: 'Portfólios', tone: 'blue' },
   { key: 'followUps', label: 'Follow-ups', tone: 'purple' },
 ]
 
@@ -52,7 +52,7 @@ export function Dashboard() {
       <PageHeading
         eyebrow={todayLabel}
         title="Visão geral"
-        description="Painel demonstrativo: KPIs e gráficos com dados fictícios."
+        description="Indicadores e atividades da sua carteira, consultados no servidor."
         actions={
           <>
             <Button icon="calendar" onClick={() => navigate(paths.agenda)}>
@@ -78,7 +78,7 @@ export function Dashboard() {
           <div className={styles.columns}>
             <div className={styles.main}>
               <Panel>
-                <PanelHead title="Atividade da semana" subtitle="Contatos, reuniões e follow-ups por dia" />
+                <PanelHead title="Atividade da semana" subtitle="Contatos, portfólios e follow-ups por dia" />
                 <WeekChart data={overview.weekActivity} />
               </Panel>
 
@@ -121,7 +121,7 @@ export function Dashboard() {
             <aside className={styles.side}>
               <Panel>
                 <PanelHead
-                  title="Compromissos de hoje"
+                  title="Próximos compromissos"
                   actions={
                     <Button kind="ghost" size="sm" onClick={() => navigate(paths.agenda)}>
                       Agenda
@@ -130,7 +130,7 @@ export function Dashboard() {
                 />
                 <div className={styles.appointmentList}>
                   {overview.appointments.length === 0 && (
-                    <p className={styles.emptyText}>Nenhum compromisso para hoje.</p>
+                    <p className={styles.emptyText}>Nenhum compromisso futuro encontrado.</p>
                   )}
                   {overview.appointments.map((appt) => (
                     <div className={styles.appointment} key={appt.id}>
@@ -189,7 +189,7 @@ function TeamPanel({ vm, onOpenLead, onOpenRep }) {
       <div className={styles.columns}>
         <div className={styles.main}>
           <Panel>
-            <PanelHead title="Desempenho da equipe" subtitle="Contatos realizados no mês por representante" />
+            <PanelHead title="Desempenho da equipe" subtitle="Dados dos vendedores cadastrados no MySQL" />
             <div className={styles.performance}>
               {performance.map((item) => (
                 <div className={styles.perfRow} key={item.name}>
@@ -198,8 +198,8 @@ function TeamPanel({ vm, onOpenLead, onOpenRep }) {
                     <i style={{ width: `${(item.contacts / maxContacts) * 100}%` }} />
                   </span>
                   <span>{item.contacts} contatos</span>
-                  <span>{item.meetings} reuniões</span>
-                  <span>{item.visits} visitas</span>
+                  <span>{item.meetings} propostas</span>
+                  <span>{item.visits} leads</span>
                 </div>
               ))}
             </div>

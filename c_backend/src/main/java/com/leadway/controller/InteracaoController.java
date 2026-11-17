@@ -4,11 +4,12 @@ import com.leadway.dto.request.CadastroInteracaoRequestDTO;
 import com.leadway.dto.response.InteracaoResponseDTO;
 import com.leadway.entity.Interacao;
 import com.leadway.mapper.InteracaoMapper;
+import com.leadway.dto.request.InteracaoRequestDTO;
+import com.leadway.dto.response.InteracaoResponseDTO;
 import com.leadway.service.InteracaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

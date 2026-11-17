@@ -4,6 +4,8 @@
   border-radius: 50%;
   display: inline-grid;
   place-items: center;
+  text-align: center;
+  line-height: 1;
   background: var(--brand-light);
   color: var(--brand-dark);
   font-weight: 700;

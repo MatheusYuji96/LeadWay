@@ -48,3 +48,13 @@
   margin-top: 12px;
   font-size: 13px;
 }
+
+/* Mantém as iniciais centralizadas; a regra genérica .owner span não deve sobrescrever o avatar. */
+.owner > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  margin-top: 0;
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
+}

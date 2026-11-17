@@ -45,11 +45,17 @@ public class VendedorResponseDTO {
     )
     private String codVendedor;
 
+    private String regiao;
+
     @Schema(
             description = "Status de atividade do usuário vendedor",
             example = "1"
     )
     private Boolean ativo;
+
+    public String getRegiao() { return regiao; }
+
+    public void setRegiao(String regiao) { this.regiao = regiao; }
 
     public Integer getId() {
     	return id;

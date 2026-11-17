@@ -81,6 +81,8 @@ public class Interacao {
 
     public void setVendedor(Vendedor vendedor) {
         this.vendedor = vendedor;
+    public void setContato(Contato contato) {
+        this.contato = contato;
     }
 
     public void setLead(Lead lead) {

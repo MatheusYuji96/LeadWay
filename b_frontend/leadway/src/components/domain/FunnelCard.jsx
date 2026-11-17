@@ -18,15 +18,21 @@ function Info({ icon, label, value }) {
   )
 }
 
-export function FunnelCard({ funnel, lead, owner, large = false }) {
-  const currentIndex = FUNNEL_STAGES.indexOf(funnel?.currentStage ?? lead?.stage ?? FUNNEL_STAGES[0])
+export function FunnelCard({ funnel, lead, owner, large = false, onUpdateStage }) {
+  const currentOrder = Number(lead?.etapa?.ordem)
+  const matchedIndex = FUNNEL_STAGES.findIndex((stage) => stage === (funnel?.currentStage ?? lead?.stage))
+  const currentIndex = Number.isInteger(currentOrder) && currentOrder > 0 ? Math.min(currentOrder - 1, FUNNEL_STAGES.length - 1) : Math.max(0, matchedIndex)
+
+  const nextStage = currentIndex >= 0 && currentIndex < FUNNEL_STAGES.length - 1
+    ? FUNNEL_STAGES[currentIndex + 1]
+    : '—'
 
   return (
     <Panel className={[styles.card, large ? styles.large : ''].filter(Boolean).join(' ')}>
       <PanelHead
         title="Funil de vendas"
         subtitle="Etapa atual e progresso da oportunidade"
-        actions={large ? <Button>Atualizar etapa</Button> : null}
+        actions={large ? <Button onClick={onUpdateStage}>Atualizar etapa</Button> : null}
       />
       <div className={styles.stepper}>
         {FUNNEL_STAGES.map((stage, index) => {
@@ -59,7 +65,7 @@ export function FunnelCard({ funnel, lead, owner, large = false }) {
             }
           />
           <Info icon="clock" label="Tempo nesta etapa" value={`${funnel?.daysInCurrentStage ?? 0} dias`} />
-          <Info icon="arrow" label="Próxima ação" value={lead?.nextAction ?? '—'} />
+          <Info icon="arrow" label="Próxima ação" value={nextStage} />
           <Info icon="user" label="Responsável" value={owner?.name ?? lead?.representativeName ?? '—'} />
         </div>
       )}

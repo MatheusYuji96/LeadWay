@@ -150,16 +150,41 @@ mesmo formato `{ user }`.
 
 | Método | Rota | Uso |
 | --- | --- | --- |
-| GET | `/agenda` | Tela Agenda (params: `month` = `yyyy-mm`) |
+| GET | `/agenda` | Tela Agenda (params: `vendedorId`, `month` = `yyyy-mm`) |
+| GET | `/agenda/slots` | Horários livres reais (params: `vendedorId`, `date` = `yyyy-mm-dd`) |
 | POST | `/appointments` | Modal "Novo compromisso" |
+| DELETE | `/appointments/{uid}` | Cancelar (params: `vendedorId`, `motivo?`) → 204 |
+| GET | `/integracoes/calcom` | Estado da conexão (params: `vendedorId`; a tela hoje não usa) |
+| PUT | `/integracoes/calcom` | Conectar o Cal.com (corpo: `vendedorId`, `apiKey`) |
+| DELETE | `/integracoes/calcom` | Desconectar (params: `vendedorId`) → 204 |
+
+**Os compromissos NÃO ficam no banco do LeadWay**: o backend lê/grava no Cal.com
+(API v2) com a credencial de cada vendedor. O `id` de um compromisso é o `uid` do
+booking no Cal.com. Detalhes em `a_docs/README_CALCOM.md`.
 
 ```jsonc
 // GET /agenda → 200
 {
-  "items": [ Appointment ],   // src/models/appointment.js
-  "overview": [ { "key", "icon", "tone", "label", "value" } ],
-  "freeSlots": [ "09:00", "10:30" ]
+  "connected": true,          // false = vendedor ainda não conectou o Cal.com (não é erro)
+  "items": [ Appointment ],   // src/models/appointment.js (+ "status")
+  "overview": [ { "key", "icon", "tone", "label", "value" } ]
 }
+
+// GET /agenda/slots → 200
+{ "date": "2026-11-03",
+  "slots": [ { "start": "2026-11-03T09:00:00.000-03:00", "label": "09:00" } ] }
+
+// POST /appointments  (o "start" do slot escolhido volta em slotStart)
+{ "vendedorId": 1, "leadId": 7, "contatoId": 70,
+  "slotStart": "2026-11-03T09:00:00.000-03:00", "tipo": "Reunião", "notas": "..." }
+// → 201 Appointment
+
+// PUT /integracoes/calcom → 200 (a API key nunca é devolvida)
+{ "conectado": true, "username": "maria", "conectadoEm": "..." }
+
+// Erros da agenda: { "message": "texto para o usuário" } (CalExceptionHandler)
+// 409 não conectado · 400 dado inválido · 404 vendedor inexistente
+// 422 Cal.com recusou · 502 Cal.com indisponível
 ```
 
 ### Notificações

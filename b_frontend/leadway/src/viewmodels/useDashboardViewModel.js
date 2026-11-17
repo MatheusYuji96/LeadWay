@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { dashboardService } from '@/services/dashboard.service'
 import { useAsync } from './useAsync'
+import { useSession } from './sessionContext'
 
 /**
  * ViewModel do dashboard (abas "Minha visão" e "Acompanhamento da equipe").
  */
 export function useDashboardViewModel() {
+  const { user } = useSession()
+  const vendedorId = user?.id ?? user?.vendedorId ?? user?.vendedor?.id
   const [tab, setTab] = useState('overview')
   const overview = useAsync()
   const team = useAsync()
@@ -13,7 +16,7 @@ export function useDashboardViewModel() {
   const execTeam = team.execute
   const teamStarted = useRef(false)
 
-  const loadOverview = useCallback(() => execOverview(() => dashboardService.getOverview()), [execOverview])
+  const loadOverview = useCallback(() => execOverview(() => dashboardService.getOverview(vendedorId)), [execOverview, vendedorId])
   const loadTeam = useCallback(() => execTeam(() => dashboardService.getTeamOverview()), [execTeam])
 
   useEffect(() => {

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
-import { ErrorState, Skeleton } from '@/components/common/Feedback'
+import { ErrorState, InlineMessage, Skeleton } from '@/components/common/Feedback'
 import { Icon } from '@/components/common/Icon'
 import { Panel, PanelHead } from '@/components/common/Panel'
 import { PageHeading, Tabs } from '@/components/common/PagePrimitives'
+import { CalConnectCard } from '@/components/domain/CalConnectCard'
 import { NewEventModal } from '@/components/domain/NewEventModal'
 import { appointmentBadgeTone, formatTime } from '@/models/appointment'
 import { useAgendaViewModel } from '@/viewmodels/useAgendaViewModel'
@@ -22,6 +23,28 @@ export function Agenda() {
   const vm = useAgendaViewModel()
   const [saving, setSaving] = useState(false)
   const [createError, setCreateError] = useState(null)
+  const [actionError, setActionError] = useState(null)
+
+  const cancelAppointment = async (appt) => {
+    const who = appt.contactName || appt.companyName
+    if (!window.confirm(`Cancelar "${appt.type}" com ${who}? O contato será avisado por e-mail pelo Cal.com.`)) return
+    setActionError(null)
+    try {
+      await vm.cancelAppointment(appt.id)
+    } catch (err) {
+      setActionError(err?.message || 'Não foi possível cancelar o compromisso.')
+    }
+  }
+
+  const disconnectCal = async () => {
+    if (!window.confirm('Desconectar o Cal.com? Seus compromissos continuam no Cal.com, mas deixam de aparecer aqui.')) return
+    setActionError(null)
+    try {
+      await vm.disconnectCal()
+    } catch (err) {
+      setActionError(err?.message || 'Não foi possível desconectar o Cal.com.')
+    }
+  }
 
   const step = (delta) => {
     if (vm.view === 'Mês') {
@@ -65,7 +88,12 @@ export function Agenda() {
                 <option value="12h">12h</option>
               </select>
             </label>
-            <Button kind="primary" icon="plus" onClick={vm.openEventModal}>
+            {vm.connected && (
+              <Button kind="ghost" onClick={disconnectCal}>
+                Desconectar Cal.com
+              </Button>
+            )}
+            <Button kind="primary" icon="plus" onClick={vm.openEventModal} disabled={!vm.connected}>
               Novo compromisso
             </Button>
           </>
@@ -90,8 +118,11 @@ export function Agenda() {
 
       {vm.loading && <Skeleton lines={6} cards={3} />}
       {vm.error && <ErrorState message={vm.error} onRetry={vm.reload} />}
+      {actionError && <InlineMessage title="Não foi possível concluir" description={actionError} />}
 
-      {!vm.loading && !vm.error && (
+      {!vm.loading && !vm.error && !vm.connected && <CalConnectCard onConnect={vm.connectCal} />}
+
+      {!vm.loading && !vm.error && vm.connected && (
         <div className={styles.layout}>
           <div className={styles.calendar}>
             <Panel>
@@ -141,17 +172,29 @@ export function Agenda() {
                       {appt.contactName && <small>{appt.contactName}</small>}
                     </div>
                     <Badge tone={appointmentBadgeTone(appt.tone)}>{appt.type}</Badge>
+                    <button
+                      type="button"
+                      className={styles.cancelButton}
+                      title="Cancelar compromisso"
+                      aria-label={`Cancelar ${appt.type} com ${appt.contactName || appt.companyName}`}
+                      onClick={() => cancelAppointment(appt)}
+                    >
+                      <Icon name="close" size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
             </Panel>
 
             <Panel>
-              <PanelHead title="Horários livres" subtitle="Sugestões para o dia selecionado" />
+              <PanelHead title="Horários livres" subtitle="Disponibilidade real no seu Cal.com" />
               <div className={styles.slots}>
-                {vm.freeSlots.map((slot) => (
-                  <span key={slot}>{formatTime(slot, vm.timeFormat)}</span>
-                ))}
+                {vm.slotsLoading && <em className={styles.slotsHint}>Buscando horários...</em>}
+                {!vm.slotsLoading && vm.freeSlots.length === 0 && (
+                  <em className={styles.slotsHint}>Sem horários livres neste dia.</em>
+                )}
+                {!vm.slotsLoading &&
+                  vm.freeSlots.map((slot) => <span key={slot}>{formatTime(slot, vm.timeFormat)}</span>)}
               </div>
             </Panel>
           </aside>

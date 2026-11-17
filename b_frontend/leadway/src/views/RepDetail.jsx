@@ -113,11 +113,11 @@ export function RepDetail() {
             </span>
             <span>
               <small>Contatos realizados</small>
-              <strong>—</strong>
+              <strong>{rep.completed ?? 0}</strong>
             </span>
             <span>
               <small>Pendências</small>
-              <strong>—</strong>
+              <strong>{rep.pending ?? 0}</strong>
             </span>
           </div>
         </Panel>

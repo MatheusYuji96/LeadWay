@@ -21,11 +21,13 @@ public class ContatoMapper {
 
     public ContatoResponseDTO toResponse(Contato contato){
         ContatoResponseDTO dto = new ContatoResponseDTO();
+        dto.setId(contato.getId());
+        dto.setLeadId(contato.getLead() == null ? null : contato.getLead().getId());
         dto.setNome(contato.getNome());
         dto.setCargo(contato.getCargo());
         dto.setEmail(contato.getEmail());
         dto.setWhatsapp(contato.getWhatsapp());
-        dto.setLead(contato.getLead());
+        dto.setContato(contato.getClassificacao());
         dto.setAtivo(contato.getAtivo());
         return dto;
     }

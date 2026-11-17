@@ -1,10 +1,10 @@
 /** Etapas do funil de vendas, na ordem do pipeline. */
 export const FUNNEL_STAGES = [
+  'Prospecção / Novo Lead',
   'Qualificação',
-  'Primeiro Contato',
-  'Portifólio',
-  'Follow-up',
-  'Visita/Orçamento',
+  'Apresentação / Proposta',
+  'Negociação',
+  'Fechado / Ganho',
 ]
 
 /** Status de cadência exibidos como badge. */
