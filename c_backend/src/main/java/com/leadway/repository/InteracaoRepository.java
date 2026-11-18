@@ -16,4 +16,8 @@ public interface InteracaoRepository extends JpaRepository<Interacao, Integer> {
 
     @Query("select count(i) from Interacao i " + "where i.lead.vendedor.id = :vendedorId " + "and coalesce(i.dataHora, i.criadoEm) >= :inicio " + "and coalesce(i.dataHora, i.criadoEm) < :fim")
     Long contarVendedorNoPeriodo(@Param("vendedorId") Integer vendedorId, @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+
+    List<Interacao> findByLead_IdOrderByDataHoraDesc(Integer leadId);
+
+    boolean existsByIdAndLead_Id(Integer id, Integer leadId);
 }

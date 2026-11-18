@@ -2,6 +2,7 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,11 @@ public class Vendedor {
 
     @Column(nullable = false)
     private Boolean ativo = true;
+
+    @Column(nullable = false)
+    private Integer tentativasLogin = 0;
+
+    private LocalDateTime bloqueadoAte;
 
     public Vendedor() {
     }
@@ -107,6 +113,22 @@ public class Vendedor {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public LocalDateTime getBloqueadoAte() {
+        return bloqueadoAte;
+    }
+
+    public void setBloqueadoAte(LocalDateTime bloqueadoAte) {
+        this.bloqueadoAte = bloqueadoAte;
+    }
+
+    public Integer getTentativasLogin() {
+        return tentativasLogin;
+    }
+
+    public void setTentativasLogin(Integer tentativasLogin) {
+        this.tentativasLogin = tentativasLogin;
     }
 
     //    public void ativar() {
