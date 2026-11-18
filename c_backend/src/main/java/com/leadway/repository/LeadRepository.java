@@ -26,4 +26,15 @@ public interface LeadRepository extends JpaRepository<Lead, Integer> {
     Boolean existsBycnpj(String cnpj);
 
     List<Lead> findByVendedor_IdAndAtivoTrue(Integer idVendedor);
+
+    @Query("select count(l) from Lead l " + "where l.ativo =  true " + "and l.vendedor.ativo = true " + "and l.vendedor.lider = :liderId")
+    Long contarCarteiraPorLider(@Param("liderId") Integer liderId);
+
+    @Query("select count(l) from Lead l " + "where l.ativo = true " + "and l.vendedor.ativo = true " + "and l.vendedor.lider.id = :liderId " + "and l.etapa.ordem < :ordemEtapaFechada " + "and l.criadoEm < :limite " + "and not exists (select i.id from Interacao i " + "where i.lead = l " + "and coalesce(i.dataHora, i.criadoEm) >= :limite)")
+    Long contarParadosPorLider(@Param("liderId") Integer liderId, @Param("limite") LocalDateTime limite, @Param("ordemEtapaFechada") Integer ordemEtapaFechada);
+
+    Long countByVendedor_IdAndAtivoTrueAndEtapa_Ordem(Integer vendedorId, Integer ordemEtapa);
+
+    @Query("select count(l) from Lead l " + "where l.ativo = true " + "and l.vendedor.id = :vendedorId " + "and l.etapa.ordem < :ordemEtapaFechada " + "and l.criadoEm < :limite " + "and not exists (select i.id from Interacao i " + "where i.lead = l " + "and coalesce(i.dataHora, i.criadoEm) >= :limite)")
+    Long contarParadosPorVendedor (@Param("vendedorId") Integer vendedorId, @Param("limite") LocalDateTime limite, @Param("ordemEtapaFechada") Integer ordemEtapaFechada);
 }

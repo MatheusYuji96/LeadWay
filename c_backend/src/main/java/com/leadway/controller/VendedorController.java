@@ -49,6 +49,12 @@ public class VendedorController {
         return ResponseEntity.status(200).body(listaResponse);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<VendedorResponseDTO> listarPorId(@PathVariable Integer id){
+        VendedorResponseDTO dto = VendedorMapper.toResponse(vendedorService.listar(id));
+        return ResponseEntity.status(200).body(dto);
+    }
+
     @Operation(
             summary = "Cadastra um novo vendedor",
             description = "Cria um novo representante comercial, podendo ser designado à acompanhar um lead específico."

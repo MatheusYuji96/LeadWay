@@ -27,6 +27,15 @@ public class VendedorService {
         return lista;
     }
 
+    public Vendedor listar(Integer id){
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(id);
+        if (vendedorOpt.isEmpty()){
+            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+        }
+        Vendedor vendedor = vendedorOpt.get();
+        return vendedor;
+    }
+
     public Vendedor cadastrar(VendedorRequestDTO dto){
         Vendedor vendedor = VendedorMapper.toEntityVendedor(dto);
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
