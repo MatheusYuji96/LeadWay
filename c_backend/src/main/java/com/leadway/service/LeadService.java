@@ -39,6 +39,15 @@ public class LeadService {
         return lista;
     }
 
+    public Lead listarId(Integer id){
+        Optional<Lead> leadOpt = leadRepository.findById(id);
+        if (leadOpt.isEmpty()){
+            throw new LeadNaoEncontradoException("Lead não consta nos registros");
+        }
+        Lead lead = leadOpt.get();
+        return lead;
+    }
+
     public Lead salvar(CadastroLeadRequestDTO dto) {
         if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");

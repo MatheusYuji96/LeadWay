@@ -3,6 +3,7 @@ package com.leadway.controller;
 import com.leadway.dto.response.DashboardEquipeIndicadoresResponseDTO;
 import com.leadway.dto.response.DashboardEquipeResponseDTO;
 import com.leadway.dto.response.DesempenhoVendedorResponseDTO;
+import com.leadway.dto.response.LeadParadoResponseDTO;
 import com.leadway.service.DashboardEquipeService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -34,5 +35,13 @@ public class DashboardEquipeController {
         return ResponseEntity.status(200).body(dashboardEquipeService.buscarDesempenho(liderId));
     }
 
-//    @GetMapping("/leads-parados/{liderId}")
+    @GetMapping
+    public ResponseEntity<DashboardEquipeResponseDTO> buscarResumo(){
+        return ResponseEntity.status(200).body(dashboardEquipeService.buscarResumo());
+    }
+
+    @GetMapping("/leads-parados/{liderId}/{dias}/{tamanho}")
+    public ResponseEntity<List<LeadParadoResponseDTO>> buscarLeadsParados(@PathVariable Integer liderId, @PathVariable Integer dias, @PathVariable Integer tamanho){
+        return ResponseEntity.status(200).body(dashboardEquipeService.buscarLeadsParados(liderId, dias, tamanho));
+    }
 }
