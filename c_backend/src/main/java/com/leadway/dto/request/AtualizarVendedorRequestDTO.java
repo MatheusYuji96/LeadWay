@@ -14,6 +14,12 @@ import java.util.List;
 public class AtualizarVendedorRequestDTO {
 
     @Schema(
+            description = "Identificador do cargo do usuário (opcional no PATCH)",
+            example = "3"
+    )
+    private Integer cargoId;
+
+    @Schema(
             description = "Identificador estrangeiro de líder associado ao vendedor",
             example = "2"
     )
@@ -47,6 +53,14 @@ public class AtualizarVendedorRequestDTO {
             example = "0"
     )
     private Boolean ativo;
+
+    public Integer getCargoId() {
+        return cargoId;
+    }
+
+    public void setCargoId(Integer cargoId) {
+        this.cargoId = cargoId;
+    }
 
     public Integer getLiderId() {
         return liderId;

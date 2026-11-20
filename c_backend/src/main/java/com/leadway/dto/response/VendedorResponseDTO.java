@@ -16,6 +16,18 @@ public class VendedorResponseDTO {
     private Integer id;
 
     @Schema(
+            description = "Identificador do cargo do usuário",
+            example = "3"
+    )
+    private Integer cargoId;
+
+    @Schema(
+            description = "Nome do cargo do usuário",
+            example = "VENDEDOR"
+    )
+    private String cargoNome;
+
+    @Schema(
             description = "Identificador estrangeiro de líder associado ao vendedor",
             example = "1"
     )
@@ -63,6 +75,22 @@ public class VendedorResponseDTO {
 
     public void setId(Integer id) {
     	this.id = id;
+    }
+
+    public Integer getCargoId() {
+        return cargoId;
+    }
+
+    public void setCargoId(Integer cargoId) {
+        this.cargoId = cargoId;
+    }
+
+    public String getCargoNome() {
+        return cargoNome;
+    }
+
+    public void setCargoNome(String cargoNome) {
+        this.cargoNome = cargoNome;
     }
 
     public Vendedor getLider() {

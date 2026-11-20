@@ -7,6 +7,13 @@ import jakarta.validation.constraints.*;
 public class VendedorRequestDTO {
 
     @Schema(
+            description = "Identificador do cargo do usuário no sistema (cargo_id é obrigatório)",
+            example = "3"
+    )
+    @NotNull
+    private Integer cargoId;
+
+    @Schema(
             description = "Identificador estrangeiro do vendedor responsável pelo Lead",
             example = "2"
     )
@@ -65,6 +72,14 @@ public class VendedorRequestDTO {
     public String getRegiao() { return regiao; }
 
     public void setRegiao(String regiao) { this.regiao = regiao; }
+
+    public Integer getCargoId() {
+        return cargoId;
+    }
+
+    public void setCargoId(Integer cargoId) {
+        this.cargoId = cargoId;
+    }
 
     public Integer getLiderId() {
         return liderId;

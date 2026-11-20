@@ -13,8 +13,6 @@ public class LeadResponseDTO {
     )
     private Integer id;
 
-    private java.time.LocalDateTime vinculadoEm;
-
     @Schema(
             description = "CNPJ da empresa",
             example = "12345678000199"
@@ -72,6 +70,12 @@ public class LeadResponseDTO {
     private Integer potencial;
 
     @Schema(
+            description = "Prioridade do Lead",
+            example = "MEDIA"
+    )
+    private String prioridade;
+
+    @Schema(
             description = "Status de atividade do Lead",
             example = "1"
     )
@@ -79,10 +83,6 @@ public class LeadResponseDTO {
 
     public LeadResponseDTO() {
     }
-
-    public java.time.LocalDateTime getVinculadoEm() { return vinculadoEm; }
-
-    public void setVinculadoEm(java.time.LocalDateTime vinculadoEm) { this.vinculadoEm = vinculadoEm; }
 
     public Integer getId() {
         return id;
@@ -350,6 +350,14 @@ public class LeadResponseDTO {
 
     public void setPotencial(Integer potencial) {
         this.potencial = potencial;
+    }
+
+    public String getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
     }
 
     public Boolean getAtivo() {

@@ -7,11 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "usuario")
 public class Vendedor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "cargo_id", nullable = false)
+    private Cargo cargo;
 
     @ManyToOne
     @JoinColumn(name = "lider_id")
@@ -23,7 +28,7 @@ public class Vendedor {
     @Column(length = 30)
     private String codVendedor;
 
-    @Column(length = 100)
+    @Column(length = 90)
     private String regiao;
 
     @Column(nullable = false, length = 190)
@@ -79,6 +84,14 @@ public class Vendedor {
 
     public Boolean getAtivo() {
         return ativo;
+    }
+
+    public Cargo getCargo() {
+        return cargo;
+    }
+
+    public void setCargo(Cargo cargo) {
+        this.cargo = cargo;
     }
 
     public Vendedor getLider() {

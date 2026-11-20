@@ -17,6 +17,7 @@ public class CadastroLeadMapper {
         lead.setTelefone(cadastroLeadRequestDTO.getTelefone());
         lead.setEndereco(toEndereco(cadastroLeadRequestDTO.getEndereco()));
         lead.setPotencial(cadastroLeadRequestDTO.getPotencial());
+        lead.setPrioridade(cadastroLeadRequestDTO.getPrioridade());
         lead.setAtivo(true);
         return lead;
     }
@@ -24,7 +25,6 @@ public class CadastroLeadMapper {
     public LeadResponseDTO toResponse(Lead lead){
         LeadResponseDTO leadResponse = new LeadResponseDTO();
         leadResponse.setId(lead.getId());
-        leadResponse.setVinculadoEm(lead.getVinculadoEm());
         leadResponse.setCnpj(lead.getCnpj());
         leadResponse.setRazaoSocial(lead.getRazaoSocial());
         leadResponse.setNomeFantasia(lead.getNomeFantasia());
@@ -35,6 +35,7 @@ public class CadastroLeadMapper {
         leadResponse.setEndereco(toEnderecoResponse(lead.getEndereco()));
         leadResponse.setVendedor(toVendedorResponse(lead.getVendedor()));
         leadResponse.setPotencial(lead.getPotencial());
+        leadResponse.setPrioridade(lead.getPrioridade());
         leadResponse.setAtivo(lead.getAtivo());
         return leadResponse;
     }

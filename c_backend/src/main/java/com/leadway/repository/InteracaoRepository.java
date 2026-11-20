@@ -21,6 +21,6 @@ public interface InteracaoRepository extends JpaRepository<Interacao, Integer> {
 
     boolean existsByIdAndLead_Id(Integer id, Integer leadId);
 
-    @Query("select max(coalesce(i.dataHora, i.criadoEm)) from Interacaoi where i.lead.id = :leadId")
+    @Query("select max(coalesce(i.dataHora, i.criadoEm)) from Interacao i where i.lead.id = :leadId")
     LocalDateTime buscarUltimaAtividadePorLead(@Param("leadId") Integer leadId);
 }

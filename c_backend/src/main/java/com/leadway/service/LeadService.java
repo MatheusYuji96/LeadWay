@@ -56,17 +56,18 @@ public class LeadService {
             throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
         }
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
-        if (dto.getVendedorId() != null) {
-            Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
-            if (vendedorOpt.isEmpty()) {
-                throw new VendedorNaoEncontradoException("Vendedor não encontrado");
-            }
-            Vendedor vendedor = vendedorOpt.get();
-            if (vendedor.getAtivo()){
-            cadastro.setVendedor(vendedor);
-            cadastro.setVinculadoEm(java.time.LocalDateTime.now());
-            }
+        if (dto.getVendedorId() == null) {
+            throw new VendedorNaoEncontradoException("Vendedor responsável é obrigatório");
         }
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
+        if (vendedorOpt.isEmpty()) {
+            throw new VendedorNaoEncontradoException("Vendedor não encontrado");
+        }
+        Vendedor vendedor = vendedorOpt.get();
+        if (!vendedor.getAtivo()) {
+            throw new InativoException("Vendedor responsável está inativo");
+        }
+        cadastro.setVendedor(vendedor);
         if (dto.getSetorId() == null){
             throw new SetorObrigatorioException("Obrigatório informar um setor de mercado");
         }
@@ -125,6 +126,9 @@ public class LeadService {
         if (dto.getPotencial() != null){
             lead.setPotencial(dto.getPotencial());
         }
+        if (dto.getPrioridade() != null){
+            lead.setPrioridade(dto.getPrioridade());
+        }
         if (dto.getDataPrimeiroContato() != null){
             lead.setDataPrimeiroContato(dto.getDataPrimeiroContato());
         }
@@ -175,9 +179,6 @@ public class LeadService {
             Vendedor vendedor = vendedorOpt.get();
             if (!vendedor.getAtivo()){
                 throw new InativoException("Vendedor solicitado está inativo");
-            }
-            if (lead.getVendedor() == null || !lead.getVendedor().getId().equals(vendedor.getId())) {
-                lead.setVinculadoEm(java.time.LocalDateTime.now());
             }
             lead.setVendedor(vendedor);
         }

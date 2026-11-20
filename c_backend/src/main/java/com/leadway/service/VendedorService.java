@@ -3,10 +3,13 @@ package com.leadway.service;
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
 import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
+import com.leadway.entity.Cargo;
 import com.leadway.entity.Vendedor;
+import com.leadway.exception.EntidadeNaoEncontradaException;
 import com.leadway.exception.EmailJaCadastradoException;
 import com.leadway.exception.VendedorNaoEncontradoException;
 import com.leadway.mapper.VendedorMapper;
+import com.leadway.repository.CargoRepository;
 import com.leadway.repository.VendedorRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +20,11 @@ import java.util.Optional;
 public class VendedorService {
 
     private final VendedorRepository vendedorRepository;
+    private final CargoRepository cargoRepository;
 
-    public VendedorService(VendedorRepository vendedorRepository) {
+    public VendedorService(VendedorRepository vendedorRepository, CargoRepository cargoRepository) {
         this.vendedorRepository = vendedorRepository;
+        this.cargoRepository = cargoRepository;
     }
 
     public List<Vendedor> listarPorFiltro(String termo){
@@ -38,6 +43,7 @@ public class VendedorService {
 
     public Vendedor cadastrar(VendedorRequestDTO dto){
         Vendedor vendedor = VendedorMapper.toEntityVendedor(dto);
+        vendedor.setCargo(buscarCargo(dto.getCargoId()));
         if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
         }
@@ -60,6 +66,9 @@ public class VendedorService {
         }
         Vendedor vendedor = vendedorOpt.get();
         vendedor.setId(id);
+        if (dto.getCargoId() != null){
+            vendedor.setCargo(buscarCargo(dto.getCargoId()));
+        }
         if (dto.getEmail() != null){
             if (!vendedor.getEmail().equalsIgnoreCase(dto.getEmail())) {
                 if (vendedorRepository.existsByEmailIgnoreCase(dto.getEmail())) {
@@ -87,6 +96,14 @@ public class VendedorService {
         }
         Vendedor vendedorLocalizado = vendedorRepository.save(vendedor);
         return vendedorLocalizado;
+    }
+
+    private Cargo buscarCargo(Integer cargoId) {
+        if (cargoId == null) {
+            throw new EntidadeNaoEncontradaException("Cargo é obrigatório");
+        }
+        return cargoRepository.findById(cargoId)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cargo não encontrado"));
     }
 
     public void apagar(Integer id){
