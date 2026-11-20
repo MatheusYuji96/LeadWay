@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "leads")
+@Table(name = "lead")
 public class Lead {
 
     @Id
@@ -25,11 +25,8 @@ public class Lead {
     private Endereco endereco;
 
     @ManyToOne
-    @JoinColumn(name = "vendedor_id")
+    @JoinColumn(name = "responsavel_id", nullable = false)
     private Vendedor vendedor;
-
-    @Column(name = "vinculado_em")
-    private LocalDateTime vinculadoEm;
 
     @ManyToOne
     @JoinColumn(name = "etapa_id", nullable = false)
@@ -53,14 +50,11 @@ public class Lead {
     @Column(columnDefinition = "CHAR(11)", nullable = false)
     private String telefone;
 
-    @Column(length = 30)
+    @Column(columnDefinition = "ENUM('ALTA','MEDIA','BAIXA')")
     private String prioridade;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT UNSIGNED")
     private Integer potencial;
-
-    @Column(length = 20)
-    private String farol;
 
     private LocalDateTime dataPrimeiroContato;
 
@@ -96,10 +90,6 @@ public class Lead {
         return endereco;
     }
 
-    public LocalDateTime getVinculadoEm() { return vinculadoEm; }
-
-    public void setVinculadoEm(LocalDateTime vinculadoEm) { this.vinculadoEm = vinculadoEm; }
-
     public Vendedor getVendedor() {
         return vendedor;
     }
@@ -134,10 +124,6 @@ public class Lead {
 
     public Integer getPotencial() {
         return potencial;
-    }
-
-    public String getFarol() {
-        return farol;
     }
 
     public LocalDateTime getDataPrimeiroContato() {
@@ -228,10 +214,6 @@ public class Lead {
 
     public void setPotencial(Integer potencial) {
         this.potencial = potencial;
-    }
-
-    public void setFarol(String farol) {
-        this.farol = farol;
     }
 
     public void setEmail(String email) {

@@ -9,10 +9,6 @@ import java.time.LocalDateTime;
 public class CadastroInteracaoRequestDTO {
 
     @NotBlank
-    @Size(max = 100)
-    private String titulo;
-
-    @NotBlank
     @Size(max = 45)
     private String tipo;
 
@@ -24,14 +20,6 @@ public class CadastroInteracaoRequestDTO {
 
     @NotNull
     private Integer etapaId;
-
-    public @NotBlank @Size(max = 100) String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(@NotBlank @Size(max = 100) String titulo) {
-        this.titulo = titulo;
-    }
 
     public @NotBlank @Size(max = 45) String getTipo() {
         return tipo;
@@ -65,4 +53,3 @@ public class CadastroInteracaoRequestDTO {
         this.etapaId = etapaId;
     }
 }
-

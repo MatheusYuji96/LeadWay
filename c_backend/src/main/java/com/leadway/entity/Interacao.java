@@ -14,15 +14,12 @@ public class Interacao {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "vendedor_id")
+    @JoinColumn(name = "usuario_id")
     private Vendedor vendedor;
 
     @ManyToOne
     @JoinColumn(name = "lead_id")
     private Lead lead;
-
-    @Column(nullable = false, length = 100)
-    private String titulo;
 
     @Column(nullable = false, length = 45)
     private String tipo;
@@ -55,10 +52,6 @@ public class Interacao {
         return lead;
     }
 
-    public String getTitulo() {
-        return titulo;
-    }
-
     public String getTipo() {
         return tipo;
     }
@@ -85,10 +78,6 @@ public class Interacao {
 
     public void setLead(Lead lead) {
         this.lead = lead;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
     }
 
     public void setTipo(String tipo) {

@@ -46,6 +46,13 @@ public class LeadController {
         return ResponseEntity.status(200).body(listaResponse);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<LeadResponseDTO> listarPorId(@PathVariable Integer id){
+        Lead lead = leadService.listarId(id);
+        LeadResponseDTO dto = cadastroLeadMapper.toResponse(lead);
+        return ResponseEntity.status(200).body(dto);
+    }
+
     @Operation(
             summary = "Cadastra leads no sistema",
             description = "Registra as informações de um lead no sistema."

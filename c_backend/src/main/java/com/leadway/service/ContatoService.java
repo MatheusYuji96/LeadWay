@@ -2,7 +2,6 @@ package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarContatoRequestDTO;
 import com.leadway.dto.request.ContatoRequestDTO;
-import com.leadway.entity.ClassificacaoContato;
 import com.leadway.entity.Contato;
 import com.leadway.entity.Lead;
 import com.leadway.exception.*;
@@ -78,13 +77,6 @@ public class ContatoService {
             contato.setAtivo(dto.getAtivo());
         }
         if (dto.getContato() != null){
-            if (!dto.getContato().equals(ClassificacaoContato.DECISOR)){
-                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
-            } else if (!dto.getContato().equals(ClassificacaoContato.INFLUENCIADOR)){
-                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
-            } else if (!dto.getContato().equals(ClassificacaoContato.PADRAO)){
-                throw new ClassificacaoNaoValidaException("Escolha uma opção válida");
-            }
             contato.setClassificacao(dto.getContato());
         }
         Contato contatoRegistrar = contatoRepository.save(contato);

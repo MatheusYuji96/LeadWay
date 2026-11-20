@@ -46,7 +46,8 @@ public class AuthController {
         VendedorResponseDTO vendedor = VendedorMapper.toResponse(
                 service.cadastrar(
                         VendedorMapper.toEntity(dto),
-                        dto.getConfirmarSenha()
+                        dto.getConfirmarSenha(),
+                        dto.getCargoId()
                 )
         );
 

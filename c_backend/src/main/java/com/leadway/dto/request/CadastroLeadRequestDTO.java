@@ -69,14 +69,21 @@ public class CadastroLeadRequestDTO {
     )
     private String telefone;
 
-    @NotBlank
-
     @Schema(
-            description = "Potencial do Lead definido pelo usuário",
+            description = "Potencial do Lead definido pelo usuário (de 1 a 5)",
             example = "1"
     )
+    @NotNull
+    @Min(1)
+    @Max(5)
     private Integer potencial;
 
+    @Schema(
+            description = "Prioridade do Lead conforme o banco definitivo",
+            example = "MEDIA"
+    )
+    @Pattern(regexp = "ALTA|MEDIA|BAIXA", message = "Prioridade deve ser ALTA, MEDIA ou BAIXA")
+    private String prioridade;
 
     @Schema(
             description = "Identificador do vendedor responsável por acompanhar o lead",
@@ -282,6 +289,14 @@ public class CadastroLeadRequestDTO {
 
     public void setPotencial(Integer potencial) {
         this.potencial = potencial;
+    }
+
+    public String getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
     }
 
     public Integer getVendedorId() {

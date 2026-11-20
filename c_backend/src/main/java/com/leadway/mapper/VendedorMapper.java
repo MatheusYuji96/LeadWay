@@ -36,6 +36,10 @@ public class VendedorMapper {
         VendedorResponseDTO dto = new VendedorResponseDTO();
 
         dto.setId(vendedor.getId());
+        if (vendedor.getCargo() != null) {
+            dto.setCargoId(vendedor.getCargo().getId());
+            dto.setCargoNome(vendedor.getCargo().getNome());
+        }
         dto.setNome(vendedor.getNome());
         dto.setEmail(vendedor.getEmail());
         dto.setTelefone(vendedor.getTelefone());

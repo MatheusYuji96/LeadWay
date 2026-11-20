@@ -1,10 +1,13 @@
 package com.leadway.service;
 
+import com.leadway.entity.Cargo;
 import com.leadway.entity.Vendedor;
 import com.leadway.exception.ContaBloqueadaException;
 import com.leadway.exception.CredenciaisInvalidasException;
 import com.leadway.exception.EntidadeConflitoException;
+import com.leadway.exception.EntidadeNaoEncontradaException;
 import com.leadway.exception.SenhasDiferentesException;
+import com.leadway.repository.CargoRepository;
 import com.leadway.repository.VendedorRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +18,23 @@ import java.util.Optional;
 public class AuthService {
 
     private final VendedorRepository repository;
+    private final CargoRepository cargoRepository;
     private static final Integer MAX_TENTATIVAS = 3;
     private static final Integer TEMPO_BLOQUEIO = 15;
 
-    public AuthService(VendedorRepository repository) {
+    public AuthService(VendedorRepository repository, CargoRepository cargoRepository) {
         this.repository = repository;
+        this.cargoRepository = cargoRepository;
     }
 
-    public Vendedor cadastrar(Vendedor vendedor, String confirmarSenha) {
+    public Vendedor cadastrar(Vendedor vendedor, String confirmarSenha, Integer cargoId) {
+
+        if (cargoId == null) {
+            throw new EntidadeNaoEncontradaException("Cargo é obrigatório");
+        }
+        Cargo cargo = cargoRepository.findById(cargoId)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cargo não encontrado"));
+        vendedor.setCargo(cargo);
 
         if (!vendedor.getSenha().equals(confirmarSenha)) {
             throw new SenhasDiferentesException();

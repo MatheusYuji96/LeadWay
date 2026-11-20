@@ -31,7 +31,7 @@ public class AtualizarContatoRequestDTO {
 
     @Schema(
             description = "Enumerador responsável pela classificação devida do contato",
-            example = "DECISOR"
+            example = "PRINCIPAL"
     )
     private ClassificacaoContato contato;
 

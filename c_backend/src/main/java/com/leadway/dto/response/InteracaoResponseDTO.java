@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public class InteracaoResponseDTO {
 
     private Integer id;
-    private String titulo;
     private String tipo;
     private LocalDateTime dataHora;
     private String descricao;
@@ -16,14 +15,6 @@ public class InteracaoResponseDTO {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
     }
 
     public String getTipo() {

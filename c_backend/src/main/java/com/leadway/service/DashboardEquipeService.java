@@ -3,7 +3,7 @@ package com.leadway.service;
 import com.leadway.dto.response.DashboardEquipeIndicadoresResponseDTO;
 import com.leadway.dto.response.DashboardEquipeResponseDTO;
 import com.leadway.dto.response.DesempenhoVendedorResponseDTO;
-import com.leadway.entity.Contato;
+import com.leadway.dto.response.LeadParadoResponseDTO;
 import com.leadway.entity.Lead;
 import com.leadway.entity.Vendedor;
 import com.leadway.exception.VendedorNaoEncontradoException;
@@ -11,6 +11,7 @@ import com.leadway.repository.ContatoRepository;
 import com.leadway.repository.InteracaoRepository;
 import com.leadway.repository.LeadRepository;
 import com.leadway.repository.VendedorRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class DashboardEquipeService {
     private static final int DIAS_PARADO = 7;
     private static final int ORDEM_ETAPA_FECHADA = 5;
     private static final int ORDEM_ETAPA_PROPOSTA = 3;
+    private static final int TAMANHO_MAXIMO_LEADS_PARADOS = 50;
 
 
     public DashboardEquipeService(VendedorRepository vendedorRepository, LeadRepository leadRepository, ContatoRepository contatoRepository, InteracaoRepository interacaoRepository) {
@@ -154,5 +156,44 @@ public class DashboardEquipeService {
     private LocalDateTime inicioDaSemana() {
         LocalDate hoje = LocalDate.now();
         return hoje.minusDays(hoje.getDayOfWeek().getValue() - 1).atStartOfDay();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeadParadoResponseDTO> buscarLeadsParados(Integer liderId, Integer dias, Integer tamanho){
+
+        if (!vendedorRepository.existsById(liderId)){
+            throw new VendedorNaoEncontradoException("Vendedor líder não consta nos registros");
+        }
+
+        int diasValidos = Math.max(dias, 1);
+        int tamanhoValido = Math.min(Math.max(tamanho, 1), TAMANHO_MAXIMO_LEADS_PARADOS);
+
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime limiteParado = agora.minusDays(diasValidos);
+
+        List<Lead> leadsParados = leadRepository.buscarParadosPorLider(liderId, limiteParado, ORDEM_ETAPA_FECHADA, PageRequest.of(0, tamanhoValido));
+
+        List<LeadParadoResponseDTO> resultado = new ArrayList<>();
+
+        for (Lead lead : leadsParados) {
+            LocalDateTime ultimaAtividade = interacaoRepository.buscarUltimaAtividadePorLead(lead.getId());
+
+            if (ultimaAtividade == null) {
+                ultimaAtividade = lead.getCriadoEm();
+            }
+
+            int diasParados = (int) ChronoUnit.DAYS.between(ultimaAtividade, agora);
+
+            resultado.add(new LeadParadoResponseDTO(
+                    lead.getId(),
+                    lead.getNomeFantasia(),
+                    lead.getVendedor().getId(),
+                    lead.getVendedor().getNome(),
+                    lead.getEtapa().getNome(),
+                    ultimaAtividade,
+                    diasParados
+            ));
+        }
+        return resultado;
     }
 }

@@ -49,7 +49,6 @@ public class InteracaoService {
         Interacao interacao = new Interacao();
         interacao.setLead(lead);
         interacao.setVendedor(vendedor);
-        interacao.setTitulo(dto.getTitulo());
         interacao.setTipo(dto.getTipo());
         interacao.setDataHora(dto.getDataHora());
         interacao.setDescricao(dto.getDescricao());
