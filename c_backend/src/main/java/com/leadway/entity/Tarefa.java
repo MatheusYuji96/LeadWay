@@ -22,9 +22,16 @@ public class Tarefa {
     private Lead lead;
 
     @ManyToOne
-    @JoinColumn(name = "responsavel_id")
+    @JoinColumn(name="responsavel_id")
     private Vendedor responsavel;
-
+    private LocalDateTime concluidoEm;
+    private LocalDateTime lembreteEm;
+    public Vendedor getResponsavel(){return responsavel;}
+    public void setResponsavel(Vendedor v){responsavel=v;}
+    public LocalDateTime getConcluidoEm(){return concluidoEm;}
+    public void setConcluidoEm(LocalDateTime v){concluidoEm=v;}
+    public LocalDateTime getLembreteEm(){return lembreteEm;}
+    public void setLembreteEm(LocalDateTime v){lembreteEm=v;}
     @Column(nullable = false, length = 50)
     private String tipo;
 
@@ -35,12 +42,8 @@ public class Tarefa {
     private LocalDateTime dataPrazo;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('ABERTA','CONCLUIDA','CANCELADA')")
+    @Column(columnDefinition = "ENUM('ABERTA', 'CONCLUIDA', 'CANCELADA')")
     private StatusTarefa status;
-
-    private LocalDateTime concluidoEm;
-
-    private LocalDateTime lembreteEm;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -65,10 +68,6 @@ public class Tarefa {
         return lead;
     }
 
-    public Vendedor getResponsavel() {
-        return responsavel;
-    }
-
     public String getTipo() {
         return tipo;
     }
@@ -79,14 +78,6 @@ public class Tarefa {
 
     public LocalDateTime getDataPrazo() {
         return dataPrazo;
-    }
-
-    public LocalDateTime getConcluidoEm() {
-        return concluidoEm;
-    }
-
-    public LocalDateTime getLembreteEm() {
-        return lembreteEm;
     }
 
     public LocalDateTime getCriadoEm() {
@@ -105,10 +96,6 @@ public class Tarefa {
         this.lead = lead;
     }
 
-    public void setResponsavel(Vendedor responsavel) {
-        this.responsavel = responsavel;
-    }
-
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
@@ -119,17 +106,5 @@ public class Tarefa {
 
     public void setDataPrazo(LocalDateTime dataPrazo) {
         this.dataPrazo = dataPrazo;
-    }
-
-    public void setConcluidoEm(LocalDateTime concluidoEm) {
-        this.concluidoEm = concluidoEm;
-    }
-
-    public void setLembreteEm(LocalDateTime lembreteEm) {
-        this.lembreteEm = lembreteEm;
-    }
-
-    public void setStatus(StatusTarefa status) {
-        this.status = status;
     }
 }

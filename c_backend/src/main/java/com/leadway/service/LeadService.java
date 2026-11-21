@@ -15,13 +15,15 @@ import java.util.Optional;
 public class LeadService {
 
     private final LeadRepository leadRepository;
+    private final LeadEtapaHistoricoRepository historicoRepository;
     private final EtapaRepository etapaRepository;
     private final SetorRepository setorRepository;
     private final VendedorRepository vendedorRepository;
     private final CadastroLeadMapper cadastroLeadMapper = new CadastroLeadMapper();
     private final EnderecoRepository enderecoRepository;
 
-    public LeadService(LeadRepository leadRepository, EtapaRepository etapaRepository, SetorRepository setorRepository, VendedorRepository vendedorRepository, EnderecoRepository enderecoRepository) {
+    public LeadService(LeadRepository leadRepository, EtapaRepository etapaRepository, SetorRepository setorRepository, VendedorRepository vendedorRepository, EnderecoRepository enderecoRepository, LeadEtapaHistoricoRepository historicoRepository) {
+        this.historicoRepository = historicoRepository;
         this.leadRepository = leadRepository;
         this.etapaRepository = etapaRepository;
         this.setorRepository = setorRepository;
@@ -39,15 +41,6 @@ public class LeadService {
         return lista;
     }
 
-    public Lead listarId(Integer id){
-        Optional<Lead> leadOpt = leadRepository.findById(id);
-        if (leadOpt.isEmpty()){
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
-        }
-        Lead lead = leadOpt.get();
-        return lead;
-    }
-
     public Lead salvar(CadastroLeadRequestDTO dto) {
         if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
@@ -56,18 +49,17 @@ public class LeadService {
             throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
         }
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
-        if (dto.getVendedorId() == null) {
-            throw new VendedorNaoEncontradoException("Vendedor responsável é obrigatório");
+        if (dto.getVendedorId() != null) {
+            Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
+            if (vendedorOpt.isEmpty()) {
+                throw new VendedorNaoEncontradoException("Vendedor não encontrado");
+            }
+            Vendedor vendedor = vendedorOpt.get();
+            if (vendedor.getAtivo()){
+            cadastro.setVendedor(vendedor);
+            cadastro.setVinculadoEm(java.time.LocalDateTime.now());
+            }
         }
-        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
-        if (vendedorOpt.isEmpty()) {
-            throw new VendedorNaoEncontradoException("Vendedor não encontrado");
-        }
-        Vendedor vendedor = vendedorOpt.get();
-        if (!vendedor.getAtivo()) {
-            throw new InativoException("Vendedor responsável está inativo");
-        }
-        cadastro.setVendedor(vendedor);
         if (dto.getSetorId() == null){
             throw new SetorObrigatorioException("Obrigatório informar um setor de mercado");
         }
@@ -99,6 +91,7 @@ public class LeadService {
         Endereco enderecoSalvar = enderecoRepository.save(cadastro.getEndereco());
         cadastro.setEndereco(enderecoSalvar);
         Lead leadCadastrar = leadRepository.save(cadastro);
+        registrarEtapa(leadCadastrar);
         return leadCadastrar;
     }
 
@@ -123,17 +116,18 @@ public class LeadService {
         if (dto.getTelefone() != null){
             lead.setTelefone(dto.getTelefone());
         }
+        if (dto.getPrioridade() != null) {
+            if (!java.util.Set.of("ALTA","MEDIA","BAIXA").contains(dto.getPrioridade())) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Prioridade inválida");
+            lead.setPrioridade(dto.getPrioridade());
+        }
         if (dto.getPotencial() != null){
             lead.setPotencial(dto.getPotencial());
-        }
-        if (dto.getPrioridade() != null){
-            lead.setPrioridade(dto.getPrioridade());
         }
         if (dto.getDataPrimeiroContato() != null){
             lead.setDataPrimeiroContato(dto.getDataPrimeiroContato());
         }
         if (dto.getDataPrimeiraVisita() != null){
-            if (dto.getDataPrimeiraVisita().isBefore(lead.getDataPrimeiroContato())){
+            if (lead.getDataPrimeiroContato() != null && dto.getDataPrimeiraVisita().isBefore(lead.getDataPrimeiroContato())){
                 throw new DataInvalidaException("Data informada não pode ser anterior à data do primeiro contato");
             }
             lead.setDataPrimeiraVisita(dto.getDataPrimeiraVisita());
@@ -142,6 +136,7 @@ public class LeadService {
             lead.setMotivoPerda(dto.getMotivoPerda());
         }
         if (dto.getAtivo() != null){
+            if (!dto.getAtivo() && (lead.getMotivoPerda()==null || lead.getMotivoPerda().isBlank())) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Motivo da perda obrigatório");
             lead.setAtivo(dto.getAtivo());
         }
         if (dto.getEndereco() != null){
@@ -180,6 +175,9 @@ public class LeadService {
             if (!vendedor.getAtivo()){
                 throw new InativoException("Vendedor solicitado está inativo");
             }
+            if (lead.getVendedor() == null || !lead.getVendedor().getId().equals(vendedor.getId())) {
+                lead.setVinculadoEm(java.time.LocalDateTime.now());
+            }
             lead.setVendedor(vendedor);
         }
         if (dto.getEtapaId() != null){
@@ -188,16 +186,41 @@ public class LeadService {
                 throw new EtapaNaoRegistradaException("Etapa não consta nos registros");
             }
             Etapa etapa = etapaOpt.get();
-            lead.setEtapa(etapa);
+            if (lead.getEtapa() == null || !lead.getEtapa().getId().equals(etapa.getId())) {
+                lead.setEtapa(etapa);
+                registrarEtapa(lead);
+            }
         }
         Lead cadastradoNovo = leadRepository.save(lead);
         return cadastradoNovo;
+    }
+
+    /** Última entrada registrada na etapa atual. Não inventa datas para históricos ausentes. */
+    public java.time.LocalDateTime obterEntradaEtapaAtual(Integer leadId) {
+        Lead lead = leadRepository.findById(leadId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Lead não encontrado"));
+        if (lead.getEtapa() == null) return null;
+        return historicoRepository
+                .findFirstByLeadIdAndEtapaIdOrderByCriadoEmDescIdDesc(leadId, lead.getEtapa().getId())
+                .map(LeadEtapaHistorico::getCriadoEm)
+                .orElse(null);
+    }
+
+    private void registrarEtapa(Lead lead) {
+        LeadEtapaHistorico h = new LeadEtapaHistorico();
+        h.setLead(lead);
+        h.setEtapa(lead.getEtapa());
+        historicoRepository.save(h);
     }
 
     public void apagar(Integer id){
         if (!leadRepository.existsById(id)){
             throw new LeadNaoEncontradoException("Lead não consta nos registros");
         }
-        leadRepository.deleteById(id);
+        Lead lead = leadRepository.findById(id).orElseThrow(() -> new LeadNaoEncontradoException("Lead não encontrado"));
+        lead.setAtivo(false);
+        if (lead.getMotivoPerda() == null || lead.getMotivoPerda().isBlank()) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Informe o motivo da perda antes de desativar");
+        leadRepository.save(lead);
     }
 }

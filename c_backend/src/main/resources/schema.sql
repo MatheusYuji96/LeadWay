@@ -104,7 +104,7 @@ CREATE TABLE leads (
     telefone CHAR(11) NOT NULL,
 
     prioridade VARCHAR(30) NULL DEFAULT NULL,
-    potencial INT NOT NULL,
+    potencial VARCHAR(30) NOT NULL,
     farol VARCHAR(20) NULL DEFAULT NULL,
 
     data_primeiro_contato DATETIME,

@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface LeadEtapaHistoricoRepository extends JpaRepository<LeadEtapaHistorico, Integer> {
 
+    java.util.Optional<LeadEtapaHistorico> findFirstByLeadIdAndEtapaIdOrderByCriadoEmDescIdDesc(Integer leadId, Integer etapaId);
+
+
     @Query(value = """
      SELECT
           DATE(h.criado_em),

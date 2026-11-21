@@ -29,9 +29,11 @@ import java.util.List;
 public class VendedorController {
 
     private final VendedorService vendedorService;
+    private final com.leadway.service.SessionService sessions;
 
-    public VendedorController(VendedorService vendedorService) {
+    public VendedorController(VendedorService vendedorService, com.leadway.service.SessionService sessions) {
         this.vendedorService = vendedorService;
+        this.sessions = sessions;
     }
 
     @Operation(
@@ -43,16 +45,14 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping
-    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo) {
-        List<Vendedor> lista = vendedorService.listarPorFiltro(termo);
+    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo, @org.springframework.web.bind.annotation.RequestHeader(value="Authorization",required=false) String token) {
+        Vendedor actor=sessions.require(token);sessions.requireManager(actor);
+        List<Vendedor> lista = vendedorService.listarPorFiltro(termo).stream()
+            .filter(v->sessions.root(v).getId().equals(sessions.root(actor).getId()))
+            .filter(v->!sessions.role(actor).equals("GERENTE") || sessions.role(v).equals("VENDEDOR"))
+            .toList();
         List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<VendedorResponseDTO> listarPorId(@PathVariable Integer id){
-        VendedorResponseDTO dto = VendedorMapper.toResponse(vendedorService.listar(id));
-        return ResponseEntity.status(200).body(dto);
     }
 
     @Operation(
@@ -67,7 +67,12 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
-    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO) {
+    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO,
+          @org.springframework.web.bind.annotation.RequestHeader(value="Authorization",required=false) String token) {
+        Vendedor actor=sessions.require(token);sessions.requireManager(actor);
+        if (sessions.role(actor).equals("GERENTE") && "GERENTE".equals(requestDTO.getCargo()))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Gerente não cadastra gerente");
+        requestDTO.setLiderId(actor.getId());
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
         VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(201).body(responseDTO);
@@ -84,7 +89,19 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO) {
+    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO,
+          @org.springframework.web.bind.annotation.RequestHeader(value="Authorization",required=false) String token) {
+        Vendedor actor=sessions.require(token);sessions.requireManager(actor);
+        Vendedor target=vendedorService.buscar(id);sessions.sameOrg(actor,target);
+        if(sessions.role(actor).equals("GERENTE") && !sessions.role(target).equals("VENDEDOR"))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Gerente só edita vendedores");
+        if (requestDTO.getCargo() != null && sessions.role(actor).equals("GERENTE")
+            && !"VENDEDOR".equals(requestDTO.getCargo()))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Gerente não pode promover a gerente ou administrador");
+        if (sessions.role(actor).equals("GERENTE") &&
+            (target.getLider() == null || !actor.getId().equals(target.getLider().getId())))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Funcionário fora da equipe");
+        requestDTO.setLiderId(null); // Alteração de hierarquia requer fluxo separado.
         Vendedor vendedor = vendedorService.atualizar(id, requestDTO);
         VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(200).body(responseDTO);
@@ -100,7 +117,14 @@ public class VendedorController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id,
+          @org.springframework.web.bind.annotation.RequestHeader(value="Authorization",required=false) String token) {
+        Vendedor actor=sessions.require(token);sessions.requireManager(actor);
+        Vendedor target=vendedorService.buscar(id);sessions.sameOrg(actor,target);
+        if(actor.getId().equals(id) || sessions.role(target).equals("ADMINISTRADOR"))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Não pode excluir essa conta");
+        if(sessions.role(actor).equals("GERENTE") && !sessions.role(target).equals("VENDEDOR"))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Gerente só exclui vendedores");
         vendedorService.apagar(id);
         return ResponseEntity.status(204).build();
     }

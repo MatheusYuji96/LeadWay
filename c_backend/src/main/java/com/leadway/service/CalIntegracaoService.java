@@ -25,20 +25,20 @@ public class CalIntegracaoService {
         this.calApiService = calApiService;
     }
 
-    public boolean estaConectado(Integer usuarioId) {
-        return calIntegracaoRepository.existsById(usuarioId);
+    public boolean estaConectado(Integer vendedorId) {
+        return calIntegracaoRepository.existsById(vendedorId);
     }
 
-    public CalIntegracaoResponseDTO status(Integer usuarioId) {
-        Optional<CalIntegracao> integracaoOpt = calIntegracaoRepository.findById(usuarioId);
+    public CalIntegracaoResponseDTO status(Integer vendedorId) {
+        Optional<CalIntegracao> integracaoOpt = calIntegracaoRepository.findById(vendedorId);
         if (integracaoOpt.isEmpty()) {
             return montarResposta(null);
         }
         return montarResposta(integracaoOpt.get());
     }
 
-    public CalIntegracaoResponseDTO conectar(Integer usuarioId, String apiKey) {
-        if (usuarioId == null || !vendedorRepository.existsById(usuarioId)) {
+    public CalIntegracaoResponseDTO conectar(Integer vendedorId, String apiKey) {
+        if (vendedorId == null || !vendedorRepository.existsById(vendedorId)) {
             throw CalException.naoEncontrado("Vendedor não encontrado.");
         }
         if (apiKey == null || apiKey.isBlank()) {
@@ -55,13 +55,13 @@ public class CalIntegracaoService {
             throw CalException.invalido("Não foi possível identificar a conta dessa API key.");
         }
 
-        Optional<CalIntegracao> existente = calIntegracaoRepository.findById(usuarioId);
+        Optional<CalIntegracao> existente = calIntegracaoRepository.findById(vendedorId);
         CalIntegracao integracao;
         if (existente.isPresent()) {
             integracao = existente.get();
         } else {
             integracao = new CalIntegracao();
-            integracao.setUsuarioId(usuarioId);
+            integracao.setVendedorId(vendedorId);
         }
         integracao.setCalUsername(username);
         integracao.setCalApiKey(chave);
@@ -71,14 +71,14 @@ public class CalIntegracaoService {
         return montarResposta(integracao);
     }
 
-    public void desconectar(Integer usuarioId) {
-        if (calIntegracaoRepository.existsById(usuarioId)) {
-            calIntegracaoRepository.deleteById(usuarioId);
+    public void desconectar(Integer vendedorId) {
+        if (calIntegracaoRepository.existsById(vendedorId)) {
+            calIntegracaoRepository.deleteById(vendedorId);
         }
     }
 
-    public CalIntegracao buscarCredencial(Integer usuarioId) {
-        Optional<CalIntegracao> integracaoOpt = calIntegracaoRepository.findById(usuarioId);
+    public CalIntegracao buscarCredencial(Integer vendedorId) {
+        Optional<CalIntegracao> integracaoOpt = calIntegracaoRepository.findById(vendedorId);
         if (integracaoOpt.isEmpty()) {
             throw CalException.naoConectado();
         }

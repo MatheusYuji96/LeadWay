@@ -14,7 +14,7 @@ public class Contato {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "lead_id", nullable = false)
+    @JoinColumn(name = "lead_id")
     private Lead lead;
 
     @Column(nullable = false, length = 190)
@@ -33,7 +33,7 @@ public class Contato {
     private String whatsapp;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('PADRAO','SECUNDARIO','PRINCIPAL')")
+    @Column(columnDefinition = "ENUM('PADRAO', 'SECUNDARIO', 'PRINCIPAL')")
     private ClassificacaoContato classificacao;
 
     @CreationTimestamp

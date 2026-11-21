@@ -14,16 +14,21 @@ import java.util.List;
 public class AtualizarVendedorRequestDTO {
 
     @Schema(
-            description = "Identificador do cargo do usuário (opcional no PATCH)",
-            example = "3"
-    )
-    private Integer cargoId;
-
-    @Schema(
             description = "Identificador estrangeiro de líder associado ao vendedor",
             example = "2"
     )
     private Integer liderId;
+    @Schema(description = "Novo cargo: GERENTE ou VENDEDOR")
+    @Pattern(regexp = "GERENTE|VENDEDOR", message = "Cargo inválido")
+    private String cargo;
+    public String getCargo(){return cargo;}
+    public void setCargo(String cargo){this.cargo=cargo;}
+    @Size(max=190) private String nome;
+    @Size(max=30) private String codVendedor;
+    @Size(max=100) private String regiao;
+    public String getNome(){return nome;} public void setNome(String v){nome=v;}
+    public String getCodVendedor(){return codVendedor;} public void setCodVendedor(String v){codVendedor=v;}
+    public String getRegiao(){return regiao;} public void setRegiao(String v){regiao=v;}
 
     @Schema(
             description = "E-mail do usuário vendedor",
@@ -53,14 +58,6 @@ public class AtualizarVendedorRequestDTO {
             example = "0"
     )
     private Boolean ativo;
-
-    public Integer getCargoId() {
-        return cargoId;
-    }
-
-    public void setCargoId(Integer cargoId) {
-        this.cargoId = cargoId;
-    }
 
     public Integer getLiderId() {
         return liderId;

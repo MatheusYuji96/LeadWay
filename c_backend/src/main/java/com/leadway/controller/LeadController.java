@@ -25,10 +25,12 @@ import java.util.List;
 public class LeadController {
 
     private final LeadService leadService;
+    private final com.leadway.service.SessionService sessions;
     private final CadastroLeadMapper cadastroLeadMapper = new CadastroLeadMapper();
 
-    public LeadController(LeadService leadService) {
+    public LeadController(LeadService leadService, com.leadway.service.SessionService sessions) {
         this.leadService = leadService;
+        this.sessions = sessions;
     }
 
     @Operation(
@@ -40,17 +42,38 @@ public class LeadController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping
-    public ResponseEntity<List<LeadResponseDTO>> listar(@RequestParam(required = false) String termo, @RequestParam(required = false) Integer vendedorId, @RequestParam(required = false) String fase) {
-        List<Lead> lista = leadService.listarPorFiltro(termo, vendedorId, fase);
+    public ResponseEntity<List<LeadResponseDTO>> listar(@RequestParam(required = false) String termo, @RequestParam(required = false) Integer vendedorId, @RequestParam(required = false) String fase, @RequestHeader(value="Authorization",required=false) String token) {
+        com.leadway.entity.Vendedor actor = sessions.require(token);
+        List<Lead> lista = leadService.listarPorFiltro(termo, vendedorId, fase).stream()
+            .filter(lead -> lead.getVendedor() != null)
+            .filter(lead -> sessions.root(actor).getId().equals(sessions.root(lead.getVendedor()).getId()))
+            .filter(lead -> !sessions.role(actor).equals("VENDEDOR") || actor.getId().equals(lead.getVendedor().getId()))
+            .filter(lead -> !sessions.role(actor).equals("GERENTE") || actor.getId().equals(lead.getVendedor().getId()) || (lead.getVendedor().getLider() != null && actor.getId().equals(lead.getVendedor().getLider().getId())))
+            .toList();
         List<LeadResponseDTO> listaResponse = lista.stream().map(cadastroLeadMapper::toResponse).toList();
         return ResponseEntity.status(200).body(listaResponse);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> listarPorId(@PathVariable Integer id){
-        Lead lead = leadService.listarId(id);
-        LeadResponseDTO dto = cadastroLeadMapper.toResponse(lead);
-        return ResponseEntity.status(200).body(dto);
+    private void requireLeadAccess(com.leadway.entity.Vendedor actor, Integer leadId) {
+        Lead lead = leadService.listarLeads().stream().filter(l -> l.getId().equals(leadId)).findFirst()
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Lead não encontrado"));
+        if (lead.getVendedor() == null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Lead sem responsável autorizado");
+        sessions.sameOrg(actor, lead.getVendedor());
+        if (sessions.role(actor).equals("VENDEDOR") && !actor.getId().equals(lead.getVendedor().getId()))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Lead fora da carteira");
+        if (sessions.role(actor).equals("GERENTE") && !actor.getId().equals(lead.getVendedor().getId()) &&
+            (lead.getVendedor().getLider() == null || !actor.getId().equals(lead.getVendedor().getLider().getId())))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Lead fora da equipe");
+    }
+
+    @Operation(summary = "Consulta a entrada do Lead na etapa atual do funil")
+    @GetMapping("/{id}/funil")
+    public ResponseEntity<java.util.Map<String, Object>> consultarFunil(@PathVariable Integer id, @RequestHeader(value="Authorization",required=false) String token) {
+        requireLeadAccess(sessions.require(token), id);
+        java.time.LocalDateTime entrada = leadService.obterEntradaEtapaAtual(id);
+        java.util.Map<String, Object> resposta = new java.util.LinkedHashMap<>();
+        resposta.put("enteredStageAt", entrada);
+        return ResponseEntity.ok(resposta);
     }
 
     @Operation(
@@ -65,7 +88,8 @@ public class LeadController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
-    public ResponseEntity<LeadResponseDTO> cadastrar(@Valid @RequestBody CadastroLeadRequestDTO requestDTO) {
+    public ResponseEntity<LeadResponseDTO> cadastrar(@Valid @RequestBody CadastroLeadRequestDTO requestDTO, @RequestHeader(value="Authorization",required=false) String token) {
+        sessions.require(token);
         Lead leadEntity = leadService.salvar(requestDTO);
         LeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(leadEntity);
         return ResponseEntity.status(201).body(responseDTO);
@@ -82,7 +106,8 @@ public class LeadController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarLeadRequestDTO requestDTO) {
+    public ResponseEntity<LeadResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarLeadRequestDTO requestDTO, @RequestHeader(value="Authorization",required=false) String token) {
+        requireLeadAccess(sessions.require(token), id);
         Lead lead = leadService.atualizar(id, requestDTO);
         LeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(lead);
         return ResponseEntity.status(200).body(responseDTO);
@@ -98,7 +123,8 @@ public class LeadController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> apagar(@PathVariable Integer id) {
+    public ResponseEntity<Void> apagar(@PathVariable Integer id, @RequestHeader(value="Authorization",required=false) String token) {
+        requireLeadAccess(sessions.require(token), id);
         leadService.apagar(id);
         return ResponseEntity.status(204).build();
     }
