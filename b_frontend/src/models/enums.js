@@ -13,7 +13,7 @@ export const CADENCE_STATUS = {
   ON_TRACK: { label: 'Em dia', tone: 'success' },
   NEXT: { label: 'Próximo contato', tone: 'info' },
   ATTENTION: { label: 'Atenção', tone: 'warning' },
-  LATE: { label: 'Atrasado', tone: 'danger' },
+  LATE: { label: 'Atrasada', tone: 'danger' },
 }
 
 /** Tipos de compromisso da agenda. */

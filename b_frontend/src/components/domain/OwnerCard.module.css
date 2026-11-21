@@ -58,3 +58,5 @@
   line-height: 1;
   flex-shrink: 0;
 }
+
+.changeOwner{border:0;background:transparent;color:#64748b;font-size:14px;font-weight:600;cursor:pointer;padding:5px}.changeOwner:hover{color:#087f81;text-decoration:underline}

@@ -229,3 +229,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+.reviewRowInvalid { background: #fff0f1; border-left: 3px solid #b52b3a; padding-left: 10px; color: #b52b3a; }
+.reviewRowInvalid span, .reviewRowInvalid strong { color: #b52b3a; }
+.reviewError { display: block; color: #b52b3a; font-size: 12px; margin-top: 4px; }

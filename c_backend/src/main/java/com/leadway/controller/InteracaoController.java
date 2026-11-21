@@ -1,5 +1,9 @@
 package com.leadway.controller;
 
+import com.leadway.dto.request.CadastroInteracaoRequestDTO;
+import com.leadway.dto.response.InteracaoResponseDTO;
+import com.leadway.entity.Interacao;
+import com.leadway.mapper.InteracaoMapper;
 import com.leadway.dto.request.InteracaoRequestDTO;
 import com.leadway.dto.response.InteracaoResponseDTO;
 import com.leadway.service.InteracaoService;
@@ -11,30 +15,41 @@ import java.util.List;
 @RestController
 @RequestMapping("/leads/{leadId}/interacoes")
 public class InteracaoController {
-    private final InteracaoService service;
 
-    public InteracaoController(InteracaoService service) { this.service = service; }
+    private final InteracaoService interacaoService;
+    private Integer leadId;
 
-    @GetMapping
-    public ResponseEntity<List<InteracaoResponseDTO>> listar(@PathVariable Integer leadId) {
-        return ResponseEntity.ok(service.listar(leadId));
+    public InteracaoController(InteracaoService interacaoService) {
+        this.interacaoService = interacaoService;
     }
 
     @PostMapping
-    public ResponseEntity<InteracaoResponseDTO> criar(@PathVariable Integer leadId,
-            @Valid @RequestBody InteracaoRequestDTO dto) {
-        return ResponseEntity.status(201).body(service.criar(leadId, dto));
+    public ResponseEntity<InteracaoResponseDTO> cadastrar(@RequestBody @Valid CadastroInteracaoRequestDTO dto,
+                                                          @PathVariable Integer leadId) {
+
+        Interacao interacao = interacaoService.cadastrar(leadId,dto);
+
+        return ResponseEntity.status(201).body(InteracaoMapper.toResponse(interacao));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<InteracaoResponseDTO> atualizar(@PathVariable Integer leadId,
-            @PathVariable Integer id, @Valid @RequestBody InteracaoRequestDTO dto) {
-        return ResponseEntity.ok(service.atualizar(leadId, id, dto));
+    @GetMapping
+    public ResponseEntity<List<InteracaoResponseDTO>> listar(@PathVariable Integer leadId) {
+
+        List<InteracaoResponseDTO> interacaoes =
+                interacaoService.listarPorLead(leadId)
+                        .stream()
+                        .map(InteracaoMapper::toResponse)
+                        .toList();
+
+        return ResponseEntity.status(200).body(interacaoes);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer leadId, @PathVariable Integer id) {
-        service.excluir(leadId, id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> excluir(@PathVariable Integer leadId,
+                                        @PathVariable Integer id) {
+
+        interacaoService.excluir(leadId, id);
+
+        return ResponseEntity.status(204).build();
     }
 }

@@ -7,12 +7,15 @@ import { paths } from '@/routes/paths'
 import { useSession } from '@/viewmodels/sessionContext'
 import { NotificationsPanel } from './NotificationsPanel'
 import styles from './AppHeader.module.css'
+import { getUserRole } from '@/utils/permissions'
 
 export function AppHeader({ onToggleMenu, notifications }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const navigate = useNavigate()
   const { user, logout } = useSession()
   const menuRef = useRef(null)
+  const role = getUserRole(user)
+  const roleLabel = { ADMINISTRADOR: 'Administrador', GERENTE: 'Gerente', VENDEDOR: 'Vendedor' }[role] ?? 'Cargo não informado'
 
   useEffect(() => {
     if (!userMenuOpen) return undefined
@@ -73,7 +76,7 @@ export function AppHeader({ onToggleMenu, notifications }) {
             <Avatar initials={user?.initials ?? '—'} />
             <span className={styles.headerUser}>
               <strong>{user?.name ?? 'Visitante'}</strong>
-              <small>{user?.role ?? 'Sem sessão'}</small>
+              <small>{roleLabel}</small>
             </span>
             <span className={userMenuOpen ? styles.chevronOpen : styles.chevron}>
               <Icon name="chevron" />

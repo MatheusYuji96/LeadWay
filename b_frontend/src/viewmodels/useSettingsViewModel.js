@@ -3,13 +3,12 @@ import { settingsService } from '@/services/settings.service'
 import { useAsync } from './useAsync'
 import { isEmail, passwordRules } from './validators'
 
-const PROFILE_FIELDS = ['name', 'email', 'whatsapp', 'role', 'address', 'cityState']
+const PROFILE_FIELDS = ['name', 'email', 'whatsapp', 'role']
 
 const DEFAULT_PREFERENCES = {
   newLeads: true,
   appointmentReminders: true,
   lateCadenceAlerts: true,
-  weeklySummaryEmail: false,
 }
 
 /**
@@ -36,7 +35,7 @@ export function useSettingsViewModel() {
   }, [loadProfile])
 
   const values = useMemo(() => draft ?? profile.data ?? {}, [draft, profile.data])
-  const prefs = preferences ?? DEFAULT_PREFERENCES
+  const prefs = Object.fromEntries(Object.keys(DEFAULT_PREFERENCES).map((key) => [key, (preferences ?? DEFAULT_PREFERENCES)[key] ?? DEFAULT_PREFERENCES[key]]))
   const profileData = profile.data
 
   const setField = useCallback(
@@ -68,12 +67,17 @@ export function useSettingsViewModel() {
       setSaving(false)
       return
     }
+    if ((values.whatsapp || '').replace(/\D/g, '').length !== 11) {
+      setFeedback({ type: 'error', message: 'Informe um telefone com DDD e 11 dígitos.' })
+      setSaving(false)
+      return
+    }
     try {
       const updated = await settingsService.updateProfile(values)
       setDraft(updated)
-      setFeedback({ type: 'success', message: 'Dados salvos neste navegador. O backend ainda não oferece atualização de perfil.' })
+      setFeedback({ type: 'success', message: 'Perfil atualizado no servidor.' })
     } catch (err) {
-      setFeedback({ type: 'error', message: err?.message || 'Não foi possível salvar.' })
+      setFeedback({ type: 'error', message: err?.response?.data?.message || err?.response?.data?.detail || (err?.response?.status ? `HTTP ${err.response.status}: não foi possível salvar.` : err?.message) || 'Não foi possível salvar.' })
     } finally {
       setSaving(false)
     }
@@ -84,7 +88,7 @@ export function useSettingsViewModel() {
     setFeedback(null)
     try {
       await settingsService.updatePreferences(prefs)
-      setFeedback({ type: 'success', message: 'Preferências salvas no banco de dados. O envio de notificações automáticas ainda depende do backend.' })
+      setFeedback({ type: 'success', message: 'Preferências salvas neste navegador. O envio de notificações automáticas ainda depende do backend.' })
     } catch (err) {
       setFeedback({ type: 'error', message: err?.message || 'Não foi possível salvar as preferências.' })
     } finally {
@@ -95,13 +99,18 @@ export function useSettingsViewModel() {
   const savePassword = useCallback(async () => {
     setSaving(true)
     setFeedback(null)
-    if (!passwordRules(passwords.next).valid) {
-      setFeedback({ type: 'error', message: 'A nova senha precisa de 8+ caracteres, uma maiúscula e um número.' })
+    if (!passwords.next || passwords.next.length < 8 || !/[A-Z]/.test(passwords.next) || !/[^a-zA-Z0-9]/.test(passwords.next)) {
+      setFeedback({ type: 'error', message: 'A nova senha precisa de 8+ caracteres, uma maiúscula e um caractere especial.' })
       setSaving(false)
       return
     }
     if (passwords.next !== passwords.confirm) {
       setFeedback({ type: 'error', message: 'As senhas não coincidem.' })
+      setSaving(false)
+      return
+    }
+    if (!passwords.current) {
+      setFeedback({ type: 'error', message: 'Informe a senha atual.' })
       setSaving(false)
       return
     }

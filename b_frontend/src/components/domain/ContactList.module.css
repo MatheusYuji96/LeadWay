@@ -5,7 +5,7 @@
 .head,
 .row {
   display: grid;
-  grid-template-columns: 38px 1fr 1.25fr 0.9fr 36px;
+  grid-template-columns: 38px 1fr 1.25fr 0.9fr 74px;
   gap: 8px;
   align-items: center;
 }
@@ -61,3 +61,5 @@
     grid-row: 3;
   }
 }
+
+.actions{display:flex;gap:12px;justify-content:flex-end}.actions button{border:0;background:transparent;color:#667992;cursor:pointer;padding:5px}.actions button:hover{color:#087f81}

@@ -18,4 +18,8 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Integer> {
     boolean existsByEmail(String email);
 
     Optional<Vendedor> findByEmail(String email);
+
+    Long countByLider_IdAndAtivoTrue(Integer liderId);
+
+    List<Vendedor> findByLider_IdAndAtivoTrueOrderByNomeAsc(Integer liderId);
 }

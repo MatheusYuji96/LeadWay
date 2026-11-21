@@ -24,11 +24,9 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
-    private final DashboardEquipeService dashboardEquipeService;
 
-    public DashboardController(DashboardService dashboardService, DashboardEquipeService dashboardEquipeService) {
+    public DashboardController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
-        this.dashboardEquipeService = dashboardEquipeService;
     }
 
     @Operation(
@@ -81,10 +79,5 @@ public class DashboardController {
     @GetMapping("/leads-atencao/{id}")
     public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer id) {
         return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(id));
-    }
-    @Operation(summary = "Resumo real do acompanhamento da equipe")
-    @GetMapping("/equipe")
-    public ResponseEntity<DashboardEquipeResponseDTO> buscarEquipe() {
-        return ResponseEntity.ok(dashboardEquipeService.buscarResumo());
     }
 }

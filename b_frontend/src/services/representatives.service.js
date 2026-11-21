@@ -12,12 +12,13 @@ function normalizeRepresentative(rep) {
     initials: rep.initials ?? repInitials(name),
     leads: rep.leads ?? 0, contacts: rep.contacts ?? 0, pending: rep.pending ?? 0,
     active: rep.active ?? rep.ativo ?? false,
+    cargo: rep.cargo ?? rep.role ?? rep.cargoNome ?? 'VENDEDOR',
   }
 }
 
 
 export function belongsToRepresentative(lead, rep) {
-  const owner = lead.vendedor ?? {}
+  const owner = lead.responsavel ?? lead.vendedor ?? lead.usuario ?? {}
   if (owner.id != null && rep.id != null) return String(owner.id) === String(rep.id)
   return Boolean((owner.codVendedor && rep.code && owner.codVendedor === rep.code) || (owner.email && rep.email && owner.email.toLowerCase() === rep.email.toLowerCase()))
 }
@@ -98,6 +99,7 @@ export const representativesService = {
       // ativo is expected as a boolean in the backend DTO
       ativo: payload.active === undefined ? true : !!payload.active,
       regiao: payload.region ?? payload.regiao ?? null,
+      cargo: payload.cargo ?? payload.role ?? 'VENDEDOR',
     }
     // include liderId only when provided and a valid integer
     if (liderIdRaw !== undefined && liderIdRaw !== null && String(liderIdRaw).trim() !== '') {
@@ -105,6 +107,18 @@ export const representativesService = {
       if (!Number.isNaN(parsed)) body.liderId = parsed
     }
     return normalizeRepresentative(unwrap(await http.post(isMockMode ? '/representatives' : '/vendedores', body)))
+  },
+
+  async update(id, payload) {
+    const body = {
+      nome: payload.name?.trim(), email: payload.email?.trim(),
+      telefone: payload.phone?.replace(/\D/g, ''),
+      codVendedor: payload.code?.trim(), regiao: payload.region?.trim(),
+      ativo: payload.active,
+      cargo: payload.cargo,
+    }
+    Object.keys(body).forEach((key) => body[key] === undefined && delete body[key])
+    return normalizeRepresentative(unwrap(await http.patch(`/vendedores/${id}`, body)))
   },
 
   /**

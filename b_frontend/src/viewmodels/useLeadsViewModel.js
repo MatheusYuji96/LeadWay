@@ -11,6 +11,7 @@ export function useLeadsViewModel() {
   const [stage, setStage] = useState('')
   const [cadence, setCadence] = useState('')
   const [owner, setOwner] = useState('')
+  const [status, setStatus] = useState('active')
   const [page, setPage] = useState(1)
   const { data, loading, error, execute } = useAsync()
 
@@ -55,6 +56,7 @@ export function useLeadsViewModel() {
     setStage('')
     setCadence('')
     setOwner('')
+    setStatus('active')
     setPage(1)
   }, [])
 
@@ -62,7 +64,7 @@ export function useLeadsViewModel() {
   const stats = data?.stats ?? null
   const owners = useMemo(() => Array.from(new Map(items.filter((item) => item.representativeId != null).map((item) => [String(item.representativeId), { id: String(item.representativeId), name: item.representativeName }])).values()).sort((a, b) => a.name.localeCompare(b.name)), [items])
 
-  const filteredItems = useMemo(() => !owner ? items : items.filter((item) => String(item.representativeId ?? 'unassigned') === owner), [items, owner])
+  const filteredItems = useMemo(() => items.filter((item) => (status === 'all' || (status === 'active' ? item.ativo !== false : item.ativo === false)) && (!owner || String(item.representativeId ?? 'unassigned') === owner)), [items, owner, status])
 
   const visibleItems = useMemo(() => {
     const start = (page - 1) * pageSize
@@ -72,13 +74,15 @@ export function useLeadsViewModel() {
   const rangeStart = filteredItems.length === 0 ? 0 : (page - 1) * pageSize + 1
   const rangeEnd = Math.min(page * pageSize, filteredItems.length)
 
-  const activeFilters = [stage && `Fase: ${stage}`, cadence && `Cadência: ${CADENCE_STATUS[cadence]?.label ?? cadence}`, owner && `Responsável: ${owner === 'unassigned' ? 'Não atribuído' : owners.find((item) => item.id === owner)?.name ?? owner}`].filter(Boolean)
+  const activeFilters = [status !== 'active' && `Status: ${status === 'inactive' ? 'Inativo' : 'Todos'}`, stage && `Fase: ${stage}`, cadence && `Cadência: ${CADENCE_STATUS[cadence]?.label ?? cadence}`, owner && `Responsável: ${owner === 'unassigned' ? 'Não atribuído' : owners.find((item) => item.id === owner)?.name ?? owner}`].filter(Boolean)
 
   return {
     searchInput,
     stage,
     cadence,
     owner,
+    status,
+    changeStatus: (value) => { setStatus(value); setPage(1) },
     owners,
     page,
     pageSize,
@@ -97,6 +101,6 @@ export function useLeadsViewModel() {
     changeOwner,
     clearFilters,
     setPage,
-    reload: () => load(),
+    reload: load,
   }
 }

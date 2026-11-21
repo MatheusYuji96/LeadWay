@@ -7,7 +7,7 @@ const SESSION_KEY = 'leadway_session_v1'
 function normalizeUser(value) {
   if (!value) return null
   const name = value.name ?? value.nome ?? value.user?.name ?? value.user?.nome ?? ''
-  return { ...value, name: name || value.email || 'Usuário', initials: name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase(), role: value.role ?? 'Usuário' }
+  return { ...value, name: name || value.email || 'Usuário', initials: name.trim().split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toUpperCase(), role: value.cargo?.nome ?? (typeof value.cargo === 'string' ? value.cargo : null) ?? value.cargoNome ?? value.role ?? value.perfil ?? 'Usuário' }
 }
 
 /**

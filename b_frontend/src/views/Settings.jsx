@@ -4,6 +4,8 @@ import { ErrorState, InlineMessage, Skeleton } from '@/components/common/Feedbac
 import { PageHeading, Tabs } from '@/components/common/PagePrimitives'
 import { Panel, PanelHead } from '@/components/common/Panel'
 import { useSettingsViewModel } from '@/viewmodels/useSettingsViewModel'
+import { Icon } from '@/components/common/Icon'
+import { formatPhoneInput } from '@/utils/phoneInput'
 import styles from './Settings.module.css'
 
 const TABS = [
@@ -17,15 +19,12 @@ const PROFILE_LABELS = {
   email: 'E-mail',
   whatsapp: 'WhatsApp',
   role: 'Cargo',
-  address: 'Endereço',
-  cityState: 'Cidade / UF',
 }
 
 const PREFERENCE_LABELS = {
   newLeads: { label: 'Novos leads atribuídos', hint: 'Avisa quando uma empresa entrar na sua carteira.' },
   appointmentReminders: { label: 'Lembretes de compromissos', hint: 'Notificação antes de reuniões e visitas.' },
   lateCadenceAlerts: { label: 'Alertas de cadência atrasada', hint: 'Avisa quando um lead ficar sem contato.' },
-  weeklySummaryEmail: { label: 'Resumo semanal por e-mail', hint: 'Envia um resumo da carteira toda segunda.' },
 }
 
 export function Settings() {
@@ -75,21 +74,20 @@ export function Settings() {
           <Panel>
             <PanelHead title="Dados pessoais" subtitle="Informações exibidas no seu perfil." />
             <div className={styles.form}>
-              {vm.profileFields.map((field) => (
-                <Field
-                  key={field}
-                  label={PROFILE_LABELS[field] ?? field}
-                  value={vm.values[field] ?? ''}
-                  onChange={(value) => vm.setField(field, value)}
-                />
-              ))}
+              <Field label="Nome completo" value={vm.values.name ?? ''} onChange={(value) => vm.setField('name', value)} />
+              <Field label="E-mail" type="email" value={vm.values.email ?? ''} onChange={(value) => vm.setField('email', value)} />
+              <Field label="Telefone" value={formatPhoneInput(vm.values.whatsapp ?? '')} onChange={(value) => vm.setField('whatsapp', value.replace(/\D/g, '').slice(0, 11))} />
+              <label className={styles.lockedField}>
+                <span>Cargo</span>
+                <span className={styles.lockedInput}><Icon name="lock" size={17} /><input value={vm.values.role ?? ''} disabled readOnly aria-label="Cargo não editável" /></span>
+              </label>
             </div>
           </Panel>
         )}
 
         {vm.tab === 'security' && (
           <Panel>
-            <PanelHead title="Alterar senha" subtitle="Use ao menos 8 caracteres, uma letra maiúscula e um número." />
+            <PanelHead title="Alterar senha" subtitle="Use ao menos 8 caracteres, uma letra maiúscula, um número e um caractere especial." />
             <div className={styles.form}>
               <Field
                 label="Senha atual"
@@ -126,7 +124,7 @@ export function Settings() {
                     <strong>{item.label}</strong>
                     <small>{item.hint}</small>
                   </span>
-                  <Checkbox checked={Boolean(vm.preferences?.[key])} onChange={() => vm.togglePreference(key)} label="" />
+                  <Checkbox checked={Boolean(vm.preferences?.[key])} onChange={() => vm.togglePreference(key)} label="" ariaLabel={item.label} />
                 </label>
               ))}
             </div>

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { ConfirmActionModal } from '@/components/common/ConfirmActionModal'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
@@ -11,6 +13,7 @@ import styles from './LeadTable.module.css'
 
 export function LeadTable({ items, loading, error, compact = false, onRetry, onClearFilters, onDeleted }) {
   const navigate = useNavigate()
+  const [deleteId, setDeleteId] = useState(null)
 
   if (loading) return <Skeleton lines={4} />
   if (error) return <ErrorState message={error} onRetry={onRetry} />
@@ -29,24 +32,27 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
 
   const handleDelete = async (e, leadId) => {
     e.stopPropagation()
-    if (!window.confirm('Tem certeza que deseja excluir este lead?')) {
-      return
-    }
+    setDeleteId(leadId)
+  }
+
+  const confirmDelete = async () => {
+    const leadId = deleteId
     try {
       await leadsService.remove(leadId)
       window.dispatchEvent(new Event('leadway:leads-changed'))
+      setDeleteId(null)
       if (typeof onDeleted === 'function') {
         onDeleted(leadId)
       } else if (typeof onRetry === 'function') {
         onRetry()
       }
     } catch (err) {
-      alert(err?.message || 'Não foi possível excluir o lead.')
+      throw new Error(err?.message || 'Não foi possível excluir o lead.')
     }
   }
 
   return (
-    <div className={styles.scroll}>
+    <><div className={styles.scroll}>
       <div className={[styles.table, compact ? styles.compact : ''].filter(Boolean).join(' ')}>
         <div className={[styles.row, styles.head].join(' ')}>
           <span>Empresa</span>
@@ -103,6 +109,8 @@ export function LeadTable({ items, loading, error, compact = false, onRetry, onC
         })}
       </div>
     </div>
+    {deleteId != null && <ConfirmActionModal title="Excluir lead?" description="O registro será removido. Esta ação não poderá ser desfeita." onClose={() => setDeleteId(null)} onConfirm={confirmDelete} />}
+    </>
   )
 }
 

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { representativesService } from '@/services/representatives.service'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Avatar } from '@/components/common/Avatar'
 import { Badge } from '@/components/common/Badge'
@@ -10,11 +12,19 @@ import { LeadTable } from '@/components/domain/LeadTable'
 import { useRepDetailViewModel } from '@/viewmodels/useRepDetailViewModel'
 import { paths } from '@/routes/paths'
 import styles from './RepDetail.module.css'
+import { formatPhoneInput } from '@/utils/phoneInput'
+import { CreateRepresentativeWizard } from '@/components/domain/CreateRepresentativeWizard'
 
 export function RepDetail() {
   const { repId } = useParams()
   const navigate = useNavigate()
   const vm = useRepDetailViewModel(repId)
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState(null)
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const startEdit = () => { const r=vm.representative; setForm({name:r.name,email:r.email,phone:r.phone,code:r.code,region:r.region==='—'?'':r.region,active:r.active,cargo:typeof r.cargo==='object'?r.cargo.nome:r.cargo}); setEditing(true); setSaveError('') }
+  const save = async (event) => {event.preventDefault();setSaving(true);setSaveError('');try{await representativesService.update(repId,form);setEditing(false);vm.reload()}catch(e){setSaveError(e.message)}finally{setSaving(false)}}
 
   if (vm.loading) {
     return (
@@ -50,61 +60,43 @@ export function RepDetail() {
     <div className={styles.page}>
       <Breadcrumb items={[{ label: 'Equipe', to: paths.team }, { label: rep.name }]} onNavigate={(to) => navigate(to)} />
 
-      <header className={styles.header}>
+      <header className={styles.profileCard}>
         <Avatar initials={rep.initials} size="xlg" />
         <div className={styles.headerText}>
-          <div className={styles.titleRow}>
-            <h1>{rep.name}</h1>
-            {rep.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="neutral">Inativo</Badge>}
-          </div>
-          <p>
-            {rep.code} • {rep.region} • {rep.email || '—'}
-          </p>
+          <div className={styles.titleRow}><h1>{rep.name}</h1>{rep.active ? <Badge tone="success">Ativo</Badge> : <Badge tone="neutral">Inativo</Badge>}</div>
+          <p>{rep.code || 'Sem código'} • {typeof rep.cargo === 'object' ? rep.cargo.nome : rep.cargo || 'Vendedor'}</p>
+          <p className={styles.contactLine}><span>✉ {rep.email || '—'}</span><span>☎ {formatPhoneInput(rep.phone) || '—'}</span><span>⌖ {rep.region || '—'}</span></p>
         </div>
-        <div className={styles.headerActions}>
-          <Button icon="briefcase" onClick={() => navigate(paths.leads)}>
-            Ver leads da carteira
-          </Button>
-        </div>
+        <div className={styles.headerActions}><Button kind="primary" onClick={startEdit}>Editar dados</Button></div>
       </header>
 
+      {editing && <CreateRepresentativeWizard representative={form} saving={saving} error={saveError} onClose={() => setEditing(false)} onSubmit={async (values) => { setSaving(true); setSaveError(''); try { await representativesService.update(repId, values); await vm.reload(); return true } catch (e) { setSaveError(e.message); return false } finally { setSaving(false) } }} />}
       {vm.notice && (
         <InlineMessage tone="warning" title={vm.notice.title} description={vm.notice.description} />
       )}
 
       <div className={styles.stats}>
-        {vm.stats.map((stat) => (
-          <StatCard key={stat.key} {...stat} />
-        ))}
+        <StatCard label="Leads em carteira" value={vm.leads.length} icon="briefcase" />
+        <StatCard label="Leads em proposta" value={vm.leads.filter(l => Number(l.etapa?.ordem) === 3).length} icon="phone" />
+        <StatCard label="Pendências identificadas" value={rep.pending ?? 0} icon="calendar" />
+        <StatCard label="Leads ativos" value={vm.leads.filter(l => l.ativo !== false && l.active !== false && l.ativo !== 0).length} icon="trending-up" />
       </div>
 
       <div className={styles.columns}>
         <Panel>
-          <PanelHead title="Evolução de contatos" subtitle="Últimos 6 meses" />
-          <div className={styles.evolution}>
-            <div className={styles.evolutionBars}>
-              {vm.evolution.map((item) => (
-                <div className={styles.evoItem} key={item.month}>
-                  <span className={styles.evoBar}>
-                    <i style={{ height: `${(item.value / maxEvolution) * 100}%` }} title={`${item.value} contatos`} />
-                    <b>{item.value}</b>
-                  </span>
-                  <small>{item.month}</small>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PanelHead title="Evolução do funcionário" subtitle="Atividades registradas" />
+          <div className={styles.emptyChart}>O histórico mensal de atividades não está disponível na API atual. Nenhum dado fictício é exibido.</div>
         </Panel>
 
         <Panel>
-          <PanelHead title="Resumo" />
+          <PanelHead title="Informações" />
           <div className={styles.summary}>
             <span>
-              <small>Região</small>
+              <small>REGIÃO DE ATENDIMENTO</small>
               <strong>{rep.region}</strong>
             </span>
             <span>
-              <small>Código</small>
+              <small>CÓDIGO DO REPRESENTANTE</small>
               <strong>{rep.code}</strong>
             </span>
             <span>
@@ -124,7 +116,7 @@ export function RepDetail() {
       </div>
 
       <div className={styles.tableCard}>
-        <PanelHead title="Leads do representante" subtitle={`${vm.leads.length} empresa(s) na carteira`} />
+        <PanelHead title="Empresas vinculadas" subtitle={`${vm.leads.length} empresa(s) na carteira`} actions={<Button onClick={() => navigate(paths.leads)}>Ver carteira completa</Button>} />
         <LeadTable items={vm.leads} loading={false} error={null} compact />
       </div>
     </div>

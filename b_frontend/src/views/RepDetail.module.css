@@ -160,3 +160,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Detalhes do funcionário: composição alinhada ao protótipo. */
+.profileCard { display:flex; align-items:center; gap:22px; background:var(--surface,#fff); border:1px solid var(--wire-line,#d9e4ee); border-radius:10px; padding:24px; margin:20px 0; flex-wrap:wrap; }
+.profileCard .headerText {flex:1;min-width:240px;}
+.contactLine {display:flex;gap:18px;flex-wrap:wrap;}
+.emptyChart {padding:48px 24px;min-height:210px;color:var(--muted);display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;}
+@media(max-width:700px){.profileCard{padding:18px}.contactLine{display:grid;gap:8px}}

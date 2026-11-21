@@ -66,7 +66,8 @@ export function ErrorState({ message, onRetry }) {
         <Icon name="close" size={22} />
       </span>
       <strong>Não foi possível carregar</strong>
-      <p>{message || 'Verifique sua conexão e tente novamente.'}</p>
+      <p>{message || 'Falha de conexão com o servidor'}</p>
+      {message === 'HTTP 401' && <p>Sessão expirada ou inválida. Saia e entre novamente na sua conta.</p>}
       {onRetry && (
         <Button onClick={onRetry} icon="arrow">
           Tentar novamente

@@ -23,7 +23,7 @@ export function Sidebar({ open, onClose, onNavigate }) {
   useEffect(() => {
     let mounted = true
     const refresh = () => leadsService.list().then((result) => {
-      if (mounted) setLeadCount(result.total ?? result.items?.length ?? null)
+      if (mounted) setLeadCount(result.stats?.total ?? result.items?.filter((lead) => lead.ativo !== false).length ?? null)
     }).catch(() => { if (mounted) setLeadCount(null) })
     refresh()
     window.addEventListener('leadway:leads-changed', refresh)
@@ -63,18 +63,6 @@ export function Sidebar({ open, onClose, onNavigate }) {
           </NavLink>
         ))}
       </nav>
-
-      <div className={styles.help}>
-        <span>
-          <Icon name="trend" />
-        </span>
-        <strong>Acelere seus resultados</strong>
-        <p>Complete seu perfil e aproveite todos os recursos.</p>
-        <div className={styles.progress}>
-          <i />
-        </div>
-        <small>75% concluído</small>
-      </div>
 
       <Button kind="danger" className={styles.logout} onClick={handleLogout}>
         Sair

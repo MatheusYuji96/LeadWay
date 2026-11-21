@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @Table(name = "cal_integracao")
 public class CalIntegracao {
 
-    // A chave primária é o próprio id do vendedor: cada vendedor tem no máximo uma conexão.
+    // A chave primária é o próprio id do usuário: cada usuário tem no máximo uma conexão.
     @Id
-    private Integer vendedorId;
+    @Column(name = "usuario_id")
+    private Integer usuarioId;
 
     @Column(nullable = false, length = 100)
     private String calUsername;
@@ -27,12 +28,12 @@ public class CalIntegracao {
     public CalIntegracao() {
     }
 
-    public Integer getVendedorId() {
-        return vendedorId;
+    public Integer getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setVendedorId(Integer vendedorId) {
-        this.vendedorId = vendedorId;
+    public void setUsuarioId(Integer usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public String getCalUsername() {

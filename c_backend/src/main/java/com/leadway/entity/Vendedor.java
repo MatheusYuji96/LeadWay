@@ -2,15 +2,21 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "usuario")
 public class Vendedor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "cargo_id", nullable = false)
+    private Cargo cargo;
 
     @ManyToOne
     @JoinColumn(name = "lider_id")
@@ -22,7 +28,7 @@ public class Vendedor {
     @Column(length = 30)
     private String codVendedor;
 
-    @Column(length = 100)
+    @Column(length = 90)
     private String regiao;
 
     @Column(nullable = false, length = 190)
@@ -39,6 +45,11 @@ public class Vendedor {
 
     @Column(nullable = false)
     private Boolean ativo = true;
+
+    @Column(nullable = false)
+    private Integer tentativasLogin = 0;
+
+    private LocalDateTime bloqueadoAte;
 
     public Vendedor() {
     }
@@ -75,6 +86,14 @@ public class Vendedor {
         return ativo;
     }
 
+    public Cargo getCargo() {
+        return cargo;
+    }
+
+    public void setCargo(Cargo cargo) {
+        this.cargo = cargo;
+    }
+
     public Vendedor getLider() {
         return lider;
     }
@@ -107,6 +126,22 @@ public class Vendedor {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public LocalDateTime getBloqueadoAte() {
+        return bloqueadoAte;
+    }
+
+    public void setBloqueadoAte(LocalDateTime bloqueadoAte) {
+        this.bloqueadoAte = bloqueadoAte;
+    }
+
+    public Integer getTentativasLogin() {
+        return tentativasLogin;
+    }
+
+    public void setTentativasLogin(Integer tentativasLogin) {
+        this.tentativasLogin = tentativasLogin;
     }
 
     //    public void ativar() {

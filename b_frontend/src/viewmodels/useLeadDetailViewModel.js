@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { leadsService } from '@/services/leads.service'
+import { contactsService } from '@/services/contacts.service'
 import { useAsync } from './useAsync'
 
 /**
@@ -60,12 +61,12 @@ export function useLeadDetailViewModel(leadId) {
       setActionError(null)
       setSaving(true)
       try {
-        await leadsService.update(leadId, payload)
+        const updated = await leadsService.update(leadId, payload)
         await load()
-        return true
+        return updated ?? { id: leadId }
       } catch (err) {
         setActionError(err?.message || 'Não foi possível salvar as alterações.')
-        return false
+        throw err
       } finally {
         setSaving(false)
       }
@@ -86,7 +87,23 @@ export function useLeadDetailViewModel(leadId) {
     } finally { setSaving(false) }
   }
 
+  const updateContact = async (contactId, payload) => {
+    setActionError(null)
+    setSaving(true)
+    try { await contactsService.update(leadId, contactId, payload); await load(); return true }
+    catch (err) { setActionError(err?.message || 'Não foi possível atualizar o contato.'); return false }
+    finally { setSaving(false) }
+  }
+  const deleteContact = async (contactId) => {
+    setActionError(null)
+    setSaving(true)
+    try { await contactsService.remove(leadId, contactId); await load(); return true }
+    catch (err) { setActionError(err?.message || 'Não foi possível excluir o contato.'); return false }
+    finally { setSaving(false) }
+  }
+
   return {
+    updateContact, deleteContact,
     lead: data?.lead ?? null,
     contacts: data?.contacts ?? [],
     timeline: data?.timeline ?? [],

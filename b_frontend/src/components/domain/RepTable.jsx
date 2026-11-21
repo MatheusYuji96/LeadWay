@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { ConfirmActionModal } from '@/components/common/ConfirmActionModal'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@/components/common/Avatar'
 import { Badge } from '@/components/common/Badge'
@@ -11,6 +13,7 @@ import styles from './RepTable.module.css'
 
 export function RepTable({ items, loading, error, onRetry, onClearFilters, onDeleted }) {
   const navigate = useNavigate()
+  const [deleteId, setDeleteId] = useState(null)
 
   if (loading) return <Skeleton lines={4} />
   if (error) return <ErrorState message={error} onRetry={onRetry} />
@@ -28,23 +31,26 @@ export function RepTable({ items, loading, error, onRetry, onClearFilters, onDel
 
   const handleDelete = async (e, repId) => {
     e.stopPropagation()
-    if (!window.confirm('Tem certeza que deseja excluir este representante?')) {
-      return
-    }
+    setDeleteId(repId)
+  }
+
+  const confirmDelete = async () => {
+    const repId = deleteId
     try {
       await representativesService.remove(repId)
+      setDeleteId(null)
       if (typeof onDeleted === 'function') {
         onDeleted(repId)
       } else if (typeof onRetry === 'function') {
         onRetry()
       }
     } catch (err) {
-      alert(err?.message || 'Não foi possível excluir o representante.')
+      throw new Error(err?.response?.status === 409 || err?.status === 409 ? 'HTTP 409 — Não é possível excluir este funcionário porque existem leads ou outros registros vinculados a ele. Considere desativar a conta ou transferir os leads.' : `HTTP ${err?.response?.status ?? err?.status ?? 'desconhecido'} — ${err?.response?.data?.message ?? err?.message ?? 'Não foi possível excluir o funcionário.'}`)
     }
   }
 
   return (
-    <div className={styles.scroll}>
+    <><div className={styles.scroll}>
       <div className={styles.table}>
         <div className={[styles.row, styles.head].join(' ')}>
           <span>Representante</span>
@@ -89,6 +95,8 @@ export function RepTable({ items, loading, error, onRetry, onClearFilters, onDel
         ))}
       </div>
     </div>
+    {deleteId != null && <ConfirmActionModal title="Excluir representante?" description="O registro será removido. Esta ação não poderá ser desfeita." onClose={() => setDeleteId(null)} onConfirm={confirmDelete} />}
+    </>
   )
 }
 

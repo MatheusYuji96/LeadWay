@@ -1,4 +1,3 @@
-import { Badge } from '@/components/common/Badge'
 import { EmptyState } from '@/components/common/Feedback'
 import { Icon } from '@/components/common/Icon'
 import styles from './Timeline.module.css'
@@ -29,12 +28,10 @@ export function Timeline({ items = [], extended = false, onDelete }) {
             <small>{item.dateLabel}</small>
             <strong>{item.title}</strong>
             <span>{item.author}</span>
-            <p>{item.description}</p>
+            {item.description && <p>{item.description}</p>}
           </div>
           {onDelete && item.id != null && <button type="button" aria-label={`Excluir interação ${item.title}`} title="Excluir interação" onClick={() => onDelete(item.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#a33', padding: 8 }}><Icon name="trash" size={16} /></button>}
-          <Badge tone={item.status === 'pending' ? 'success' : 'neutral'}>
-            {item.status === 'pending' ? 'Retorno' : 'Concluído'}
-          </Badge>
+
         </div>
       ))}
     </div>

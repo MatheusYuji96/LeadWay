@@ -94,24 +94,42 @@
   font-weight: 500;
 }
 
+/* Toggle switch compartilhado por todos os Checkbox do projeto. */
 .checkbox input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
-
 .checkboxBox {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #bec8d0;
-  border-radius: 4px;
-  background: var(--surface);
+  width: 42px;
+  height: 24px;
+  border: 1px solid #b6c5d0;
+  border-radius: 999px;
+  background: #dce4eb;
   flex: 0 0 auto;
+  position: relative;
+  transition: background .18s ease, border-color .18s ease;
 }
-
+.checkboxBox::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px #0002;
+  transition: transform .18s ease;
+}
 .checkbox input:checked + .checkboxBox {
-  background: var(--brand);
-  border-color: var(--brand);
-  box-shadow: inset 0 0 0 3px white;
+  background: var(--brand, #19b0b0);
+  border-color: var(--brand, #19b0b0);
 }
+.checkbox input:checked + .checkboxBox::after { transform: translateX(18px); }
+.checkbox input:focus-visible + .checkboxBox { outline: 3px solid #77c9e4; outline-offset: 3px; }
+.checkbox input:disabled + .checkboxBox { opacity: .5; cursor: not-allowed; }
 
 .checkboxLarge {
   font-size: 15px;
