@@ -3,6 +3,7 @@ package com.leadway.dto.request;
 import com.leadway.entity.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,6 +20,7 @@ public class AtualizarLeadRequestDTO {
     @Schema(
             description = "Dados consolidados de endereço da empresa"
     )
+    @Valid
     private EnderecoDto endereco;
 
     @Schema(
@@ -100,7 +102,7 @@ public class AtualizarLeadRequestDTO {
                 description = "CEP do endereço",
                 example = "40225610"
         )
-        @Size(max = 20)
+        @Pattern(regexp = "^\\d{5}-?\\d{3}$")
         private String cep;
 
         @Schema(

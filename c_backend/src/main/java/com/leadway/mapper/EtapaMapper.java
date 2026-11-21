@@ -2,7 +2,9 @@ package com.leadway.mapper;
 
 import com.leadway.dto.response.EtapaResponseDTO;
 import com.leadway.entity.Etapa;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EtapaMapper {
 
     public EtapaResponseDTO toResponse(Etapa etapa){

@@ -1,12 +1,14 @@
 package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
+import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
 import com.leadway.entity.Cargo;
 import com.leadway.entity.Vendedor;
 import com.leadway.exception.EntidadeNaoEncontradaException;
 import com.leadway.exception.EmailJaCadastradoException;
+import com.leadway.exception.SenhasDiferentesException;
 import com.leadway.exception.VendedorNaoEncontradoException;
 import com.leadway.mapper.VendedorMapper;
 import com.leadway.repository.CargoRepository;
@@ -98,7 +100,20 @@ public class VendedorService {
         return vendedorLocalizado;
     }
 
-    private Cargo buscarCargo(Integer cargoId) {
+    public void atualizarPasswd (AtualizarSenhaRequestDTO dto, Integer id){
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(id);
+        if (vendedorOpt.isEmpty()){
+            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+        }
+        Vendedor vendedor = vendedorOpt.get();
+        if (!dto.getSenhaAtual().equals(vendedor.getSenha())){
+            throw new SenhasDiferentesException();
+        }
+        vendedor.setSenha(dto.getNovaSenha());
+        vendedorRepository.save(vendedor);
+    }
+
+    public Cargo buscarCargo(Integer cargoId) {
         if (cargoId == null) {
             throw new EntidadeNaoEncontradaException("Cargo é obrigatório");
         }

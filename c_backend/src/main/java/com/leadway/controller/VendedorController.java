@@ -1,5 +1,6 @@
 package com.leadway.controller;
 
+import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
 import com.leadway.dto.response.VendedorResponseDTO;
@@ -71,6 +72,12 @@ public class VendedorController {
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
         VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
         return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    @PutMapping("/{id}/senha")
+    public ResponseEntity<Void> atualizarSenha(@Valid @RequestBody AtualizarSenhaRequestDTO requestDTO, @PathVariable Integer id){
+        vendedorService.atualizarPasswd(requestDTO, id);
+        return ResponseEntity.status(204).build();
     }
 
     @Operation(

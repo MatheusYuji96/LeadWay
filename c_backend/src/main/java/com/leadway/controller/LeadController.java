@@ -2,6 +2,7 @@ package com.leadway.controller;
 
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
 import com.leadway.dto.request.CadastroLeadRequestDTO;
+import com.leadway.dto.request.TransferirLeadRequestDTO;
 import com.leadway.dto.response.LeadResponseDTO;
 import com.leadway.entity.Lead;
 import com.leadway.mapper.CadastroLeadMapper;
@@ -69,6 +70,12 @@ public class LeadController {
         Lead leadEntity = leadService.salvar(requestDTO);
         LeadResponseDTO responseDTO = cadastroLeadMapper.toResponse(leadEntity);
         return ResponseEntity.status(201).body(responseDTO);
+    }
+
+    @PostMapping("/{leadId}/transferencia")
+    public ResponseEntity<Void> transferirLead(@PathVariable Integer leadId, @Valid @RequestBody TransferirLeadRequestDTO requestDTO){
+        leadService.atualizarLead(leadId, requestDTO);
+        return ResponseEntity.status(201).build();
     }
 
     @Operation(

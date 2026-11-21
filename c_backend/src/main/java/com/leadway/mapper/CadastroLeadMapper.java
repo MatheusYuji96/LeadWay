@@ -81,7 +81,7 @@ public class CadastroLeadMapper {
         Endereco endereco = new Endereco();
         endereco.setRua(dto.getRua());
         endereco.setNumero(dto.getNumero());
-        endereco.setCep(dto.getCep());
+        endereco.setCep(dto.getCep() == null ? null : dto.getCep().replaceAll("\\D", ""));
         endereco.setComplemento(dto.getComplemento());
         endereco.setBairro(dto.getBairro());
         endereco.setCidade(dto.getCidade());

@@ -108,6 +108,7 @@ public class CadastroLeadRequestDTO {
                 example = "01310100"
         )
         @NotBlank
+        @Pattern(regexp = "^\\d{5}-?\\d{3}$")
         private String cep;
 
         @Schema(

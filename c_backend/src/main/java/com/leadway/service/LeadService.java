@@ -1,7 +1,10 @@
 package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
+import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.CadastroLeadRequestDTO;
+import com.leadway.dto.request.TransferirLeadRequestDTO;
+import com.leadway.dto.response.CepResponseDTO;
 import com.leadway.entity.*;
 import com.leadway.exception.*;
 import com.leadway.mapper.CadastroLeadMapper;
@@ -20,13 +23,17 @@ public class LeadService {
     private final VendedorRepository vendedorRepository;
     private final CadastroLeadMapper cadastroLeadMapper = new CadastroLeadMapper();
     private final EnderecoRepository enderecoRepository;
+    private final LogRepository logRepository;
+    private final CepService cepService;
 
-    public LeadService(LeadRepository leadRepository, EtapaRepository etapaRepository, SetorRepository setorRepository, VendedorRepository vendedorRepository, EnderecoRepository enderecoRepository) {
+    public LeadService(LeadRepository leadRepository, EtapaRepository etapaRepository, SetorRepository setorRepository, VendedorRepository vendedorRepository, EnderecoRepository enderecoRepository, LogRepository logRepository, CepService cepService) {
         this.leadRepository = leadRepository;
         this.etapaRepository = etapaRepository;
         this.setorRepository = setorRepository;
         this.vendedorRepository = vendedorRepository;
         this.enderecoRepository = enderecoRepository;
+        this.logRepository = logRepository;
+        this.cepService = cepService;
     }
 
     public List<Lead> listarLeads() {
@@ -46,6 +53,28 @@ public class LeadService {
         }
         Lead lead = leadOpt.get();
         return lead;
+    }
+
+    public void atualizarLead(Integer leadId, TransferirLeadRequestDTO dto){
+        Optional<Lead> leadOpt = leadRepository.findById(leadId);
+        if (leadOpt.isEmpty()){
+            throw new LeadNaoEncontradoException("Lead não consta nos registros");
+        }
+        Lead lead = leadOpt.get();
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
+        if (vendedorOpt.isEmpty()){
+            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
+        }
+        Vendedor vendedor = vendedorOpt.get();
+        if (!vendedor.getAtivo()){
+            throw new InativoException("Vendedor está inativo");
+        }
+        lead.setVendedor(vendedor);
+
+        Log log = new Log();
+        log.setTipo("TRANSFERENCIA");
+        log.setMensagem("Lead " + leadId + " tranferido para " + vendedor.getNome() + " - " + dto.getMotivacao());
+        logRepository.save(log);
     }
 
     public Lead salvar(CadastroLeadRequestDTO dto) {
@@ -96,11 +125,37 @@ public class LeadService {
         if (dto.getEndereco() == null) {
             throw new EnderecoObrigatorioException("Endereço incompleto. Preencha-o corretamente");
         }
+        CadastroLeadRequestDTO.EnderecoDto enderecoDto = dto.getEndereco();
+        String cepNormal = cepService.normalizar(enderecoDto.getCep());
+        enderecoDto.setCep(cepNormal);
+        CepResponseDTO cepResponseDTO = cepService.consultar(cepNormal);
+        preencherEnderecoSeVazio(enderecoDto, cepResponseDTO);
+
+        cadastro.setEndereco(cadastroLeadMapper.toEndereco(enderecoDto));
         Endereco enderecoSalvar = enderecoRepository.save(cadastro.getEndereco());
         cadastro.setEndereco(enderecoSalvar);
         Lead leadCadastrar = leadRepository.save(cadastro);
         return leadCadastrar;
     }
+
+    private void preencherEnderecoSeVazio(CadastroLeadRequestDTO.EnderecoDto endDto, CepResponseDTO cepInfo) {
+        if (isBlank(endDto.getRua())){
+            endDto.setRua(cepInfo.getRua());
+        }
+        if (isBlank(endDto.getBairro())){
+            endDto.setBairro(cepInfo.getBairro());
+        }
+        if (isBlank(endDto.getCidade())){
+            endDto.setCidade(cepInfo.getCidade());
+        }
+        if (isBlank(endDto.getEstado())){
+            endDto.setEstado(cepInfo.getEstado());
+        }
+        if (isBlank(endDto.getPais())){
+            endDto.setPais(cepInfo.getPais());
+        }
+    }
+    private boolean isBlank(String v) { return v == null || v.trim().isEmpty(); }
 
     public Lead atualizar(Integer id, AtualizarLeadRequestDTO dto) {
         if (dto == null){
@@ -148,11 +203,20 @@ public class LeadService {
             Endereco endereco = lead.getEndereco();
             AtualizarLeadRequestDTO.EnderecoDto enderecoDto = dto.getEndereco();
 
+            CepResponseDTO cepResponseDTO = null;
+            if (enderecoDto.getCep() != null){
+                String cepNormal = cepService.normalizar(enderecoDto.getCep());
+                enderecoDto.setCep(cepNormal);
+                cepResponseDTO = cepService.consultar(cepNormal);
+                endereco.setCep(cepNormal);
+
+                if (enderecoDto.getRua() == null && !isBlank(cepResponseDTO.getRua())) endereco.setRua(cepResponseDTO.getRua());
+                if (enderecoDto.getBairro() == null && !isBlank(cepResponseDTO.getBairro())) endereco.setBairro(cepResponseDTO.getBairro());
+                if (enderecoDto.getCidade() == null && !isBlank(cepResponseDTO.getCidade())) endereco.setCidade(cepResponseDTO.getCidade());
+                if (enderecoDto.getEstado() == null && !isBlank(cepResponseDTO.getEstado())) endereco.setEstado(cepResponseDTO.getEstado());
+            }
             if (enderecoDto.getRua() != null){
                 endereco.setRua(enderecoDto.getRua());
-            }
-            if (enderecoDto.getCep() != null){
-                endereco.setCep(enderecoDto.getCep());
             }
             if (enderecoDto.getComplemento() != null){
                 endereco.setComplemento(enderecoDto.getComplemento());
