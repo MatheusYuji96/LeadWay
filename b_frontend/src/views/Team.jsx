@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/common/Button'
-import { Field } from '@/components/common/Field'
+import { Field, SelectField } from '@/components/common/Field'
 import { PageHeading } from '@/components/common/PagePrimitives'
 import { StatCard } from '@/components/common/StatCard'
 import { RepTable } from '@/components/domain/RepTable'
@@ -12,6 +12,7 @@ import styles from './Team.module.css'
 export function Team() {
   const vm = useTeamViewModel()
   const [wizardOpen, setWizardOpen] = useState(false)
+  const [status, setStatus] = useState('active')
   const [saving, setSaving] = useState(false)
   const [wizardError, setWizardError] = useState(null)
 
@@ -62,9 +63,7 @@ export function Team() {
 
   const term = vm.search.trim().toLowerCase()
   const base = vm.representatives
-  const representatives = term
-    ? base.filter((r) => [r.name, r.code, r.region].some((field) => String(field).toLowerCase().includes(term)))
-    : base
+  const representatives = base.filter((r) => (status === 'all' || (status === 'active' ? r.active : !r.active)) && (!term || [r.name, r.code, r.region].some((field) => String(field ?? '').toLowerCase().includes(term))))
 
   return (
     <div className={styles.page}>
@@ -92,6 +91,11 @@ export function Team() {
           value={vm.search}
           onChange={vm.changeSearch}
         />
+        <SelectField value={status} onChange={setStatus} aria-label="Filtrar funcionários por status">
+          <option value="active">Ativos</option>
+          <option value="inactive">Inativos</option>
+          <option value="all">Todos</option>
+        </SelectField>
         <span className={styles.count}>{representatives.length} representante(s)</span>
       </div>
 

@@ -5,7 +5,7 @@ const envBase = (import.meta.env.VITE_API_BASE_URL ?? '').trim()
 const isDev = import.meta.env.DEV === true
 // In development force use of the Vite proxy path '/api' to avoid CORS.
 // In production (non-DEV) use VITE_API_BASE_URL when provided, otherwise default to the local backend URL.
-const baseURL = isDev ? '/api' : envBase || 'http://localhost:8080'
+const baseURL = envBase || (isDev ? '/api' : 'http://localhost:8080')
 
 // Toggle mock/local adapter via env var VITE_USE_MOCK (string 'true')
 export const isMockMode = String(import.meta.env.VITE_USE_MOCK || '').toLowerCase() === 'true'
@@ -21,6 +21,17 @@ if (isMockMode) {
   http.defaults.adapter = createLocalApiAdapter()
 }
 
+// Envia o token quando o backend disponibiliza autenticação por JWT.
+http.interceptors.request.use((config) => {
+  if (isMockMode) return config
+  try {
+    const session = JSON.parse(localStorage.getItem('leadway_session_v1') || 'null')
+    const token = session?.token ?? session?.accessToken ?? session?.jwt
+    if (token) config.headers.Authorization = `Bearer ${token}`
+  } catch { /* sessão ausente ou inválida */ }
+  return config
+})
+
 http.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -34,12 +45,13 @@ http.interceptors.response.use(
       const serverMessage = data?.message || data?.error ||
         (Array.isArray(data?.errors) ? data.errors.map((e) => e.message || e).join('; ') : null)
       if (serverMessage) {
-        friendly = new Error(String(serverMessage))
+        friendly = new Error(`HTTP ${resp.status} — ${String(serverMessage)}`)
       } else {
         // fallback to a generic message including HTTP status
-        friendly = new Error(`O servidor respondeu com erro (${resp.status}). Verifique os dados e tente novamente.`)
+        friendly = new Error(`HTTP ${resp.status}`)
       }
       friendly.status = resp.status
+      friendly.httpStatus = resp.status
       friendly.details = data
       friendly.cause = error
     } else {

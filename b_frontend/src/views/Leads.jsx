@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/common/Button'
 import { Field, SelectField } from '@/components/common/Field'
 import { Icon } from '@/components/common/Icon'
@@ -11,6 +11,10 @@ import styles from './Leads.module.css'
 
 export function Leads() {
   const vm = useLeadsViewModel()
+  useEffect(() => {
+    const timer = setInterval(() => vm.reload(), 60000)
+    return () => clearInterval(timer)
+  }, [vm.reload])
   const [wizardOpen, setWizardOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -40,7 +44,7 @@ export function Leads() {
     { label: 'Follow-up', value: vm.stats?.followUp ?? 0 },
     { label: 'Precisam de atenção', value: vm.stats?.attention ?? 0, attention: true },
   ]
-  const filterCount = Number(Boolean(vm.owner)) + Number(Boolean(vm.cadence))
+  const filterCount = Number(Boolean(vm.owner)) + Number(Boolean(vm.cadence)) + Number(vm.status !== 'active')
 
   return (
     <div className={styles.page}>
@@ -69,11 +73,16 @@ export function Leads() {
                 <option value="unassigned">Não atribuído</option>
                 {vm.owners.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </SelectField>
+              <SelectField label="Status" value={vm.status} onChange={vm.changeStatus}>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+                <option value="all">Todos</option>
+              </SelectField>
               <SelectField label="Cadência" value={vm.cadence} onChange={vm.changeCadence}>
                 <option value="">Todas as cadências</option>
                 {Object.entries(CADENCE_STATUS).map(([key, item]) => <option key={key} value={key}>{item.label}</option>)}
               </SelectField>
-              <small>A cadência ainda não é calculada pelo backend; sem dados reais, aparece como “Não monitorada”.</small>
+
             </div>}
           </div>
           <SelectField value={vm.stage} onChange={vm.changeStage} className={styles.filter}>

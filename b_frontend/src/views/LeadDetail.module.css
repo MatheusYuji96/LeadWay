@@ -172,3 +172,16 @@
 .ownerWrap>button{align-self:flex-end}.pad{padding:18px}.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:24px}.details dt{font-size:13px;color:#64748b}.details dd{font-weight:600;margin:5px 0 0;overflow-wrap:anywhere}
 @media(max-width:1000px){.summaryGrid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.tabs{grid-template-columns:repeat(2,1fr)}.details{grid-template-columns:1fr}.summaryCard{min-height:auto}}
+
+/* Cores semânticas de prioridade */
+.priorityLow { background: #e9f9f3; border-color: #a8dfd0; color: #087f62; }
+.priorityMedium { background: #fff5dc; border-color: #f3d47a; color: #946000; }
+.priorityHigh { background: #fff0f1; border-color: #ff9ba4; color: #c9283a; }
+.priorityUnset { background: #f3f6fa; border-color: #cbd5e1; color: #64748b; }
+
+.companyPanel,.contactsPanel{max-width:1080px;margin:16px auto 0}.companyPanel{padding:22px 24px}.companyGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 22px;padding:18px 0 24px}.companyField{display:flex;align-items:center;gap:12px;min-width:0}.fieldIcon{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:#f5f8f9;color:#008b91;flex-shrink:0}.companyField small{display:block;font-size:13px;color:#667992;letter-spacing:.04em}.companyField strong{display:block;font-size:14px;margin-top:5px;overflow-wrap:anywhere}.addressBox{display:flex;gap:16px;background:#effafa;border:1px solid #c5dce8;border-radius:8px;padding:20px;color:#008b91}.addressBox h3{font-size:14px;letter-spacing:.06em;margin:0 0 10px}.addressBox strong{display:block;font-size:14px}.addressBox p{margin-top:8px;font-size:13px;color:#667992}@media(max-width:850px){.companyGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.companyGrid{grid-template-columns:1fr}.companyPanel{padding:16px}}
+
+.commercialGrid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; margin-top:16px; align-items:stretch; }
+@media(max-width:950px){.commercialGrid{grid-template-columns:1fr}}
+
+.pillInactive {border-radius:22px;padding:7px 10px;font-size:13px;border:1px solid #fda4af;background:#fff1f2;color:#be123c;}

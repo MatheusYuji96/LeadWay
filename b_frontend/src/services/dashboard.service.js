@@ -43,7 +43,7 @@ export const dashboardService = {
         { key: 'total', icon: 'building', label: 'Total de leads', value: String(number(indicators.totaLeads ?? indicators.totalLeads)), detail: 'ativos na carteira', tone: 'brand' },
         { key: 'appointments', icon: 'calendar', label: 'Compromissos', value: String(number(indicators.compromissosSemana)), detail: 'nesta semana', tone: 'blue' },
         { key: 'prospecting', icon: 'trend', label: 'Em prospecção', value: String(number(indicators.leadsEmProspeccao)), detail: 'sem primeira visita', tone: 'purple' },
-        { key: 'stale', icon: 'bell', label: 'Sem atualização', value: String(number(indicators.leadsSemAtualizacao)), detail: 'indicador informado pelo backend', tone: 'danger' },
+        { key: 'stale', icon: 'bell', label: 'Sem atualização', value: indicators.leadsSemAtualizacao == null ? '—' : String(number(indicators.leadsSemAtualizacao)), detail: 'cadências ativas vencidas', tone: 'danger' },
       ],
       weekActivity: activities.map((item) => ({
         day: dayName(item.dia), contacts: number(item.contatos),
@@ -80,10 +80,10 @@ export const dashboardService = {
     const data = unwrap(await http.get('/dashboard/equipe')) ?? {}
     return {
       stats: [
-        { key: 'reps', icon: 'users', label: 'Representantes ativos', value: String(number(data.representantesAtivos)), detail: 'cadastrados e ativos', tone: 'brand' },
+        { key: 'reps', icon: 'users', label: 'Funcionários ativos', value: String(number(data.representantesAtivos)), detail: 'cadastrados e ativos', tone: 'brand' },
         { key: 'leads', icon: 'building', label: 'Leads em carteira', value: String(number(data.leadsEmCarteira)), detail: 'leads ativos', tone: 'blue' },
         { key: 'contacts', icon: 'check', label: 'Contatos realizados', value: String(number(data.contatosRealizados)), detail: 'leads na etapa 3', tone: 'purple' },
-        { key: 'pending', icon: 'bell', label: 'Pendências da equipe', value: String(number(data.pendenciasEquipe)), detail: 'sem atualização há mais de 7 dias', tone: 'danger' },
+        { key: 'pending', icon: 'bell', label: 'Pendências da equipe', value: String(number(data.pendenciasEquipe)), detail: 'cadências ativas vencidas', tone: 'danger' },
       ],
       performance: (data.desempenho ?? []).map((item) => ({
         id: item.id, name: item.nome, contacts: number(item.contatos),

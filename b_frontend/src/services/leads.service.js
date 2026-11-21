@@ -1,6 +1,8 @@
 import { http, unwrap, isMockMode } from './http'
 import { contactsService } from './contacts.service'
 import { FUNNEL_STAGES } from '@/models/enums'
+import { cadencesService } from './cadences.service'
+import { cadenceProgress, currentCadence } from '@/utils/cadenceProgress'
 
 const nextFunnelStage = (lead) => {
   const order = Number(lead?.etapa?.ordem)
@@ -14,7 +16,7 @@ const digits = (value) => String(value ?? '').replace(/\D/g, '')
 export function normalizeLead(raw) {
   const addr = raw.endereco ?? raw.address ?? {}
   const name = raw.name ?? raw.nomeFantasia ?? raw.razaoSocial ?? 'Sem nome'
-  const owner = raw.vendedor ?? {}
+  const owner = raw.responsavel ?? raw.vendedor ?? raw.usuario ?? {}
   const potential = String(raw.potencial ?? '').toUpperCase()
   return {
     ...raw,
@@ -25,7 +27,7 @@ export function normalizeLead(raw) {
     segment: raw.segment ?? raw.setor?.nome ?? '',
     stage: raw.stage ?? raw.etapa?.nome ?? 'Não definida',
     representativeName: raw.representativeName ?? owner.nome ?? 'Não atribuído',
-    representativeId: raw.representativeId ?? owner.id ?? null,
+    representativeId: raw.representativeId ?? raw.responsavelId ?? raw.vendedorId ?? owner.id ?? null,
     score: raw.score ?? (Number(raw.potencial) || { ALTO: 5, MEDIO: 3, BAIXO: 1 }[potential] || 0),
     lastContact: raw.lastContact ?? '—', nextAction: raw.nextAction ?? '—',
     cadenceStatus: raw.cadenceStatus ?? 'UNTRACKED',
@@ -47,6 +49,14 @@ export const leadsService = {
     // Busca a carteira completa para que os indicadores não mudem com filtros de tela.
     const result = unwrap(await http.get('/leads'))
     const allItems = (Array.isArray(result) ? result : result?.items ?? []).map(normalizeLead)
+      .sort((a, b) => Number(b.ativo !== false) - Number(a.ativo !== false))
+    let cadences = []
+    try {
+      const response = await cadencesService.list()
+      cadences = Array.isArray(response) ? response : response?.items ?? []
+    } catch (error) {
+      console.warn('Não foi possível consultar cadências:', error)
+    }
     const stageOrder = FUNNEL_STAGES
     const enriched = await Promise.all(allItems.map(async (lead) => {
       let lastContact = '—'
@@ -66,13 +76,15 @@ export const leadsService = {
         }
       }
       const position = stageOrder.indexOf(lead.stage)
-      return { ...lead, lastContact, nextAction: position >= 0 && position < stageOrder.length - 1 ? stageOrder[position + 1] : '—' }
+      const current = currentCadence(cadences.filter(c => String(c.leadId) === String(lead.id)))
+      const cadenceStatus = cadenceProgress(current).key
+      return { ...lead, cadenceStatus, lastContact, nextAction: position >= 0 && position < stageOrder.length - 1 ? stageOrder[position + 1] : '—' }
     }))
     const stats = {
-      total: enriched.length,
-      prospecting: enriched.filter((lead) => lead.stage !== 'Fechado / Ganho').length,
-      followUp: enriched.filter((lead) => lead.stage === 'Negociação').length,
-      attention: 0,
+      total: enriched.filter((lead) => lead.ativo !== false).length,
+      prospecting: enriched.filter((lead) => lead.ativo !== false && lead.stage !== 'Fechado / Ganho').length,
+      followUp: enriched.filter((lead) => lead.ativo !== false && lead.stage === 'Negociação').length,
+      attention: enriched.filter(lead => lead.ativo !== false && ['ATTENTION', 'LATE'].includes(lead.cadenceStatus)).length,
     }
     const term = String(filters.search ?? '').trim().toLocaleLowerCase('pt-BR')
     const items = enriched.filter((lead) => {
@@ -101,14 +113,15 @@ export const leadsService = {
       ...item, name: item.name ?? item.nome, role: item.role ?? item.cargo,
       initials: (item.nome ?? item.name ?? '?').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
     }))
-    const ownerId = found.vendedor?.id
+    const ownerData = found.responsavel ?? found.vendedor ?? found.usuario
+    const ownerId = ownerData?.id
     const activeCount = ownerId == null ? null : rows.filter((row) =>
       String(row.vendedor?.id ?? row.representativeId) === String(ownerId) && row.ativo !== false,
     ).length
-    const owner = found.vendedor ? {
-      name: found.vendedor.nome, email: found.vendedor.email, phone: found.vendedor.telefone,
-      initials: (found.vendedor.nome ?? '?').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
-      since: found.vinculadoEm ?? null, leads: activeCount,
+    const owner = ownerData ? {
+      name: ownerData.nome, email: ownerData.email, phone: ownerData.telefone,
+      initials: (ownerData.nome ?? '?').split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase(),
+      since: found.vinculadoEm ?? found.vinculado_em ?? found.dataVinculo ?? found.criadoEm ?? found.criado_em ?? null, leads: activeCount,
     } : null
     const interactions = unwrap(await http.get(`/leads/${id}/interacoes`))
     const interactionRows = Array.isArray(interactions) ? interactions : []
@@ -122,13 +135,21 @@ export const leadsService = {
     const detailedLead = { ...found, lastContact, nextAction: nextFunnelStage(found) }
     const timeline = interactionRows.map((item) => ({
       id: item.id,
-      dateLabel: item.dataHora ? new Date(item.dataHora).toLocaleString('pt-BR') : 'Sem data',
+      dateLabel: (item.dataHora ?? item.criadoEm) ? new Date(item.dataHora ?? item.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Sem data',
       title: ({ ANOTACAO: 'Anotação', LIGACAO: 'Ligação', REUNIAO: 'Reunião', VISITA: 'Visita', EMAIL: 'E-mail', WHATSAPP: 'WhatsApp' })[item.tipo] ?? item.tipo,
-      author: item.contatoNome ? `Contato: ${item.contatoNome}` : 'Interação com a empresa',
+      author: (item.contatoNome ?? item.contato?.nome ?? contacts.find((c) => String(c.id) === String(item.contatoId ?? item.contato?.id))?.nome) ? `Interação com ${item.contatoNome ?? item.contato?.nome ?? contacts.find((c) => String(c.id) === String(item.contatoId ?? item.contato?.id))?.nome}` : 'Interação com a empresa',
       description: item.descricao,
       icon: item.tipo === 'LIGACAO' ? 'phone' : item.tipo === 'REUNIAO' ? 'users' : 'clock',
     }))
-    return { lead: detailedLead, contacts, timeline, owner, funnel: null, cadence: null }
+    // A data vem exclusivamente de lead_etapa_historico no backend.
+    // Para leads antigos sem registro, o backend devolve null e a interface mostra "—".
+    let funnel = null
+    try {
+      funnel = unwrap(await http.get(`/leads/${id}/funil`))
+    } catch (error) {
+      console.warn(`Não foi possível consultar o histórico do funil do lead ${id}:`, error)
+    }
+    return { lead: detailedLead, contacts, timeline, owner, funnel, cadence: null }
   },
 
   /**
@@ -174,6 +195,7 @@ export const leadsService = {
    * @param {{ representativeId: string, reason: string }} payload
    */
   async transfer(id, payload) {
+    // O DTO Java atual ainda utiliza vendedorId, embora a coluna MySQL seja responsavel_id.
     if (!isMockMode) return unwrap(await http.patch(`/leads/${id}`, { vendedorId: Number(payload.representativeId) }))
     return unwrap(await http.post(`/leads/${id}/transfer`, payload))
   },

@@ -20,7 +20,7 @@ export function useAsync() {
       setData(result)
       return { ok: true, data: result }
     } catch (err) {
-      setError(err?.message || 'Não foi possível carregar os dados.')
+      setError(err?.status ? `HTTP ${err.status}` : (err?.code === 'ECONNABORTED' ? 'Tempo limite de conexão excedido' : 'Falha de conexão com o servidor'))
       return { ok: false, error: err }
     } finally {
       setLoading(false)

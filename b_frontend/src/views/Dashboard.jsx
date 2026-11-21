@@ -9,6 +9,7 @@ import { Tabs, PageHeading } from '@/components/common/PagePrimitives'
 import { useDashboardViewModel } from '@/viewmodels/useDashboardViewModel'
 import { paths } from '@/routes/paths'
 import styles from './Dashboard.module.css'
+import { useSession } from '@/viewmodels/sessionContext'
 
 const TABS = [
   { value: 'overview', label: 'Minha visão' },
@@ -16,21 +17,23 @@ const TABS = [
 ]
 
 const LEGEND = [
-  { key: 'contacts', label: 'Contatos', tone: 'brand' },
-  { key: 'meetings', label: 'Portfólios', tone: 'blue' },
-  { key: 'followUps', label: 'Follow-ups', tone: 'purple' },
+  { key: 'contacts', label: 'Prospecção', tone: 'brand' },
+  { key: 'meetings', label: 'Negociação', tone: 'blue' },
+  { key: 'followUps', label: 'Fechado / Ganho', tone: 'purple' },
 ]
 
 export function Dashboard() {
   const navigate = useNavigate()
   const vm = useDashboardViewModel()
+  const { user } = useSession()
+  const firstName = (user?.name ?? user?.nome ?? 'usuário').trim().split(/\s+/)[0]
 
   const todayLabel = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date())
 
   if (vm.overviewLoading && vm.tab === 'overview') {
     return (
       <div className={styles.page}>
-        <PageHeading eyebrow={todayLabel} title="Visão geral" description="Acompanhe sua carteira e seus compromissos." />
+        <PageHeading eyebrow={todayLabel} title={`Olá, ${firstName}!`} description="Acompanhe o desempenho da sua carteira e as atividades comerciais de hoje." />
         <Skeleton cards={4} lines={3} />
       </div>
     )
@@ -39,7 +42,7 @@ export function Dashboard() {
   if (vm.overviewError && vm.tab === 'overview') {
     return (
       <div className={styles.page}>
-        <PageHeading eyebrow={todayLabel} title="Visão geral" />
+        <PageHeading eyebrow={todayLabel} title={`Olá, ${firstName}!`} />
         <ErrorState message={vm.overviewError} onRetry={vm.reloadOverview} />
       </div>
     )
@@ -51,8 +54,8 @@ export function Dashboard() {
     <div className={styles.page}>
       <PageHeading
         eyebrow={todayLabel}
-        title="Visão geral"
-        description="Indicadores e atividades da sua carteira, consultados no servidor."
+        title={`Olá, ${firstName}!`}
+        description="Acompanhe o desempenho da sua carteira e as atividades comerciais de hoje."
         actions={
           <>
             <Button icon="calendar" onClick={() => navigate(paths.agenda)}>
@@ -65,7 +68,7 @@ export function Dashboard() {
         }
       />
 
-      <Tabs tabs={TABS} active={vm.tab} onChange={vm.setTab} />
+      <Tabs tabs={vm.canViewTeam ? TABS : TABS.filter((item) => item.value === 'overview')} active={vm.tab} onChange={vm.setTab} />
 
       {vm.tab === 'overview' && overview && (
         <div className={styles.content}>
@@ -78,14 +81,14 @@ export function Dashboard() {
           <div className={styles.columns}>
             <div className={styles.main}>
               <Panel>
-                <PanelHead title="Atividade da semana" subtitle="Contatos, portfólios e follow-ups por dia" />
+                <PanelHead title="Atividade da semana" subtitle="Movimentações do funil por dia" />
                 <WeekChart data={overview.weekActivity} />
               </Panel>
 
               <Panel>
                 <PanelHead
                   title="Leads que precisam de atenção"
-                  subtitle="Sem atualização nos últimos dias"
+                  subtitle="Leads com cadências vencidas"
                   actions={
                     <Button kind="ghost" size="sm" onClick={() => navigate(paths.leads)}>
                       Ver todos <Icon name="arrow" size={14} />
@@ -189,7 +192,7 @@ function TeamPanel({ vm, onOpenLead, onOpenRep }) {
       <div className={styles.columns}>
         <div className={styles.main}>
           <Panel>
-            <PanelHead title="Desempenho da equipe" subtitle="Dados dos vendedores cadastrados no MySQL" />
+            <PanelHead title="Desempenho da equipe" subtitle="Movimentações comerciais da equipe" />
             <div className={styles.performance}>
               {performance.map((item) => (
                 <div className={styles.perfRow} key={item.name}>
@@ -206,7 +209,7 @@ function TeamPanel({ vm, onOpenLead, onOpenRep }) {
           </Panel>
 
           <Panel>
-            <PanelHead title="Leads parados" subtitle="Oportunidades sem atualização há mais de 7 dias" />
+            <PanelHead title="Leads sem evolução" subtitle="Há mais de 7 dias na mesma etapa" />
             <div className={styles.staleList}>
               {staleLeads.length === 0 && <p className={styles.emptyText}>Nenhum lead parado.</p>}
               {staleLeads.map((lead) => (
@@ -255,9 +258,9 @@ function WeekChart({ data = [] }) {
         {data.map((item) => (
           <div className={styles.chartGroup} key={item.day}>
             <span className={styles.bars}>
-              <i className={styles.barBrand} style={{ height: `${(item.contacts / max) * 100}%` }} title={`${item.contacts} contatos`} />
-              <i className={styles.barBlue} style={{ height: `${(item.meetings / max) * 100}%` }} title={`${item.meetings} reuniões`} />
-              <i className={styles.barPurple} style={{ height: `${(item.followUps / max) * 100}%` }} title={`${item.followUps} follow-ups`} />
+              <i className={styles.barBrand} style={{ height: `${(item.contacts / max) * 100}%` }} title={`${item.contacts} entradas em prospecção`} />
+              <i className={styles.barBlue} style={{ height: `${(item.meetings / max) * 100}%` }} title={`${item.meetings} entradas em negociação`} />
+              <i className={styles.barPurple} style={{ height: `${(item.followUps / max) * 100}%` }} title={`${item.followUps} fechamentos ganhos`} />
             </span>
             <small>{item.day}</small>
           </div>

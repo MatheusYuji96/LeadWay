@@ -8,6 +8,7 @@ import { Title } from '@/components/common/Title'
 import { REGIONS } from '@/models/enums'
 import { isEmail, passwordRules, isPhone11 } from '@/viewmodels/validators'
 import styles from './Wizard.module.css'
+import { formatPhoneInput } from '@/utils/phoneInput'
 
 const STEPS = ['Dados pessoais', 'Código e região', 'Acesso', 'Revisão']
 
@@ -18,12 +19,12 @@ const emptyValues = {
   code: '',
   region: '',
   active: true,
-  sendInvite: true,
+  cargo: 'VENDEDOR',
 }
 
-export function CreateRepresentativeWizard({ saving = false, error = null, onClose, onSubmit }) {
+export function CreateRepresentativeWizard({ saving = false, error = null, onClose, onSubmit, representative = null }) {
   const [step, setStep] = useState(0)
-  const [values, setValues] = useState(emptyValues)
+  const [values, setValues] = useState(() => representative ? { ...emptyValues, ...representative, cargo: typeof representative.cargo === "object" ? representative.cargo.nome : representative.cargo || "VENDEDOR", password: "", confirmPassword: "" } : emptyValues)
   const [done, setDone] = useState(false)
   const [errors, setErrors] = useState({})
 
@@ -55,7 +56,7 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
     if (s === 2) {
       const pwd = values.password || ''
       const pr = passwordRules(pwd)
-      if (!pr.valid) nextErrors.password = 'Senha fraca. Use >=8 chars, maiúscula, número e caractere especial, sem espaços.'
+      if ((!representative || pwd) && !pr.valid) nextErrors.password = 'Senha fraca. Use >=8 chars, maiúscula, número e caractere especial, sem espaços.'
       if ((values.password || '') !== (values.confirmPassword || '')) nextErrors.confirmPassword = 'As senhas não coincidem.'
     }
     return nextErrors
@@ -77,7 +78,7 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
     if (!values.code || values.code.trim().length < 1) next.code = 'Informe o código do representante.'
     // The backend requires a password on Vendedor creation. Do not allow sending without senha.
     const pr = passwordRules(values.password || '')
-    if (!pr.valid) next.password = 'Senha fraca. Use >=8 chars, maiúscula, número e caractere especial, sem espaços.'
+    if ((!representative || values.password) && !pr.valid) next.password = 'Senha fraca. Use >=8 chars, maiúscula, número e caractere especial, sem espaços.'
     if (values.password !== values.confirmPassword) next.confirmPassword = 'As senhas não coincidem.'
     setErrors(next)
     if (Object.keys(next).length) return
@@ -91,8 +92,8 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
       <div className={styles.backdrop}>
         <div className={styles.modalPane}>
           <SuccessContent
-            title="Representante adicionado!"
-            description="O novo representante já pode ser vinculado a empresas da sua carteira."
+            title={representative ? "Funcionário atualizado!" : "Representante adicionado!"}
+            description={representative ? "Os dados do funcionário foram atualizados." : "O novo representante já pode ser vinculado a empresas da sua carteira."}
             actionLabel="Fechar"
             onAction={onClose}
           />
@@ -119,10 +120,7 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
               </span>
             ))}
           </div>
-          <div className={styles.help}>
-            <strong>Convite por e-mail</strong>
-            <p>Se marcado, o representante recebe um link para definir a própria senha.</p>
-          </div>
+
         </aside>
 
         <main className={styles.main}>
@@ -131,7 +129,7 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
               <small>
                 Passo {step + 1} de {STEPS.length}
               </small>
-              <Title level={1}>Novo representante</Title>
+              <Title level={1}>{representative ? "Editar funcionário" : "Novo representante"}</Title>
               <p>{STEPS[step]}</p>
             </div>
             <Button kind="ghost" aria-label="Fechar" onClick={onClose}>
@@ -161,8 +159,8 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
                   <Field
                     label="Telefone"
                     placeholder="(11) 99999-0000"
-                    value={values.phone}
-                    onChange={(v) => setField('phone', v)}
+                    value={formatPhoneInput(values.phone)}
+                    onChange={(v) => setField('phone', v.replace(/\D/g, '').slice(0, 11))}
                     error={errors.phone}
                   />
                 </div>
@@ -188,6 +186,10 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
                     ))}
                   </SelectField>
                 </div>
+                <SelectField label="Cargo" value={values.cargo || 'VENDEDOR'} onChange={(v) => setField('cargo', v)}>
+                  <option value="VENDEDOR">Vendedor</option>
+                  <option value="GERENTE">Gerente</option>
+                </SelectField>
               </div>
             )}
 
@@ -199,17 +201,12 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
                   label="Cadastro ativo"
                   hint="Representantes inativos não recebem novas empresas."
                 />
-                <Checkbox
-                  checked={values.sendInvite}
-                  onChange={(checked) => setField('sendInvite', checked)}
-                  label="Enviar convite de acesso por e-mail"
-                  hint="O convite usa o e-mail informado no primeiro passo."
-                />
+
                 <div>
                   <Field
                     label="Senha"
                     type="password"
-                    placeholder="Senha de acesso"
+                    placeholder={representative ? "Deixe em branco para manter a senha" : "Senha de acesso"}
                     value={values.password}
                     onChange={(v) => setField('password', v)}
                     error={errors.password}
@@ -248,14 +245,12 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
                   <span>Região</span>
                   <strong>{values.region || '—'}</strong>
                 </div>
+                <div className={styles.reviewRow}><span>Cargo</span><strong>{values.cargo === "GERENTE" ? "Gerente" : "Vendedor"}</strong></div>
                 <div className={styles.reviewRow}>
                   <span>Status</span>
                   <strong>{values.active ? 'Ativo' : 'Inativo'}</strong>
                 </div>
-                <div className={styles.reviewRow}>
-                  <span>Convite</span>
-                  <strong>{values.sendInvite ? 'Enviar por e-mail' : 'Sem convite'}</strong>
-                </div>
+
               </div>
             )}
           </div>
@@ -270,7 +265,7 @@ export function CreateRepresentativeWizard({ saving = false, error = null, onClo
               </Button>
             ) : (
               <Button kind="primary" onClick={submit} loading={saving}>
-                Adicionar representante
+                {representative ? "Atualizar funcionário" : "Cadastrar funcionário"}
               </Button>
             )}
           </footer>

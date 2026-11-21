@@ -17,7 +17,7 @@ export function useRepDetailViewModel(repId) {
     if (isMockMode) return representativesService.getById(repId)
     const rep = await representativesService.getById(repId)
     const leads = (await leadsService.list()).items.filter((lead) => belongsToRepresentative(lead, rep))
-    return { representative: { ...rep, leads: leads.length, completed: leads.filter(isProposalStage).length, pending: leads.filter(isOverdue).length }, leads, stats: [{ key: 'leads', label: 'Leads na carteira', value: leads.length, icon: 'briefcase' }], evolution: [{ month: 'Mai', value: 3 }, { month: 'Jun', value: 5 }, { month: 'Jul', value: 4 }, { month: 'Ago', value: 7 }, { month: 'Set', value: 6 }, { month: 'Out', value: 8 }], notice: null }
+    return { representative: { ...rep, leads: leads.length, completed: leads.filter(isProposalStage).length, pending: leads.filter(isOverdue).length }, leads, stats: [{ key: 'leads', label: 'Leads na carteira', value: leads.length, icon: 'briefcase' }], evolution: [], notice: null }
   }), [exec, repId])
 
   useEffect(() => {

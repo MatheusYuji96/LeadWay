@@ -2,7 +2,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { Panel, PanelHead } from '@/components/common/Panel'
 import styles from './OwnerCard.module.css'
 
-export function OwnerCard({ owner, lead }) {
+export function OwnerCard({ owner, lead, onChange }) {
   if (!owner) return null
   const joinedLabel = owner.since
     ? new Date(owner.since).toLocaleDateString('pt-BR', {
@@ -14,7 +14,7 @@ export function OwnerCard({ owner, lead }) {
 
   return (
     <Panel>
-      <PanelHead title="Responsável" />
+      <PanelHead title="Responsável" actions={onChange && <button type="button" className={styles.changeOwner} onClick={onChange}>Alterar</button>} />
       <div className={styles.owner}>
         <Avatar initials={owner.initials} size="lg" />
         <div>

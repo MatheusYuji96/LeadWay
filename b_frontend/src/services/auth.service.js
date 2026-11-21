@@ -38,11 +38,12 @@ export const authService = {
   },
 
   async me() {
-    const { user } = unwrap(await http.get('/auth/me'))
-    return user
+    const response = unwrap(await http.get('/auth/me'))
+    return response?.user ?? response
   },
 
   async logout() {
-    return unwrap(await http.post('/auth/logout'))
+    try { await http.post('/auth/logout') } catch (error) { if (error.status && error.status !== 401) throw error }
+    return null
   },
 }
