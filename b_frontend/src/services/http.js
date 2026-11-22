@@ -40,18 +40,33 @@ http.interceptors.response.use(
     const resp = error.response
     let friendly
     if (resp) {
-      // Try to extract a meaningful message from the server response body
       const data = resp.data || {}
-      const serverMessage = data?.message || data?.error ||
-        (Array.isArray(data?.errors) ? data.errors.map((e) => e.message || e).join('; ') : null)
-      if (serverMessage) {
-        friendly = new Error(`HTTP ${resp.status} — ${String(serverMessage)}`)
-      } else {
-        // fallback to a generic message including HTTP status
-        friendly = new Error(`HTTP ${resp.status}`)
+      const status = resp.status
+      const defaults = {
+        400: 'Os dados enviados são inválidos. Confira os campos e tente novamente.',
+        401: 'Sua sessão expirou ou você precisa entrar novamente.',
+        403: 'Você não tem permissão para realizar esta operação.',
+        404: 'O recurso solicitado não foi encontrado.',
+        405: 'Esta operação não é permitida pelo servidor.',
+        409: 'Não foi possível concluir porque existem dados conflitantes ou registros vinculados.',
+        422: 'Os dados informados não puderam ser processados.',
+        423: 'A conta está temporariamente bloqueada.',
+        429: 'Muitas tentativas. Aguarde antes de tentar novamente.',
+        500: 'O servidor encontrou um erro interno. Tente novamente ou contate o suporte.',
+        502: 'O serviço externo não respondeu corretamente.',
+        503: 'O serviço está temporariamente indisponível.',
+        504: 'O servidor demorou para responder.'
       }
-      friendly.status = resp.status
-      friendly.httpStatus = resp.status
+      const validationErrors = Array.isArray(data?.errors)
+        ? data.errors.map((item) => item?.message || item?.defaultMessage || String(item)).join('; ')
+        : ''
+      // 'Internal Server Error' e 'Forbidden' são rótulos HTTP, não explicações.
+      const serverMessage = data?.message || data?.detail || validationErrors || ''
+      const generic = /^(forbidden|bad request|internal server error|not found|unauthorized|conflict)$/i.test(String(serverMessage).trim())
+      const explanation = !generic && String(serverMessage).trim() ? String(serverMessage).trim() : (defaults[status] || 'Não foi possível concluir a solicitação.')
+      friendly = new Error(`HTTP ${status} — ${explanation}`)
+      friendly.status = status
+      friendly.httpStatus = status
       friendly.details = data
       friendly.cause = error
     } else {

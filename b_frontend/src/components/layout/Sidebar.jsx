@@ -18,7 +18,8 @@ const navItems = [
 
 export function Sidebar({ open, onClose, onNavigate }) {
   const location = useLocation()
-  const { logout } = useSession()
+  const { logout, user } = useSession()
+  const isSeller = String(user?.role ?? '').trim().toUpperCase() === 'VENDEDOR'
   const [leadCount, setLeadCount] = useState(null)
   useEffect(() => {
     let mounted = true
@@ -45,7 +46,7 @@ export function Sidebar({ open, onClose, onNavigate }) {
       </div>
 
       <nav className={styles.nav}>
-        {navItems.map((item) => (
+        {navItems.filter((item) => !(isSeller && item.to === paths.team)).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

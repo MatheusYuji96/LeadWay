@@ -29,8 +29,8 @@ export function useAuthViewModel(mode) {
     const next = {}
     if (mode === 'signup' && !isRequired(values.name)) next.name = 'Informe seu nome completo.'
     if (mode === 'signup') {
-      if (!isRequired(values.whatsapp)) next.whatsapp = 'Informe um WhatsApp para contato.'
-      else if (!isPhone11(values.whatsapp)) next.whatsapp = 'Informe um WhatsApp válido com 11 dígitos (somente números).'
+      if (!isRequired(values.whatsapp)) next.whatsapp = 'Informe um telefone para contato.'
+      else if (!isPhone11(values.whatsapp)) next.whatsapp = 'Informe um telefone válido com DDD e 11 dígitos.'
     }
     if (!isEmail(values.email)) next.email = 'Informe um e-mail válido.'
     if (!isRequired(values.password)) next.password = 'Informe sua senha.'
@@ -60,6 +60,7 @@ export function useAuthViewModel(mode) {
           whatsapp: values.whatsapp,
           email: values.email,
           password: values.password,
+          confirmPassword: values.confirmPassword,
         })
       }
       setFinished(true)

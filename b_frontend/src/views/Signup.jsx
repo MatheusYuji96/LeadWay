@@ -9,6 +9,7 @@ import { Title } from '@/components/common/Title'
 import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { paths } from '@/routes/paths'
 import styles from './Auth.module.css'
+import { formatPhoneInput } from '@/utils/phoneInput'
 
 export function Signup() {
   const navigate = useNavigate()
@@ -29,7 +30,7 @@ export function Signup() {
         <Logo light />
         <div className={styles.pitchBody}>
           <Title level={1}>Comece a organizar suas pré-vendas</Title>
-          <p>Crie sua conta e explore o sistema completo com dados de demonstração.</p>
+          <p>Crie sua conta para começar a organizar suas pré-vendas.</p>
           <ul>
             <li>
               <Icon name="check" size={14} /> Cadastro em menos de 1 minuto
@@ -65,12 +66,12 @@ export function Signup() {
               error={errors.name}
             />
             <Field
-              label="WhatsApp"
+              label="Telefone"
               icon="phone"
               placeholder="(11) 99999-0000"
               autoComplete="tel"
-              value={values.whatsapp}
-              onChange={(v) => setValue('whatsapp', v)}
+              value={formatPhoneInput(values.whatsapp)}
+              onChange={(v) => setValue('whatsapp', v.replace(/\D/g, '').slice(0, 11))}
               error={errors.whatsapp}
             />
             <Field

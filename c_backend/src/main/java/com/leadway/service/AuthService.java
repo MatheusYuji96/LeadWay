@@ -24,7 +24,9 @@ public class AuthService {
 
     public Vendedor cadastrar(Vendedor vendedor, String confirmarSenha) {
 
-        if (repository.count() > 0) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"Cadastro público disponível apenas para o primeiro administrador");
+        // Cadastro público: cada inscrição cria um administrador raiz independente.
+        // A organização é identificada pelo próprio administrador (lider == null).
+        // O isolamento dos recursos é aplicado pelos endpoints autenticados.
         if (!vendedor.getSenha().equals(confirmarSenha)) {
             throw new SenhasDiferentesException();
         }
