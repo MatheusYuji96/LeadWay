@@ -74,10 +74,20 @@ public class LeadController {
         return ResponseEntity.status(201).body(responseDTO);
     }
 
-    @PostMapping("/{leadId}/transferencia")
-    public ResponseEntity<Void> transferirLead(@PathVariable Integer leadId, @Valid @RequestBody TransferirLeadRequestDTO requestDTO){
-        leadService.atualizarLead(leadId, requestDTO);
-        return ResponseEntity.status(201).build();
+    @Operation(
+            summary = "Transfere o responsável de um lead",
+            description = "Altera o vendedor responsável pelo lead e registra a operação no log."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Responsável transferido com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou vendedor inativo"),
+            @ApiResponse(responseCode = "404", description = "Lead ou vendedor não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @PostMapping("/{id}/transfer")
+    public ResponseEntity<Void> transferirLead(@PathVariable Integer id, @Valid @RequestBody TransferirLeadRequestDTO requestDTO) {
+        leadService.transferir(id, requestDTO);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(

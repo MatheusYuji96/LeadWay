@@ -3,9 +3,11 @@ package com.leadway.controller;
 import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
+import com.leadway.dto.response.VendedorDetalheResponseDTO;
 import com.leadway.dto.response.VendedorResponseDTO;
 import com.leadway.entity.Vendedor;
 import com.leadway.mapper.VendedorMapper;
+import com.leadway.service.VendedorDetalheService;
 import com.leadway.service.VendedorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,9 +32,11 @@ import java.util.List;
 public class VendedorController {
 
     private final VendedorService vendedorService;
+    private final VendedorDetalheService vendedorDetalheService;
 
-    public VendedorController(VendedorService vendedorService) {
+    public VendedorController(VendedorService vendedorService, VendedorDetalheService vendedorDetalheService) {
         this.vendedorService = vendedorService;
+        this.vendedorDetalheService = vendedorDetalheService;
     }
 
     @Operation(
@@ -50,10 +54,18 @@ public class VendedorController {
         return ResponseEntity.status(200).body(listaResponse);
     }
 
+    @Operation(
+            summary = "Detalha um vendedor",
+            description = "Retorna os dados do representante, avisos, indicadores, evolução e os leads da carteira."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Detalhe do vendedor retornado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Vendedor não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<VendedorResponseDTO> listarPorId(@PathVariable Integer id){
-        VendedorResponseDTO dto = VendedorMapper.toResponse(vendedorService.listar(id));
-        return ResponseEntity.status(200).body(dto);
+    public ResponseEntity<VendedorDetalheResponseDTO> listarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(vendedorDetalheService.buscar(id));
     }
 
     @Operation(

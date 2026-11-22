@@ -10,6 +10,7 @@ import com.leadway.exception.*;
 import com.leadway.mapper.CadastroLeadMapper;
 import com.leadway.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,26 +56,35 @@ public class LeadService {
         return lead;
     }
 
-    public void atualizarLead(Integer leadId, TransferirLeadRequestDTO dto){
-        Optional<Lead> leadOpt = leadRepository.findById(leadId);
-        if (leadOpt.isEmpty()){
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
-        }
-        Lead lead = leadOpt.get();
-        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
-        if (vendedorOpt.isEmpty()){
-            throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
-        }
-        Vendedor vendedor = vendedorOpt.get();
-        if (!vendedor.getAtivo()){
+    @Transactional
+    public void transferir(Integer leadId, TransferirLeadRequestDTO dto) {
+        Lead lead = leadRepository.findById(leadId)
+                .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
+
+        Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
+                .orElseThrow(() -> new VendedorNaoEncontradoException("Vendedor não consta nos registros"));
+
+        if (!Boolean.TRUE.equals(vendedor.getAtivo())) {
             throw new InativoException("Vendedor está inativo");
         }
+
         lead.setVendedor(vendedor);
+        leadRepository.save(lead);
 
         Log log = new Log();
         log.setTipo("TRANSFERENCIA");
-        log.setMensagem("Lead " + leadId + " tranferido para " + vendedor.getNome() + " - " + dto.getMotivacao());
+        log.setMensagem(montarMensagemTransferencia(leadId, vendedor.getNome(), dto.getMotivacao()));
         logRepository.save(log);
+    }
+
+    private String montarMensagemTransferencia(Integer leadId, String nomeVendedor, String motivacao) {
+        StringBuilder mensagem = new StringBuilder("Lead ").append(leadId)
+                .append(" transferido para ").append(nomeVendedor);
+        if (motivacao != null && !motivacao.isBlank()) {
+            mensagem.append(" - ").append(motivacao);
+        }
+        String texto = mensagem.toString();
+        return texto.length() <= 100 ? texto : texto.substring(0, 100);
     }
 
     public Lead salvar(CadastroLeadRequestDTO dto) {

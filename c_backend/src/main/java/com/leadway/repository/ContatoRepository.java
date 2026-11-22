@@ -20,4 +20,6 @@ public interface ContatoRepository extends JpaRepository<Contato, Integer> {
     Boolean existsByEmailIgnoreCase(String email);
 
     List<Contato> findByLead_IdOrderByIdAsc(Integer leadId);
+
+    boolean existsByIdAndLead_Id(Integer id, Integer leadId);
 }

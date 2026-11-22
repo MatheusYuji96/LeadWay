@@ -1,7 +1,6 @@
 package com.leadway.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -12,13 +11,11 @@ public class CadastroInteracaoRequestDTO {
     @Size(max = 45)
     private String tipo;
 
-    @NotNull
     private LocalDateTime dataHora;
 
     @NotBlank
     private String descricao;
 
-    @NotNull
     private Integer etapaId;
 
     public @NotBlank @Size(max = 45) String getTipo() {
@@ -29,11 +26,11 @@ public class CadastroInteracaoRequestDTO {
         this.tipo = tipo;
     }
 
-    public @NotNull LocalDateTime getDataHora() {
+    public LocalDateTime getDataHora() {
         return dataHora;
     }
 
-    public void setDataHora(@NotNull LocalDateTime dataHora) {
+    public void setDataHora(LocalDateTime dataHora) {
         this.dataHora = dataHora;
     }
 

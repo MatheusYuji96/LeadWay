@@ -1,6 +1,7 @@
 package com.leadway.service;
 
 import com.leadway.dto.request.CadastroInteracaoRequestDTO;
+import com.leadway.dto.request.NotaLeadRequestDTO;
 import com.leadway.entity.*;
 import com.leadway.exception.EntidadeNaoEncontradaException;
 import com.leadway.exception.LeadNaoEncontradoException;
@@ -31,32 +32,66 @@ public class InteracaoService {
     private final VendedorRepository vendedorRepository;
     private final EtapaRepository etapaRepository;
     private final LeadEtapaHistoricoRepository historicoRepository;
+    private final ContatoRepository contatoRepository;
 
-    public InteracaoService(InteracaoRepository interacaoRepository, LeadRepository leadRepository, VendedorRepository vendedorRepository, EtapaRepository etapaRepository, LeadEtapaHistoricoRepository historicoRepository) {
+    public InteracaoService(InteracaoRepository interacaoRepository, LeadRepository leadRepository, VendedorRepository vendedorRepository, EtapaRepository etapaRepository, LeadEtapaHistoricoRepository historicoRepository, ContatoRepository contatoRepository) {
         this.interacaoRepository = interacaoRepository;
         this.leadRepository = leadRepository;
         this.vendedorRepository = vendedorRepository;
         this.etapaRepository = etapaRepository;
         this.historicoRepository = historicoRepository;
+        this.contatoRepository = contatoRepository;
     }
 
+    @Transactional
     public Interacao cadastrar(Integer leadId, CadastroInteracaoRequestDTO dto) {
         Lead lead = leadRepository.findById(leadId)
                 .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
 
-        Vendedor vendedor = lead.getVendedor();
+        Interacao interacao = new Interacao();
+        interacao.setLead(lead);
+        interacao.setVendedor(lead.getVendedor());
+        interacao.setTipo(dto.getTipo());
+        interacao.setDataHora(dto.getDataHora() != null ? dto.getDataHora() : LocalDateTime.now());
+        interacao.setDescricao(dto.getDescricao());
+
+        aplicarEtapa(lead, dto.getEtapaId());
+
+        return interacaoRepository.save(interacao);
+    }
+
+    @Transactional
+    public Interacao cadastrarNota(Integer leadId, NotaLeadRequestDTO dto) {
+        Lead lead = leadRepository.findById(leadId)
+                .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
+
+        if (dto.getContatoId() != null
+                && !contatoRepository.existsByIdAndLead_Id(dto.getContatoId(), leadId)) {
+            throw new EntidadeNaoEncontradaException("Contato não consta nos registros desse lead");
+        }
 
         Interacao interacao = new Interacao();
         interacao.setLead(lead);
-        interacao.setVendedor(vendedor);
-        interacao.setTipo(dto.getTipo());
-        interacao.setDataHora(dto.getDataHora());
+        interacao.setVendedor(lead.getVendedor());
+        String tipo = dto.getTipo();
+        interacao.setTipo(tipo == null || tipo.isBlank() ? "ANOTACAO" : tipo);
+        interacao.setDataHora(dto.getDataHora() != null ? dto.getDataHora() : LocalDateTime.now());
         interacao.setDescricao(dto.getDescricao());
 
-        Etapa novaEtapa = etapaRepository.findById(dto.getEtapaId())
+        aplicarEtapa(lead, dto.getEtapaId());
+
+        return interacaoRepository.save(interacao);
+    }
+
+    private void aplicarEtapa(Lead lead, Integer etapaId) {
+        if (etapaId == null) {
+            return;
+        }
+
+        Etapa novaEtapa = etapaRepository.findById(etapaId)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Etapa não consta nos registros"));
 
-        if (!lead.getEtapa().getId().equals(novaEtapa.getId())) {
+        if (lead.getEtapa() == null || !lead.getEtapa().getId().equals(novaEtapa.getId())) {
             lead.setEtapa(novaEtapa);
 
             LeadEtapaHistorico historico = new LeadEtapaHistorico();
@@ -65,8 +100,6 @@ public class InteracaoService {
 
             historicoRepository.save(historico);
         }
-
-        return interacaoRepository.save(interacao);
     }
 
     public List<Interacao> listarPorLead(Integer leadId) {
