@@ -3,9 +3,11 @@ package com.leadway.controller;
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
 import com.leadway.dto.request.CadastroLeadRequestDTO;
 import com.leadway.dto.request.TransferirLeadRequestDTO;
+import com.leadway.dto.response.LeadDetalhadoResponseDTO;
 import com.leadway.dto.response.LeadResponseDTO;
 import com.leadway.entity.Lead;
 import com.leadway.mapper.CadastroLeadMapper;
+import com.leadway.service.LeadDetalheService;
 import com.leadway.service.LeadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,10 +28,12 @@ import java.util.List;
 public class LeadController {
 
     private final LeadService leadService;
+    private final LeadDetalheService leadDetalheService;
     private final CadastroLeadMapper cadastroLeadMapper = new CadastroLeadMapper();
 
-    public LeadController(LeadService leadService) {
+    public LeadController(LeadService leadService, LeadDetalheService leadDetalheService) {
         this.leadService = leadService;
+        this.leadDetalheService = leadDetalheService;
     }
 
     @Operation(
@@ -48,10 +52,8 @@ public class LeadController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> listarPorId(@PathVariable Integer id){
-        Lead lead = leadService.listarId(id);
-        LeadResponseDTO dto = cadastroLeadMapper.toResponse(lead);
-        return ResponseEntity.status(200).body(dto);
+    public ResponseEntity<LeadDetalhadoResponseDTO> listarPorId(@PathVariable Integer id){
+        return ResponseEntity.status(200).body(leadDetalheService.buscar(id));
     }
 
     @Operation(
