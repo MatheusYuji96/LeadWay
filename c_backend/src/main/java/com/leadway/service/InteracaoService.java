@@ -7,20 +7,10 @@ import com.leadway.exception.LeadNaoEncontradoException;
 import com.leadway.repository.*;
 import org.springframework.stereotype.Service;
 
-import com.leadway.dto.request.InteracaoRequestDTO;
-import com.leadway.dto.response.InteracaoResponseDTO;
-import com.leadway.entity.Contato;
 import com.leadway.entity.Interacao;
 import com.leadway.entity.Lead;
-import com.leadway.repository.ContatoRepository;
 import com.leadway.repository.InteracaoRepository;
 import com.leadway.repository.LeadRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,14 +18,12 @@ public class InteracaoService {
 
     private final InteracaoRepository interacaoRepository;
     private final LeadRepository leadRepository;
-    private final VendedorRepository vendedorRepository;
     private final EtapaRepository etapaRepository;
     private final LeadEtapaHistoricoRepository historicoRepository;
 
-    public InteracaoService(InteracaoRepository interacaoRepository, LeadRepository leadRepository, VendedorRepository vendedorRepository, EtapaRepository etapaRepository, LeadEtapaHistoricoRepository historicoRepository) {
+    public InteracaoService(InteracaoRepository interacaoRepository, LeadRepository leadRepository, EtapaRepository etapaRepository, LeadEtapaHistoricoRepository historicoRepository) {
         this.interacaoRepository = interacaoRepository;
         this.leadRepository = leadRepository;
-        this.vendedorRepository = vendedorRepository;
         this.etapaRepository = etapaRepository;
         this.historicoRepository = historicoRepository;
     }

@@ -1,20 +1,17 @@
 package com.leadway.service;
 
 import com.leadway.dto.response.*;
-import com.leadway.entity.Interacao;
-import com.leadway.entity.Lead;
-import com.leadway.entity.StatusTarefa;
-import com.leadway.entity.Tarefa;
-import com.leadway.repository.InteracaoRepository;
-import com.leadway.repository.LeadEtapaHistoricoRepository;
-import com.leadway.repository.LeadRepository;
-import com.leadway.repository.TarefaRepository;
+import com.leadway.entity.*;
+import com.leadway.exception.EntidadeNaoEncontradaException;
+import com.leadway.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DashboardService {
@@ -23,16 +20,18 @@ public class DashboardService {
     private final TarefaRepository tarefaRepository;
     private final LeadEtapaHistoricoRepository leadEtapaHistoricoRepository;
     private final InteracaoRepository interacaoRepository;
+    private final CadenciaRepository cadenciaRepository;
 
     public DashboardService(
             LeadRepository leadRepository,
             TarefaRepository tarefaRepository,
             LeadEtapaHistoricoRepository leadEtapaHistoricoRepository,
-            InteracaoRepository interacaoRepository) {
+            InteracaoRepository interacaoRepository, CadenciaRepository cadenciaRepository) {
         this.leadRepository = leadRepository;
         this.tarefaRepository = tarefaRepository;
         this.leadEtapaHistoricoRepository = leadEtapaHistoricoRepository;
         this.interacaoRepository = interacaoRepository;
+        this.cadenciaRepository = cadenciaRepository;
     }
 
     public DashboardIndicadoresResponseDTO buscarIndicadores(Integer idVendedor) {
@@ -147,6 +146,17 @@ public class DashboardService {
 
         for (Lead lead : leads) {
 
+            Optional<Cadencia> cadenciaOpt = cadenciaRepository.findByLead_IdAndStatus(
+                    lead.getId(),
+                    StatusCadencia.ATIVA
+            );
+
+            if (cadenciaOpt.isEmpty()) {
+                continue;
+            }
+
+            Cadencia cadencia = cadenciaOpt.get();
+
             if (resultado.size() == 4) {
                 break;
             }
@@ -169,34 +179,39 @@ public class DashboardService {
                 }
             }
 
-            Tarefa proximaTarefa = tarefaRepository
-                    .findFirstByLead_IdAndStatusAndDataPrazoGreaterThanEqualOrderByDataPrazoAsc(
-                            lead.getId(),
-                            StatusTarefa.ABERTA,
-                            horarioAtual
-                    );
+            LocalDateTime dataReferencia = ultimoContato;
+
+            if (dataReferencia == null) {
+                dataReferencia = cadencia.getDataInicio();
+            }
+
+            if (dataReferencia == null) {
+                continue;
+            }
+
+            LocalDateTime proximoContato = calcularProximoContato(dataReferencia, cadencia);
+
+            if (proximoContato == null) {
+                continue;
+            }
+
+            if (!proximoContato.isBefore(horarioAtual)) {
+                continue;
+            }
+
+            Long minutosAtraso = Duration.between(proximoContato, horarioAtual).toMinutes();
+
+            String descricaoCadencia = formatarAtraso(minutosAtraso);
 
             String etapa = null;
-
-            if (lead.getEtapa() != null) {
-                etapa = lead.getEtapa().getNome();
-            }
-
-            String proximaAcao = null;
-            LocalDateTime dataProximaAcao = null;
-
-            if (proximaTarefa != null) {
-                proximaAcao = proximaTarefa.getDescricao();
-                dataProximaAcao = proximaTarefa.getDataPrazo();
-            }
 
             LeadAtencaoResponseDTO dto = new LeadAtencaoResponseDTO(
                     lead.getId(),
                     lead.getNomeFantasia(),
                     etapa,
-                    ultimoContato,
-                    proximaAcao,
-                    dataProximaAcao
+                    lead.getPrioridade(),
+                    descricaoCadencia,
+                    ultimoContato
             );
 
             resultado.add(dto);
@@ -204,6 +219,55 @@ public class DashboardService {
         }
         return resultado;
 
+    }
+
+    private String formatarAtraso(Long minutosAtraso) {
+        Long dias = minutosAtraso / (24*60);
+
+        if (dias == 0) {
+            return "Atrasado há menos de um dia.";
+        }
+
+        if (dias == 1) {
+            return "Atrasado há 1 dia";
+        }
+
+        return "Atrasado há " + dias  + " dias.";
+    }
+
+    private LocalDateTime calcularProximoContato(
+            LocalDateTime ultimoContato,
+            Cadencia cadencia) {
+
+        FrequenciaCadencia frequencia = cadencia.getFrequencia();
+
+        switch (frequencia) {
+
+            case DIARIA:
+                return ultimoContato.plusDays(1);
+
+            case SEMANAL:
+                return ultimoContato.plusWeeks(1);
+
+            case QUINZENAL:
+                return ultimoContato.plusDays(15);
+
+            case MENSAL:
+                return ultimoContato.plusMonths(1);
+
+            case PERSONALIZADA:
+
+                Integer intervaloDias = cadencia.getIntervaloDias();
+
+                if (intervaloDias == null || intervaloDias <= 0) {
+                    return null;
+                }
+
+                return ultimoContato.plusDays(intervaloDias);
+
+            default:
+                return null;
+        }
     }
 
 }
