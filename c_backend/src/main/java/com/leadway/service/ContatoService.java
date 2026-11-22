@@ -2,6 +2,7 @@ package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarContatoRequestDTO;
 import com.leadway.dto.request.ContatoRequestDTO;
+import com.leadway.entity.ClassificacaoContato;
 import com.leadway.entity.Contato;
 import com.leadway.entity.Lead;
 import com.leadway.exception.*;

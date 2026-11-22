@@ -4,11 +4,13 @@ import com.leadway.dto.response.FunilResponseDTO;
 import com.leadway.entity.Lead;
 import com.leadway.entity.LeadEtapaHistorico;
 import com.leadway.repository.LeadEtapaHistoricoRepository;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Component
 public class FunilMapper {
 
     private final LeadEtapaHistoricoRepository leadEtapaHistoricoRepository;

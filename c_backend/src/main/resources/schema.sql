@@ -17,12 +17,16 @@ USE leadway;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS preferencias_vendedor;
+DROP TABLE IF EXISTS cal_integracao;
+DROP TABLE IF EXISTS cadencia;
 DROP TABLE IF EXISTS tarefa;
 DROP TABLE IF EXISTS interacao;
 DROP TABLE IF EXISTS contato;
 DROP TABLE IF EXISTS lead_etapa_historico;
+DROP TABLE IF EXISTS log;
 DROP TABLE IF EXISTS leads;
-DROP TABLE IF EXISTS vendedor;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS cargo;
 DROP TABLE IF EXISTS etapa;
 DROP TABLE IF EXISTS endereco;
 DROP TABLE IF EXISTS setor;
@@ -65,28 +69,45 @@ CREATE TABLE etapa (
 ) ENGINE=InnoDB;
 
 -- ========================================================
--- 4. TABELA VENDEDOR
+-- 4. TABELA CARGO (feature/teste-all: RBAC por cargo)
 -- ========================================================
 
-CREATE TABLE vendedor (
+CREATE TABLE cargo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(90) NOT NULL UNIQUE,
+    descricao VARCHAR(145)
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- 5. TABELA USUARIO (entidade Vendedor)
+-- ========================================================
+
+CREATE TABLE usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
     lider_id INT,
+    cargo_id INT NOT NULL,
     cod_vendedor VARCHAR(30),
     nome VARCHAR(190) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(50) NOT NULL,
     telefone CHAR(11) NOT NULL,
     regiao VARCHAR(100),
+    tentativas_login INT NOT NULL DEFAULT 0,
+    bloqueado_ate DATETIME NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT fk_vendedor_lider
         FOREIGN KEY (lider_id)
-        REFERENCES vendedor(id)
-        ON DELETE SET NULL
+        REFERENCES usuario(id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_vendedor_cargo
+        FOREIGN KEY (cargo_id)
+        REFERENCES cargo(id)
 ) ENGINE=InnoDB;
 
 -- ========================================================
--- 5. TABELA LEADS
+-- 6. TABELA LEADS
 -- ========================================================
 
 CREATE TABLE leads (
@@ -104,7 +125,7 @@ CREATE TABLE leads (
     telefone CHAR(11) NOT NULL,
 
     prioridade VARCHAR(30) NULL DEFAULT NULL,
-    potencial INT NOT NULL,
+    potencial VARCHAR(30) NOT NULL,
     farol VARCHAR(20) NULL DEFAULT NULL,
 
     data_primeiro_contato DATETIME,
@@ -133,7 +154,7 @@ CREATE TABLE leads (
 
     CONSTRAINT fk_leads_vendedor
         FOREIGN KEY (vendedor_id)
-        REFERENCES vendedor(id)
+        REFERENCES usuario(id)
         ON DELETE SET NULL,
 
     CONSTRAINT fk_leads_etapa
@@ -212,6 +233,7 @@ CREATE TABLE interacao (
 
     contato_id INT,
     lead_id INT,
+    usuario_id INT,
 
     tipo VARCHAR(45) NOT NULL,
     data_hora DATETIME,
@@ -232,7 +254,12 @@ CREATE TABLE interacao (
     CONSTRAINT fk_interacao_lead
         FOREIGN KEY (lead_id)
         REFERENCES leads(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_interacao_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuario(id)
+        ON DELETE SET NULL
 
 ) ENGINE=InnoDB;
 
@@ -297,6 +324,69 @@ CREATE TABLE preferencias_vendedor (
 ) ENGINE=InnoDB;
 
 -- ========================================================
+-- 11. TABELA CADENCIA (feature/calcom + feature/teste-all)
+-- ========================================================
+
+CREATE TABLE cadencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    contato_id INT NULL,
+    lead_id INT NOT NULL,
+    responsavel_id INT NULL,
+    frequencia ENUM('DIARIA','SEMANAL','QUINZENAL','MENSAL','PERSONALIZADA') NOT NULL,
+    intervalo_dias INT NULL,
+    data_inicio DATETIME NULL,
+    data_fim DATETIME NULL,
+    status ENUM('ATIVA','PAUSADA','CONCLUIDA','CANCELADA') NOT NULL DEFAULT 'ATIVA',
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cadencia_contato
+        FOREIGN KEY (contato_id) REFERENCES contato(id) ON DELETE SET NULL,
+
+    CONSTRAINT fk_cadencia_lead
+        FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_cadencia_responsavel
+        FOREIGN KEY (responsavel_id) REFERENCES usuario(id) ON DELETE SET NULL
+
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- 12. TABELA LOG (feature/calcom: transferência de leads)
+-- ========================================================
+
+CREATE TABLE log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo VARCHAR(45) NOT NULL,
+    mensagem VARCHAR(100) NOT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- 13. TABELA CAL_INTEGRACAO (feature/calcom)
+-- ========================================================
+
+CREATE TABLE cal_integracao (
+    usuario_id INT NOT NULL PRIMARY KEY,
+    cal_username VARCHAR(100) NOT NULL,
+    cal_api_key VARCHAR(255) NOT NULL,
+    conectado_em DATETIME NOT NULL,
+
+    CONSTRAINT fk_cal_integracao_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+
+) ENGINE=InnoDB;
+
+-- ========================================================
+-- INSERÇÃO DE CARGOS (RBAC do feature/teste-all)
+-- ========================================================
+
+INSERT INTO cargo (id, nome, descricao) VALUES
+(1, 'ADMINISTRADOR', 'Administrador da organização'),
+(2, 'GERENTE', 'Gerencia equipe de vendedores'),
+(3, 'VENDEDOR', 'Responsável pelo atendimento comercial');
+
+-- ========================================================
 -- INSERÇÃO DE SETORES
 -- ========================================================
 
@@ -327,13 +417,17 @@ SHOW TABLES;
 DESCRIBE setor;
 DESCRIBE endereco;
 DESCRIBE etapa;
-DESCRIBE vendedor;
+DESCRIBE cargo;
+DESCRIBE usuario;
 DESCRIBE leads;
 DESCRIBE contato;
 DESCRIBE lead_etapa_historico;
 DESCRIBE interacao;
 DESCRIBE tarefa;
 DESCRIBE preferencias_vendedor;
+DESCRIBE cadencia;
+DESCRIBE log;
+DESCRIBE cal_integracao;
 
 -- ========================================================
 -- CONSULTAR AS ETAPAS CADASTRADAS

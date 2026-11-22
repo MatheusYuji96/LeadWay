@@ -1,7 +1,6 @@
 package com.leadway.service;
 
 import com.leadway.dto.request.AtualizarLeadRequestDTO;
-import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.CadastroLeadRequestDTO;
 import com.leadway.dto.request.TransferirLeadRequestDTO;
 import com.leadway.dto.response.CepResponseDTO;
@@ -12,13 +11,20 @@ import com.leadway.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+/**
+ * Base do feature/teste-all (vendedor opcional, histórico de etapa, prioridade,
+ * soft delete) com transferência, log e ViaCep portados do feature/calcom.
+ */
 @Service
 public class LeadService {
 
     private final LeadRepository leadRepository;
+    private final LeadEtapaHistoricoRepository historicoRepository;
     private final EtapaRepository etapaRepository;
     private final SetorRepository setorRepository;
     private final VendedorRepository vendedorRepository;
@@ -27,7 +33,15 @@ public class LeadService {
     private final LogRepository logRepository;
     private final CepService cepService;
 
-    public LeadService(LeadRepository leadRepository, EtapaRepository etapaRepository, SetorRepository setorRepository, VendedorRepository vendedorRepository, EnderecoRepository enderecoRepository, LogRepository logRepository, CepService cepService) {
+    public LeadService(LeadRepository leadRepository,
+                       EtapaRepository etapaRepository,
+                       SetorRepository setorRepository,
+                       VendedorRepository vendedorRepository,
+                       EnderecoRepository enderecoRepository,
+                       LeadEtapaHistoricoRepository historicoRepository,
+                       LogRepository logRepository,
+                       CepService cepService) {
+        this.historicoRepository = historicoRepository;
         this.leadRepository = leadRepository;
         this.etapaRepository = etapaRepository;
         this.setorRepository = setorRepository;
@@ -38,37 +52,32 @@ public class LeadService {
     }
 
     public List<Lead> listarLeads() {
-        List<Lead> lista = leadRepository.findAll();
-        return lista;
+        return leadRepository.findAll();
     }
 
     public List<Lead> listarPorFiltro(String termo, Integer vendedorId, String fase) {
-        List<Lead> lista = leadRepository.findByFiltros(termo, vendedorId, fase);
-        return lista;
+        return leadRepository.findByFiltros(termo, vendedorId, fase);
     }
 
-    public Lead listarId(Integer id){
-        Optional<Lead> leadOpt = leadRepository.findById(id);
-        if (leadOpt.isEmpty()){
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
-        }
-        Lead lead = leadOpt.get();
-        return lead;
+    /** Mantido para LeadDetalheService (feature/calcom). */
+    public Lead listarId(Integer id) {
+        return leadRepository.findById(id)
+                .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
     }
 
+    /** feature/calcom: transferência com log, agora autorizada no controller. */
     @Transactional
     public void transferir(Integer leadId, TransferirLeadRequestDTO dto) {
-        Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new LeadNaoEncontradoException("Lead não consta nos registros"));
-
+        Lead lead = listarId(leadId);
         Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
                 .orElseThrow(() -> new VendedorNaoEncontradoException("Vendedor não consta nos registros"));
-
-        if (!Boolean.TRUE.equals(vendedor.getAtivo())) {
+        if (!Boolean.TRUE.equals(vendedor.getAtivo()))
             throw new InativoException("Vendedor está inativo");
-        }
 
+        boolean responsavelDiferente = lead.getVendedor() == null
+                || !lead.getVendedor().getId().equals(vendedor.getId());
         lead.setVendedor(vendedor);
+        if (responsavelDiferente) lead.setVinculadoEm(LocalDateTime.now());
         leadRepository.save(lead);
 
         Log log = new Log();
@@ -80,198 +89,173 @@ public class LeadService {
     private String montarMensagemTransferencia(Integer leadId, String nomeVendedor, String motivacao) {
         StringBuilder mensagem = new StringBuilder("Lead ").append(leadId)
                 .append(" transferido para ").append(nomeVendedor);
-        if (motivacao != null && !motivacao.isBlank()) {
-            mensagem.append(" - ").append(motivacao);
-        }
+        if (motivacao != null && !motivacao.isBlank()) mensagem.append(" - ").append(motivacao);
         String texto = mensagem.toString();
         return texto.length() <= 100 ? texto : texto.substring(0, 100);
     }
 
     public Lead salvar(CadastroLeadRequestDTO dto) {
-        if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())){
+        if (leadRepository.existsByEmailIgnoreCase(dto.getEmail()))
             throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
-        }
-        if (leadRepository.existsBycnpj(dto.getCnpj())){
+        if (leadRepository.existsBycnpj(dto.getCnpj()))
             throw new CNPJJaCadastradoException("CNPJ já consta nos registros");
-        }
+
         Lead cadastro = cadastroLeadMapper.toEntity(dto);
-        if (dto.getVendedorId() == null) {
-            throw new VendedorNaoEncontradoException("Vendedor responsável é obrigatório");
+        if (dto.getVendedorId() != null) {
+            Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
+            if (vendedorOpt.isEmpty())
+                throw new VendedorNaoEncontradoException("Vendedor não encontrado");
+            Vendedor vendedor = vendedorOpt.get();
+            if (vendedor.getAtivo()) {
+                cadastro.setVendedor(vendedor);
+                cadastro.setVinculadoEm(LocalDateTime.now());
+            }
         }
-        Optional<Vendedor> vendedorOpt = vendedorRepository.findById(dto.getVendedorId());
-        if (vendedorOpt.isEmpty()) {
-            throw new VendedorNaoEncontradoException("Vendedor não encontrado");
-        }
-        Vendedor vendedor = vendedorOpt.get();
-        if (!vendedor.getAtivo()) {
-            throw new InativoException("Vendedor responsável está inativo");
-        }
-        cadastro.setVendedor(vendedor);
-        if (dto.getSetorId() == null){
+        if (dto.getSetorId() == null)
             throw new SetorObrigatorioException("Obrigatório informar um setor de mercado");
-        }
-        Optional<Setor> setorOpt = setorRepository.findById(dto.getSetorId());
-        if (setorOpt.isEmpty()) {
-            throw new SetorNaoExistenteException("Setor não encontrado nos registros");
-        }
-        Setor setor = setorOpt.get();
+        Setor setor = setorRepository.findById(dto.getSetorId())
+                .orElseThrow(() -> new SetorNaoExistenteException("Setor não encontrado nos registros"));
         cadastro.setSetor(setor);
+
         Etapa etapa;
         if (dto.getEtapaId() == null) {
-            Optional<Etapa> etapaOpt = etapaRepository.findFirstByOrderByIdAsc();
-            if (etapaOpt.isEmpty()) {
-                throw new EtapaNaoRegistradaException("Etapa não registrada");
-            }
-            etapa = etapaOpt.get();
-            cadastro.setEtapa(etapa);
+            etapa = etapaRepository.findFirstByOrderByIdAsc()
+                    .orElseThrow(() -> new EtapaNaoRegistradaException("Etapa não registrada"));
         } else {
-            Optional<Etapa> etapaOpt = etapaRepository.findById(dto.getEtapaId());
-            if (etapaOpt.isEmpty()) {
-                throw new EtapaNaoRegistradaException("Etapa não registrada");
-            }
-            etapa = etapaOpt.get();
-            cadastro.setEtapa(etapa);
+            etapa = etapaRepository.findById(dto.getEtapaId())
+                    .orElseThrow(() -> new EtapaNaoRegistradaException("Etapa não registrada"));
         }
-        if (dto.getEndereco() == null) {
+        cadastro.setEtapa(etapa);
+
+        if (dto.getEndereco() == null)
             throw new EnderecoObrigatorioException("Endereço incompleto. Preencha-o corretamente");
-        }
+
+        // feature/calcom: enriquecimento ViaCep, preservando o que o cliente informou.
         CadastroLeadRequestDTO.EnderecoDto enderecoDto = dto.getEndereco();
         String cepNormal = cepService.normalizar(enderecoDto.getCep());
         enderecoDto.setCep(cepNormal);
-        CepResponseDTO cepResponseDTO = cepService.consultar(cepNormal);
-        preencherEnderecoSeVazio(enderecoDto, cepResponseDTO);
-
+        preencherEnderecoSeVazio(enderecoDto, cepService.consultar(cepNormal));
         cadastro.setEndereco(cadastroLeadMapper.toEndereco(enderecoDto));
+
         Endereco enderecoSalvar = enderecoRepository.save(cadastro.getEndereco());
         cadastro.setEndereco(enderecoSalvar);
         Lead leadCadastrar = leadRepository.save(cadastro);
+        registrarEtapa(leadCadastrar);
         return leadCadastrar;
     }
 
     private void preencherEnderecoSeVazio(CadastroLeadRequestDTO.EnderecoDto endDto, CepResponseDTO cepInfo) {
-        if (isBlank(endDto.getRua())){
-            endDto.setRua(cepInfo.getRua());
-        }
-        if (isBlank(endDto.getBairro())){
-            endDto.setBairro(cepInfo.getBairro());
-        }
-        if (isBlank(endDto.getCidade())){
-            endDto.setCidade(cepInfo.getCidade());
-        }
-        if (isBlank(endDto.getEstado())){
-            endDto.setEstado(cepInfo.getEstado());
-        }
-        if (isBlank(endDto.getPais())){
-            endDto.setPais(cepInfo.getPais());
-        }
+        if (isBlank(endDto.getRua())) endDto.setRua(cepInfo.getRua());
+        if (isBlank(endDto.getBairro())) endDto.setBairro(cepInfo.getBairro());
+        if (isBlank(endDto.getCidade())) endDto.setCidade(cepInfo.getCidade());
+        if (isBlank(endDto.getEstado())) endDto.setEstado(cepInfo.getEstado());
+        if (isBlank(endDto.getPais())) endDto.setPais(cepInfo.getPais());
     }
-    private boolean isBlank(String v) { return v == null || v.trim().isEmpty(); }
+
+    private boolean isBlank(String valor) {
+        return valor == null || valor.trim().isEmpty();
+    }
 
     public Lead atualizar(Integer id, AtualizarLeadRequestDTO dto) {
-        if (dto == null){
-            throw new LeadVazioException("Os campos estão vazios");
-        }
-        Optional<Lead> leadOpt = leadRepository.findById(id);
-        if (leadOpt.isEmpty()){
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
-        }
-        Lead lead = leadOpt.get();
+        if (dto == null) throw new LeadVazioException("Os campos estão vazios");
+        Lead lead = listarId(id);
         lead.setId(id);
+
         if (dto.getEmail() != null) {
-            if (!dto.getEmail().equalsIgnoreCase(lead.getEmail())) {
-                if (leadRepository.existsByEmailIgnoreCase(dto.getEmail())) {
-                    throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
-                }
-            }
+            if (!dto.getEmail().equalsIgnoreCase(lead.getEmail())
+                    && leadRepository.existsByEmailIgnoreCase(dto.getEmail()))
+                throw new EmailJaCadastradoException("Email já cadastrado anteriormente");
             lead.setEmail(dto.getEmail());
         }
-        if (dto.getTelefone() != null){
-            lead.setTelefone(dto.getTelefone());
-        }
-        if (dto.getPotencial() != null){
-            lead.setPotencial(dto.getPotencial());
-        }
-        if (dto.getPrioridade() != null){
+        if (dto.getTelefone() != null) lead.setTelefone(dto.getTelefone());
+        if (dto.getPrioridade() != null) {
+            if (!Set.of("ALTA", "MEDIA", "BAIXA").contains(dto.getPrioridade()))
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "Prioridade inválida");
             lead.setPrioridade(dto.getPrioridade());
         }
-        if (dto.getDataPrimeiroContato() != null){
-            lead.setDataPrimeiroContato(dto.getDataPrimeiroContato());
-        }
-        if (dto.getDataPrimeiraVisita() != null){
-            if (dto.getDataPrimeiraVisita().isBefore(lead.getDataPrimeiroContato())){
+        if (dto.getPotencial() != null) lead.setPotencial(dto.getPotencial());
+        if (dto.getDataPrimeiroContato() != null) lead.setDataPrimeiroContato(dto.getDataPrimeiroContato());
+        if (dto.getDataPrimeiraVisita() != null) {
+            if (lead.getDataPrimeiroContato() != null && dto.getDataPrimeiraVisita().isBefore(lead.getDataPrimeiroContato()))
                 throw new DataInvalidaException("Data informada não pode ser anterior à data do primeiro contato");
-            }
             lead.setDataPrimeiraVisita(dto.getDataPrimeiraVisita());
         }
-        if (dto.getMotivoPerda() != null){
-            lead.setMotivoPerda(dto.getMotivoPerda());
-        }
-        if (dto.getAtivo() != null){
+        if (dto.getMotivoPerda() != null) lead.setMotivoPerda(dto.getMotivoPerda());
+        if (dto.getAtivo() != null) {
+            if (!dto.getAtivo() && (lead.getMotivoPerda() == null || lead.getMotivoPerda().isBlank()))
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "Motivo da perda obrigatório");
             lead.setAtivo(dto.getAtivo());
         }
-        if (dto.getEndereco() != null){
+
+        if (dto.getEndereco() != null) {
             Endereco endereco = lead.getEndereco();
             AtualizarLeadRequestDTO.EnderecoDto enderecoDto = dto.getEndereco();
-
-            CepResponseDTO cepResponseDTO = null;
-            if (enderecoDto.getCep() != null){
+            if (enderecoDto.getCep() != null) {
                 String cepNormal = cepService.normalizar(enderecoDto.getCep());
                 enderecoDto.setCep(cepNormal);
-                cepResponseDTO = cepService.consultar(cepNormal);
                 endereco.setCep(cepNormal);
-
-                if (enderecoDto.getRua() == null && !isBlank(cepResponseDTO.getRua())) endereco.setRua(cepResponseDTO.getRua());
-                if (enderecoDto.getBairro() == null && !isBlank(cepResponseDTO.getBairro())) endereco.setBairro(cepResponseDTO.getBairro());
-                if (enderecoDto.getCidade() == null && !isBlank(cepResponseDTO.getCidade())) endereco.setCidade(cepResponseDTO.getCidade());
-                if (enderecoDto.getEstado() == null && !isBlank(cepResponseDTO.getEstado())) endereco.setEstado(cepResponseDTO.getEstado());
+                CepResponseDTO cepInfo = cepService.consultar(cepNormal);
+                if (enderecoDto.getRua() == null) endereco.setRua(cepInfo.getRua());
+                if (enderecoDto.getBairro() == null) endereco.setBairro(cepInfo.getBairro());
+                if (enderecoDto.getCidade() == null) endereco.setCidade(cepInfo.getCidade());
+                if (enderecoDto.getEstado() == null) endereco.setEstado(cepInfo.getEstado());
+                // AtualizarLeadRequestDTO.EnderecoDto não expõe pais: preserva o valor já cadastrado.
+                if (endereco.getPais() == null) endereco.setPais(cepInfo.getPais());
             }
-            if (enderecoDto.getRua() != null){
-                endereco.setRua(enderecoDto.getRua());
-            }
-            if (enderecoDto.getComplemento() != null){
-                endereco.setComplemento(enderecoDto.getComplemento());
-            }
-            if (enderecoDto.getNumero() != null){
-                endereco.setNumero(enderecoDto.getNumero());
-            }
-            if (enderecoDto.getBairro() != null){
-                endereco.setBairro(enderecoDto.getBairro());
-            }
-            if (enderecoDto.getCidade() != null){
-                endereco.setCidade(enderecoDto.getCidade());
-            }
-            if (enderecoDto.getEstado() != null){
-                endereco.setEstado(enderecoDto.getEstado());
-            }
+            if (enderecoDto.getRua() != null) endereco.setRua(enderecoDto.getRua());
+            if (enderecoDto.getComplemento() != null) endereco.setComplemento(enderecoDto.getComplemento());
+            if (enderecoDto.getNumero() != null) endereco.setNumero(enderecoDto.getNumero());
+            if (enderecoDto.getBairro() != null) endereco.setBairro(enderecoDto.getBairro());
+            if (enderecoDto.getCidade() != null) endereco.setCidade(enderecoDto.getCidade());
+            if (enderecoDto.getEstado() != null) endereco.setEstado(enderecoDto.getEstado());
         }
+
         if (dto.getVendedorId() != null) {
-            Optional<Vendedor> vendedorOpt =
-                    vendedorRepository.findById(dto.getVendedorId());
-            if (vendedorOpt.isEmpty()) {
-                throw new VendedorNaoEncontradoException("Vendedor não consta nos registros");
-            }
-            Vendedor vendedor = vendedorOpt.get();
-            if (!vendedor.getAtivo()){
-                throw new InativoException("Vendedor solicitado está inativo");
-            }
+            Vendedor vendedor = vendedorRepository.findById(dto.getVendedorId())
+                    .orElseThrow(() -> new VendedorNaoEncontradoException("Vendedor não consta nos registros"));
+            if (!vendedor.getAtivo()) throw new InativoException("Vendedor solicitado está inativo");
+            if (lead.getVendedor() == null || !lead.getVendedor().getId().equals(vendedor.getId()))
+                lead.setVinculadoEm(LocalDateTime.now());
             lead.setVendedor(vendedor);
         }
-        if (dto.getEtapaId() != null){
-            Optional<Etapa> etapaOpt = etapaRepository.findById(dto.getEtapaId());
-            if (etapaOpt.isEmpty()){
-                throw new EtapaNaoRegistradaException("Etapa não consta nos registros");
+        if (dto.getEtapaId() != null) {
+            Etapa etapa = etapaRepository.findById(dto.getEtapaId())
+                    .orElseThrow(() -> new EtapaNaoRegistradaException("Etapa não consta nos registros"));
+            if (lead.getEtapa() == null || !lead.getEtapa().getId().equals(etapa.getId())) {
+                lead.setEtapa(etapa);
+                registrarEtapa(lead);
             }
-            Etapa etapa = etapaOpt.get();
-            lead.setEtapa(etapa);
         }
-        Lead cadastradoNovo = leadRepository.save(lead);
-        return cadastradoNovo;
+        return leadRepository.save(lead);
     }
 
-    public void apagar(Integer id){
-        if (!leadRepository.existsById(id)){
-            throw new LeadNaoEncontradoException("Lead não consta nos registros");
-        }
-        leadRepository.deleteById(id);
+    /** Última entrada registrada na etapa atual. Não inventa datas para históricos ausentes. */
+    public LocalDateTime obterEntradaEtapaAtual(Integer leadId) {
+        Lead lead = listarId(leadId);
+        if (lead.getEtapa() == null) return null;
+        return historicoRepository
+                .findFirstByLeadIdAndEtapaIdOrderByCriadoEmDescIdDesc(leadId, lead.getEtapa().getId())
+                .map(LeadEtapaHistorico::getCriadoEm)
+                .orElse(null);
+    }
+
+    /** Único dono da escrita do histórico de etapa (compartilhado com InteracaoService). */
+    public void registrarEtapa(Lead lead) {
+        if (lead.getEtapa() == null) return;
+        LeadEtapaHistorico historico = new LeadEtapaHistorico();
+        historico.setLead(lead);
+        historico.setEtapa(lead.getEtapa());
+        historicoRepository.save(historico);
+    }
+
+    public void apagar(Integer id) {
+        Lead lead = listarId(id);
+        if (lead.getMotivoPerda() == null || lead.getMotivoPerda().isBlank())
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Informe o motivo da perda antes de desativar");
+        lead.setAtivo(false);
+        leadRepository.save(lead);
     }
 }

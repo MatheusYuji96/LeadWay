@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface CadenciaRepository extends JpaRepository<Cadencia, Integer> {
 
+    /** Mantido do feature/calcom: alimenta CadenciaMapper e o detalhe do lead. */
     List<Cadencia> findByLead_IdOrderByCriadoEmDesc(Integer leadId);
 }

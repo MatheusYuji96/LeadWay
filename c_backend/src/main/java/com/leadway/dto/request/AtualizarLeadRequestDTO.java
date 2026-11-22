@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -51,18 +49,14 @@ public class AtualizarLeadRequestDTO {
     private String telefone;
 
     @Schema(
-            description = "Potencial do Lead definido pelo usuário (de 1 a 5)",
+            description = "Potencial do Lead definido pelo usuário",
             example = "5"
     )
-    @Min(1)
-    @Max(5)
+    @jakarta.validation.constraints.Min(1)
+    @jakarta.validation.constraints.Max(5)
     private Integer potencial;
 
-    @Schema(
-            description = "Prioridade do Lead conforme o banco definitivo",
-            example = "ALTA"
-    )
-    @Pattern(regexp = "ALTA|MEDIA|BAIXA", message = "Prioridade deve ser ALTA, MEDIA ou BAIXA")
+    @jakarta.validation.constraints.Pattern(regexp="ALTA|MEDIA|BAIXA")
     private String prioridade;
 
     @Schema(
@@ -238,20 +232,15 @@ public class AtualizarLeadRequestDTO {
         this.telefone = telefone;
     }
 
+    public String getPrioridade() { return prioridade; }
+    public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
+
     public Integer getPotencial() {
         return potencial;
     }
 
     public void setPotencial(Integer potencial) {
         this.potencial = potencial;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
     }
 
     public LocalDateTime getDataPrimeiroContato() {

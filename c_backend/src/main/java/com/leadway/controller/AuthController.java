@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService service;
+    private final com.leadway.service.SessionService sessions;
 
-    public AuthController(AuthService service) {
+    public AuthController(AuthService service, com.leadway.service.SessionService sessions) {
         this.service = service;
+        this.sessions = sessions;
     }
 
     @Operation(
@@ -43,13 +45,9 @@ public class AuthController {
     public ResponseEntity<VendedorResponseDTO> cadastrar(
             @Valid @RequestBody CadastroVendedorRequestDTO dto) {
 
-        VendedorResponseDTO vendedor = VendedorMapper.toResponse(
-                service.cadastrar(
-                        VendedorMapper.toEntity(dto),
-                        dto.getConfirmarSenha(),
-                        dto.getCargoId()
-                )
-        );
+        com.leadway.entity.Vendedor created = service.cadastrar(VendedorMapper.toEntity(dto),dto.getConfirmarSenha());
+        VendedorResponseDTO vendedor = VendedorMapper.toResponse(created);
+        vendedor.setToken(sessions.issue(created));
 
         return ResponseEntity.status(201).body(vendedor);
 
@@ -65,13 +63,23 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<VendedorResponseDTO> autenticar(@Valid @RequestBody LoginRequestDTO dto) {
-        VendedorResponseDTO vendedor = VendedorMapper.toResponse(
-                service.autenticar(
-                        dto.getEmail(),
-                        dto.getSenha()
-                )
-        );
+        com.leadway.entity.Vendedor logged = service.autenticar(dto.getEmail(),dto.getSenha());
+        VendedorResponseDTO vendedor = VendedorMapper.toResponse(logged);
+        vendedor.setToken(sessions.issue(logged));
 
         return ResponseEntity.status(200).body(vendedor);
     }
+    @org.springframework.web.bind.annotation.GetMapping("/me")
+    public ResponseEntity<VendedorResponseDTO> me(
+            @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String token) {
+        return ResponseEntity.ok(VendedorMapper.toResponse(sessions.require(token)));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String token) {
+        sessions.revoke(token);
+        return ResponseEntity.noContent().build();
+    }
+
 }

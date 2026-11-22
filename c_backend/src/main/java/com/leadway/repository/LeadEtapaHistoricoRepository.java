@@ -10,7 +10,12 @@ import java.util.List;
 
 public interface LeadEtapaHistoricoRepository extends JpaRepository<LeadEtapaHistorico, Integer> {
 
+    /** feature/teste-all: data de entrada na etapa atual. */
+    java.util.Optional<LeadEtapaHistorico> findFirstByLeadIdAndEtapaIdOrderByCriadoEmDescIdDesc(Integer leadId, Integer etapaId);
+
+    /** feature/calcom: histórico completo do funil, usado por FunilMapper e LeadDetalheService. */
     List<LeadEtapaHistorico> findByLead_IdOrderByCriadoEmDesc(Integer leadId);
+
 
     @Query(value = """
      SELECT

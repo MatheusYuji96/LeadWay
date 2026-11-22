@@ -4,9 +4,11 @@ import com.leadway.dto.response.LeadDetalhadoResponseDTO;
 import com.leadway.dto.response.TimelineResponseDTO;
 import com.leadway.entity.Interacao;
 import com.leadway.entity.Lead;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 public class LeadDetalheMapper {
 
     public TimelineResponseDTO toTimeline(Interacao interacao) {

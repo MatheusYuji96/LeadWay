@@ -35,7 +35,7 @@ public class CalIntegracaoController {
             description = "Valida a API key no Cal.com e a guarda. A key nunca é devolvida.")
     @PutMapping
     public ResponseEntity<CalIntegracaoResponseDTO> conectar(@RequestBody CalConectarRequestDTO dto) {
-        return ResponseEntity.ok(calIntegracaoService.conectar(dto.getUsuarioId(), dto.getApiKey()));
+        return ResponseEntity.ok(calIntegracaoService.conectar(dto.getVendedorId(), dto.getApiKey()));
     }
 
     @Operation(summary = "Desconecta o Cal.com",

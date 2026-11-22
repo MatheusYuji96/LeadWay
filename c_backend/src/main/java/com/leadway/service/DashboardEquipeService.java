@@ -1,25 +1,18 @@
 package com.leadway.service;
 
-import com.leadway.dto.response.DashboardEquipeIndicadoresResponseDTO;
 import com.leadway.dto.response.DashboardEquipeResponseDTO;
-import com.leadway.dto.response.DesempenhoVendedorResponseDTO;
-import com.leadway.dto.response.LeadParadoResponseDTO;
+import com.leadway.entity.Contato;
 import com.leadway.entity.Lead;
 import com.leadway.entity.Vendedor;
-import com.leadway.exception.VendedorNaoEncontradoException;
 import com.leadway.repository.ContatoRepository;
-import com.leadway.repository.InteracaoRepository;
 import com.leadway.repository.LeadRepository;
 import com.leadway.repository.VendedorRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,26 +22,27 @@ public class DashboardEquipeService {
     private final VendedorRepository vendedorRepository;
     private final LeadRepository leadRepository;
     private final ContatoRepository contatoRepository;
-    private final InteracaoRepository interacaoRepository;
+    private final SessionService sessions;
+    private final DashboardService dashboardService;
 
-    private static final int DIAS_PARADO = 7;
-    private static final int ORDEM_ETAPA_FECHADA = 5;
-    private static final int ORDEM_ETAPA_PROPOSTA = 3;
-    private static final int TAMANHO_MAXIMO_LEADS_PARADOS = 50;
-
-
-    public DashboardEquipeService(VendedorRepository vendedorRepository, LeadRepository leadRepository, ContatoRepository contatoRepository, InteracaoRepository interacaoRepository) {
+    public DashboardEquipeService(VendedorRepository vendedorRepository, LeadRepository leadRepository,
+                                  ContatoRepository contatoRepository, SessionService sessions, DashboardService dashboardService) {
         this.vendedorRepository = vendedorRepository;
         this.leadRepository = leadRepository;
         this.contatoRepository = contatoRepository;
-        this.interacaoRepository = interacaoRepository;
+        this.sessions = sessions;
+        this.dashboardService = dashboardService;
     }
 
     @Transactional(readOnly = true)
-    public DashboardEquipeResponseDTO buscarResumo() {
-        List<Vendedor> vendedores = vendedorRepository.findAll();
+    public DashboardEquipeResponseDTO buscarResumo(Vendedor actor) {
+        Integer org = sessions.root(actor).getId();
+        List<Vendedor> vendedores = vendedorRepository.findAll().stream()
+                .filter(v -> sessions.root(v).getId().equals(org))
+                .filter(v -> sessions.role(v).equals("VENDEDOR")).toList();
         List<Lead> leads = leadRepository.findAll().stream()
-                .filter(lead -> Boolean.TRUE.equals(lead.getAtivo())).toList();
+                .filter(lead -> Boolean.TRUE.equals(lead.getAtivo()))
+                .filter(lead -> lead.getVendedor() != null && sessions.root(lead.getVendedor()).getId().equals(org)).toList();
         Map<Integer, Long> contatosPorLead = contatoRepository.findAll().stream()
                 .filter(contato -> contato.getLead() != null && contato.getLead().getId() != null)
                 .collect(Collectors.groupingBy(contato -> contato.getLead().getId(), Collectors.counting()));
@@ -73,8 +67,7 @@ public class DashboardEquipeService {
             int contatos = carteira.stream().mapToInt(lead -> contatosPorLead.getOrDefault(lead.getId(), 0L).intValue()).sum();
             int propostas = (int) carteira.stream().filter(lead -> lead.getEtapa() != null
                     && Integer.valueOf(3).equals(lead.getEtapa().getOrdem())).count();
-            int pendencias = (int) carteira.stream().filter(lead -> parados.stream()
-                    .anyMatch(parado -> parado.id().equals(lead.getId()))).count();
+            int pendencias = dashboardService.contarCadenciasVencidas(vendedor.getId());
             desempenho.add(new DashboardEquipeResponseDTO.DesempenhoVendedorDTO(
                     vendedor.getId(), vendedor.getNome(), carteira.size(), contatos, propostas, pendencias));
             representantes.add(new DashboardEquipeResponseDTO.RepresentanteResumoDTO(
@@ -83,117 +76,6 @@ public class DashboardEquipeService {
         return new DashboardEquipeResponseDTO(
                 representantes.size(), leads.size(),
                 desempenho.stream().mapToInt(DashboardEquipeResponseDTO.DesempenhoVendedorDTO::propostas).sum(),
-                parados.size(), desempenho, representantes, parados);
-    }
-
-    @Transactional(readOnly = true)
-    public DashboardEquipeIndicadoresResponseDTO buscarIndicadores(Integer liderId){
-
-        if (!vendedorRepository.existsById(liderId)){
-            throw new VendedorNaoEncontradoException("Vendedor líder não consta nos registros");
-        }
-
-        LocalDate hoje = LocalDate.now();
-        LocalDate inicioDaSemana = hoje.minusDays(hoje.getDayOfWeek().getValue() - 1);
-
-        LocalDateTime inicio = inicioDaSemana.atStartOfDay();
-        LocalDateTime fim = inicioDaSemana.plusWeeks(1).atStartOfDay();
-        LocalDateTime limiteParado = LocalDateTime.now().minusDays(DIAS_PARADO);
-
-        Long representantesAtivos = vendedorRepository.countByLider_IdAndAtivoTrue(liderId);
-        Long leadsCarteira = leadRepository.contarCarteiraPorLider(liderId);
-        Long contatosRealizados = interacaoRepository.contarPorLiderNoPeriodo(liderId, inicio, fim);
-        Long pendenciasEquipe = leadRepository.contarParadosPorLider(liderId, limiteParado, ORDEM_ETAPA_FECHADA);
-
-        return new DashboardEquipeIndicadoresResponseDTO(
-                representantesAtivos.intValue(),
-                leadsCarteira.intValue(),
-                contatosRealizados.intValue(),
-                pendenciasEquipe.intValue()
-        );
-    }
-
-    public List<DesempenhoVendedorResponseDTO> buscarDesempenho(Integer liderId){
-        if (!vendedorRepository.existsById(liderId)){
-            throw new VendedorNaoEncontradoException("Vendedor líder não encontrado nos registros");
-        }
-
-        LocalDateTime inicio = inicioDaSemana();
-        LocalDateTime fim = inicio.plusWeeks(1);
-        LocalDateTime limiteParado = LocalDateTime.now().minusDays(DIAS_PARADO);
-
-        List<Vendedor> listaVendedores = vendedorRepository.findByLider_IdAndAtivoTrueOrderByNomeAsc(liderId);
-
-        List<DesempenhoVendedorResponseDTO> listaDesempenho = new ArrayList<>();
-
-        for(Vendedor vendedor : listaVendedores){
-            Integer id = vendedor.getId();
-
-            Integer leads = leadRepository.countByVendedor_IdAndAtivoTrue(id);
-            Long propostas = leadRepository.countByVendedor_IdAndAtivoTrueAndEtapa_Ordem(id, ORDEM_ETAPA_PROPOSTA);
-            Long contatos = interacaoRepository.contarVendedorNoPeriodo(id, inicio, fim);
-            Long pendencias = leadRepository.contarParadosPorVendedor(id, limiteParado, ORDEM_ETAPA_FECHADA);
-
-            listaDesempenho.add(new DesempenhoVendedorResponseDTO(
-                    id,
-                    vendedor.getNome(),
-                    vendedor.getCodVendedor(),
-                    vendedor.getEmail(),
-                    leads.intValue(),
-                    contatos.intValue(),
-                    propostas.intValue(),
-                    pendencias.intValue()
-            ));
-
-            listaDesempenho.sort(Comparator
-                    .comparing(DesempenhoVendedorResponseDTO::getContatos, Comparator.reverseOrder())
-                    .thenComparing(DesempenhoVendedorResponseDTO::getNome));
-
-        }
-            return listaDesempenho;
-    }
-
-    private LocalDateTime inicioDaSemana() {
-        LocalDate hoje = LocalDate.now();
-        return hoje.minusDays(hoje.getDayOfWeek().getValue() - 1).atStartOfDay();
-    }
-
-    @Transactional(readOnly = true)
-    public List<LeadParadoResponseDTO> buscarLeadsParados(Integer liderId, Integer dias, Integer tamanho){
-
-        if (!vendedorRepository.existsById(liderId)){
-            throw new VendedorNaoEncontradoException("Vendedor líder não consta nos registros");
-        }
-
-        int diasValidos = Math.max(dias, 1);
-        int tamanhoValido = Math.min(Math.max(tamanho, 1), TAMANHO_MAXIMO_LEADS_PARADOS);
-
-        LocalDateTime agora = LocalDateTime.now();
-        LocalDateTime limiteParado = agora.minusDays(diasValidos);
-
-        List<Lead> leadsParados = leadRepository.buscarParadosPorLider(liderId, limiteParado, ORDEM_ETAPA_FECHADA, PageRequest.of(0, tamanhoValido));
-
-        List<LeadParadoResponseDTO> resultado = new ArrayList<>();
-
-        for (Lead lead : leadsParados) {
-            LocalDateTime ultimaAtividade = interacaoRepository.buscarUltimaAtividadePorLead(lead.getId());
-
-            if (ultimaAtividade == null) {
-                ultimaAtividade = lead.getCriadoEm();
-            }
-
-            int diasParados = (int) ChronoUnit.DAYS.between(ultimaAtividade, agora);
-
-            resultado.add(new LeadParadoResponseDTO(
-                    lead.getId(),
-                    lead.getNomeFantasia(),
-                    lead.getVendedor().getId(),
-                    lead.getVendedor().getNome(),
-                    lead.getEtapa().getNome(),
-                    ultimaAtividade,
-                    diasParados
-            ));
-        }
-        return resultado;
+                desempenho.stream().mapToInt(DashboardEquipeResponseDTO.DesempenhoVendedorDTO::pendencias).sum(), desempenho, representantes, parados);
     }
 }

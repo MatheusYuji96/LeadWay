@@ -1,0 +1,70 @@
+.page {
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.feedback {
+  margin-top: 20px;
+}
+
+.content {
+  margin-top: 24px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+
+.prefs {
+  display: flex;
+  flex-direction: column;
+}
+
+.prefRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--wire-line);
+  cursor: pointer;
+}
+
+.prefRow:first-child {
+  border-top: 0;
+}
+
+.prefRow > span {
+  display: block;
+}
+
+.prefRow strong {
+  display: block;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.prefRow small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 20px 16px;
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lockedField { display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:600; color:var(--ink); }
+.lockedInput { display:flex; align-items:center; gap:9px; min-height:39px; border:1px solid #cbd5e1; border-radius:7px; padding:0 12px; background:#f1f5f9; color:#64748b; }
+.lockedInput input { width:100%; border:0; outline:0; background:transparent; color:#475569; cursor:not-allowed; font:inherit; }

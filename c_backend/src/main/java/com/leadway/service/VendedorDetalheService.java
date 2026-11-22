@@ -60,7 +60,7 @@ public class VendedorDetalheService {
 
     @Transactional(readOnly = true)
     public VendedorDetalheResponseDTO buscar(Integer id) {
-        Vendedor vendedor = vendedorService.listar(id);
+        Vendedor vendedor = vendedorService.buscar(id);
         LocalDateTime agora = LocalDateTime.now();
 
         int total = nuloComoZero(leadRepository.countByVendedor_IdAndAtivoTrue(id));

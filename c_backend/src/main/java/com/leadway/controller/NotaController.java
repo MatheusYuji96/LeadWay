@@ -2,9 +2,8 @@ package com.leadway.controller;
 
 import com.leadway.dto.request.NotaLeadRequestDTO;
 import com.leadway.dto.response.InteracaoResponseDTO;
-import com.leadway.entity.Interacao;
-import com.leadway.mapper.InteracaoMapper;
 import com.leadway.service.InteracaoService;
+import com.leadway.service.SessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,16 +21,17 @@ import org.springframework.web.bind.annotation.*;
 public class NotaController {
 
     private final InteracaoService interacaoService;
+    private final SessionService sessions;
 
-    public NotaController(InteracaoService interacaoService) {
+    public NotaController(InteracaoService interacaoService, SessionService sessions) {
         this.interacaoService = interacaoService;
+        this.sessions = sessions;
     }
 
     @Operation(
             summary = "Registra uma anotação no lead",
-            description = "Grava uma interação no histórico do lead. tipo e dataHora são opcionais; "
-                    + "quando omitidos, usam ANOTACAO e a data/hora atual. Se etapaId for informado, "
-                    + "a etapa do lead é atualizada e o histórico de etapas é registrado."
+            description = "feature/calcom: tipo e dataHora opcionais (ANOTACAO / agora). "
+                    + "Se etapaId vier preenchido, a etapa do lead é atualizada com histórico."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Anotação registrada com sucesso"),
@@ -41,8 +41,10 @@ public class NotaController {
     })
     @PostMapping
     public ResponseEntity<InteracaoResponseDTO> cadastrar(@PathVariable Integer leadId,
-                                                           @Valid @RequestBody NotaLeadRequestDTO dto) {
-        Interacao interacao = interacaoService.cadastrarNota(leadId, dto);
-        return ResponseEntity.status(201).body(InteracaoMapper.toResponse(interacao));
+                                                          @Valid @RequestBody NotaLeadRequestDTO dto,
+                                                          @RequestHeader(value = "Authorization", required = false) String token) {
+        sessions.requireLeadAccess(sessions.require(token), leadId);
+        // O mapper de interação foi removido no feature/teste-all: o serviço devolve o record canônico.
+        return ResponseEntity.status(201).body(interacaoService.cadastrarNota(leadId, dto));
     }
 }

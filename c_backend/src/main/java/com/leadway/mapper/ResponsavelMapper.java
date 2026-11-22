@@ -4,7 +4,9 @@ import com.leadway.dto.response.ResponsavelResponseDTO;
 import com.leadway.entity.Lead;
 import com.leadway.entity.Vendedor;
 import com.leadway.repository.LeadRepository;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ResponsavelMapper {
 
     private final LeadRepository leadRepository;

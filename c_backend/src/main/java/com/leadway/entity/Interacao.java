@@ -13,9 +13,14 @@ public class Interacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Transient
+    private Contato contato;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Vendedor vendedor;
+    private Vendedor usuario;
+    public Vendedor getUsuario() { return usuario; }
+    public void setUsuario(Vendedor usuario) { this.usuario = usuario; }
 
     @ManyToOne
     @JoinColumn(name = "lead_id")
@@ -29,7 +34,7 @@ public class Interacao {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime criadoEm;
 
@@ -44,8 +49,8 @@ public class Interacao {
         return id;
     }
 
-    public Vendedor getVendedor() {
-        return vendedor;
+    public Contato getContato() {
+        return contato;
     }
 
     public Lead getLead() {
@@ -72,8 +77,8 @@ public class Interacao {
         return atualizadoEm;
     }
 
-    public void setVendedor(Vendedor vendedor) {
-        this.vendedor = vendedor;
+    public void setContato(Contato contato) {
+        this.contato = contato;
     }
 
     public void setLead(Lead lead) {
