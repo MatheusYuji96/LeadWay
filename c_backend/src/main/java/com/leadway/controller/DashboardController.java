@@ -24,9 +24,13 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final DashboardEquipeService dashboardEquipeService;
+    private final com.leadway.service.SessionService sessions;
 
-    public DashboardController(DashboardService dashboardService) {
+    public DashboardController(DashboardService dashboardService, DashboardEquipeService dashboardEquipeService, com.leadway.service.SessionService sessions) {
         this.dashboardService = dashboardService;
+        this.dashboardEquipeService = dashboardEquipeService;
+        this.sessions = sessions;
     }
 
     @Operation(
@@ -79,5 +83,12 @@ public class DashboardController {
     @GetMapping("/leads-atencao/{id}")
     public ResponseEntity<List<LeadAtencaoResponseDTO>> buscarLeadsAtencao(@PathVariable Integer id) {
         return ResponseEntity.status(200).body(dashboardService.buscarLeadsAtencao(id));
+    }
+    @Operation(summary = "Resumo real do acompanhamento da equipe")
+    @GetMapping("/equipe")
+    public ResponseEntity<DashboardEquipeResponseDTO> buscarEquipe(@org.springframework.web.bind.annotation.RequestHeader(value="Authorization",required=false) String token) {
+        com.leadway.entity.Vendedor actor = sessions.require(token);
+        sessions.requireManager(actor);
+        return ResponseEntity.ok(dashboardEquipeService.buscarResumo(actor));
     }
 }

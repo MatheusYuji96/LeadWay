@@ -16,22 +16,19 @@ public class VendedorResponseDTO {
     private Integer id;
 
     @Schema(
-            description = "Identificador do cargo do usuário",
-            example = "3"
-    )
-    private Integer cargoId;
-
-    @Schema(
-            description = "Nome do cargo do usuário",
-            example = "VENDEDOR"
-    )
-    private String cargoNome;
-
-    @Schema(
             description = "Identificador estrangeiro de líder associado ao vendedor",
             example = "1"
     )
     private Vendedor lider;
+    private Integer liderId;
+    private String cargo;
+    private String token;
+    public String getToken(){return token;}
+    public void setToken(String v){token=v;}
+    public Integer getLiderId(){return liderId;}
+    public void setLiderId(Integer id){liderId=id;}
+    public String getCargo(){return cargo;}
+    public void setCargo(String v){cargo=v;}
 
     @Schema(
             description = "Nome do usuário vendedor",
@@ -75,22 +72,6 @@ public class VendedorResponseDTO {
 
     public void setId(Integer id) {
     	this.id = id;
-    }
-
-    public Integer getCargoId() {
-        return cargoId;
-    }
-
-    public void setCargoId(Integer cargoId) {
-        this.cargoId = cargoId;
-    }
-
-    public String getCargoNome() {
-        return cargoNome;
-    }
-
-    public void setCargoNome(String cargoNome) {
-        this.cargoNome = cargoNome;
     }
 
     public Vendedor getLider() {

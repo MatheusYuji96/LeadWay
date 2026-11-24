@@ -1,22 +1,24 @@
 package com.leadway.controller;
 
+import com.leadway.dto.request.AtualizarSenhaRequestDTO;
 import com.leadway.dto.request.AtualizarVendedorRequestDTO;
 import com.leadway.dto.request.VendedorRequestDTO;
+import com.leadway.dto.response.VendedorDetalheResponseDTO;
 import com.leadway.dto.response.VendedorResponseDTO;
 import com.leadway.entity.Vendedor;
 import com.leadway.mapper.VendedorMapper;
+import com.leadway.service.SessionService;
+import com.leadway.service.VendedorDetalheService;
 import com.leadway.service.VendedorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,78 +31,114 @@ import java.util.List;
 public class VendedorController {
 
     private final VendedorService vendedorService;
+    private final VendedorDetalheService vendedorDetalheService;
+    private final SessionService sessions;
 
-    public VendedorController(VendedorService vendedorService) {
+    public VendedorController(VendedorService vendedorService,
+                              VendedorDetalheService vendedorDetalheService,
+                              SessionService sessions) {
         this.vendedorService = vendedorService;
+        this.vendedorDetalheService = vendedorDetalheService;
+        this.sessions = sessions;
     }
 
-    @Operation(
-            summary = "Lista vendedores cadastrados",
-            description = "Lista representantes comerciais no sistema, com ou sem filtros."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Vendedores listados com sucesso"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
+    @Operation(summary = "Lista vendedores cadastrados")
     @GetMapping
-    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo) {
-        List<Vendedor> lista = vendedorService.listarPorFiltro(termo);
-        List<VendedorResponseDTO> listaResponse = lista.stream().map(VendedorMapper::toResponse).toList();
-        return ResponseEntity.status(200).body(listaResponse);
+    public ResponseEntity<List<VendedorResponseDTO>> listar(@RequestParam(required = false) String termo,
+                                                            @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        sessions.requireManager(actor);
+        List<Vendedor> lista = vendedorService.listarPorFiltro(termo).stream()
+                .filter(v -> sessions.root(v).getId().equals(sessions.root(actor).getId()))
+                .filter(v -> !sessions.role(actor).equals("GERENTE") || sessions.role(v).equals("VENDEDOR"))
+                .toList();
+        return ResponseEntity.ok(lista.stream().map(VendedorMapper::toResponse).toList());
     }
 
+    @Operation(
+            summary = "Detalha um vendedor",
+            description = "feature/calcom: indicadores, evolução e carteira, agora protegidos por RBAC."
+    )
     @GetMapping("/{id}")
-    public ResponseEntity<VendedorResponseDTO> listarPorId(@PathVariable Integer id){
-        VendedorResponseDTO dto = VendedorMapper.toResponse(vendedorService.listar(id));
-        return ResponseEntity.status(200).body(dto);
+    public ResponseEntity<VendedorDetalheResponseDTO> listarPorId(@PathVariable Integer id,
+                                                                  @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        Vendedor target = vendedorService.buscar(id);
+        sessions.sameOrg(actor, target);
+        boolean self = actor.getId().equals(id);
+        if (sessions.role(actor).equals("VENDEDOR") && !self)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sem permissão para detalhar outro vendedor");
+        if (sessions.role(actor).equals("GERENTE") && !sessions.role(target).equals("VENDEDOR"))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gerente só detalha vendedores");
+        if (sessions.role(actor).equals("GERENTE") && !self
+                && (target.getLider() == null || !actor.getId().equals(target.getLider().getId())))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Funcionário fora da equipe");
+        return ResponseEntity.ok(vendedorDetalheService.buscar(id));
     }
 
-    @Operation(
-            summary = "Cadastra um novo vendedor",
-            description = "Cria um novo representante comercial, podendo ser designado à acompanhar um lead específico."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Vendedor cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de cadastro inválidos, ausentes ou em formato incorreto"),
-            @ApiResponse(responseCode = "404", description = "Vendedor líder não consta no sistema"),
-            @ApiResponse(responseCode = "409", description = "E-mail de vendedor já cadastrado no sistema"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
+    @Operation(summary = "Cadastra um novo vendedor")
     @PostMapping
-    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO) {
+    public ResponseEntity<VendedorResponseDTO> cadastrar(@Valid @RequestBody VendedorRequestDTO requestDTO,
+                                                         @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        sessions.requireManager(actor);
+        if (sessions.role(actor).equals("GERENTE") && "GERENTE".equals(requestDTO.getCargo()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gerente não cadastra gerente");
+        requestDTO.setLiderId(actor.getId());
         Vendedor vendedor = vendedorService.cadastrar(requestDTO);
-        VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
-        return ResponseEntity.status(201).body(responseDTO);
+        return ResponseEntity.status(201).body(VendedorMapper.toResponse(vendedor));
     }
 
-    @Operation(
-            summary = "Atualiza um vendedor",
-            description = "Atualiza uma ou mais informações de um vendedor no sistema."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Vendedor atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Vendedor não encontrado no sistema"),
-            @ApiResponse(responseCode = "409", description = "E-mail de vendedor já cadastrado no sistema"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
+    /**
+     * feature/calcom: troca de senha preservada, mas usando PasswordHashService
+     * (feature/teste-all) em vez da comparação de texto puro da branch antiga.
+     */
+    @Operation(summary = "Altera a própria senha")
+    @PutMapping("/{id}/senha")
+    public ResponseEntity<Void> atualizarSenha(@PathVariable Integer id,
+                                               @Valid @RequestBody AtualizarSenhaRequestDTO requestDTO,
+                                               @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        if (!actor.getId().equals(id))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário só altera a própria senha");
+        vendedorService.atualizarPasswd(requestDTO, id);
+        return ResponseEntity.status(204).build();
+    }
+
+    @Operation(summary = "Atualiza um vendedor")
     @PatchMapping("/{id}")
-    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO) {
+    public ResponseEntity<VendedorResponseDTO> atualizar(@PathVariable Integer id,
+                                                         @Valid @RequestBody AtualizarVendedorRequestDTO requestDTO,
+                                                         @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        sessions.requireManager(actor);
+        Vendedor target = vendedorService.buscar(id);
+        sessions.sameOrg(actor, target);
+        if (sessions.role(actor).equals("GERENTE") && !sessions.role(target).equals("VENDEDOR"))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gerente só edita vendedores");
+        if (requestDTO.getCargo() != null && sessions.role(actor).equals("GERENTE")
+                && !"VENDEDOR".equals(requestDTO.getCargo()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gerente não pode promover a gerente ou administrador");
+        if (sessions.role(actor).equals("GERENTE")
+                && (target.getLider() == null || !actor.getId().equals(target.getLider().getId())))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Funcionário fora da equipe");
+        requestDTO.setLiderId(null); // Alteração de hierarquia requer fluxo separado.
         Vendedor vendedor = vendedorService.atualizar(id, requestDTO);
-        VendedorResponseDTO responseDTO = VendedorMapper.toResponse(vendedor);
-        return ResponseEntity.status(200).body(responseDTO);
+        return ResponseEntity.ok(VendedorMapper.toResponse(vendedor));
     }
 
-    @Operation(
-            summary = "Deleta um vendedor",
-            description = "Apaga um vendedor do sistema."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Vendedor excluído com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Vendedor não encontrado no sistema"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
+    @Operation(summary = "Deleta um vendedor")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id,
+                                        @RequestHeader(value = "Authorization", required = false) String token) {
+        Vendedor actor = sessions.require(token);
+        sessions.requireManager(actor);
+        Vendedor target = vendedorService.buscar(id);
+        sessions.sameOrg(actor, target);
+        if (actor.getId().equals(id) || sessions.role(target).equals("ADMINISTRADOR"))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Não pode excluir essa conta");
+        if (sessions.role(actor).equals("GERENTE") && !sessions.role(target).equals("VENDEDOR"))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Gerente só exclui vendedores");
         vendedorService.apagar(id);
         return ResponseEntity.status(204).build();
     }

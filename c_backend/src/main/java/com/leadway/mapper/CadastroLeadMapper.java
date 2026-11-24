@@ -25,6 +25,7 @@ public class CadastroLeadMapper {
     public LeadResponseDTO toResponse(Lead lead){
         LeadResponseDTO leadResponse = new LeadResponseDTO();
         leadResponse.setId(lead.getId());
+        leadResponse.setVinculadoEm(lead.getVinculadoEm());
         leadResponse.setCnpj(lead.getCnpj());
         leadResponse.setRazaoSocial(lead.getRazaoSocial());
         leadResponse.setNomeFantasia(lead.getNomeFantasia());
@@ -81,7 +82,7 @@ public class CadastroLeadMapper {
         Endereco endereco = new Endereco();
         endereco.setRua(dto.getRua());
         endereco.setNumero(dto.getNumero());
-        endereco.setCep(dto.getCep());
+        endereco.setCep(dto.getCep() == null ? null : dto.getCep().replaceAll("\\D", ""));
         endereco.setComplemento(dto.getComplemento());
         endereco.setBairro(dto.getBairro());
         endereco.setCidade(dto.getCidade());
