@@ -4,19 +4,11 @@ package com.leadway.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Dados necessários para cadastrar um usuário vendedor no sistema")
 public class CadastroVendedorRequestDTO {
-
-    @Schema(
-            description = "Identificador do cargo do usuário (cargo_id é obrigatório)",
-            example = "3"
-    )
-    @NotNull
-    private Integer cargoId;
 
     @Schema(
             description = "Nome do usuário vendedor",
@@ -39,10 +31,10 @@ public class CadastroVendedorRequestDTO {
             example = "Senhamuitosegura123!"
     )
     @NotBlank
-    @Size(min = 8, max = 50)
+    @Size(min = 8)
     @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
-            message = "A senha deve conter letras, números e caracteres especiais"
+            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            message = "A senha deve conter uma letra maiúscula, um número e um caractere especial"
     )
     private String senha;
 
@@ -62,14 +54,6 @@ public class CadastroVendedorRequestDTO {
     @Pattern(regexp = "^[0-9]+$")
     private String telefone;
 
-    public Integer getCargoId() {
-        return cargoId;
-    }
-
-    public void setCargoId(Integer cargoId) {
-        this.cargoId = cargoId;
-    }
-
     public @NotBlank @Size(min = 3) String getNome() {
         return nome;
     }
@@ -86,16 +70,16 @@ public class CadastroVendedorRequestDTO {
         this.email = email;
     }
 
-    public @NotBlank @Size(min = 8, max = 50) @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
-            message = "A senha deve conter letras, números e caracteres especiais"
+    public @NotBlank @Size(min = 8) @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            message = "A senha deve conter uma letra maiúscula, um número e um caractere especial"
     ) String getSenha() {
         return senha;
     }
 
-    public void setSenha(@NotBlank @Size(min = 8, max = 50) @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
-            message = "A senha deve conter letras, números e caracteres especiais"
+    public void setSenha(@NotBlank @Size(min = 8) @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s])\\S+$",
+            message = "A senha deve conter uma letra maiúscula, um número e um caractere especial"
     ) String senha) {
         this.senha = senha;
     }

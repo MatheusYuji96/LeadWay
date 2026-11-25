@@ -2,7 +2,6 @@ package com.leadway.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,20 +14,26 @@ public class Vendedor {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "cargo_id", nullable = false)
-    private Cargo cargo;
-
-    @ManyToOne
     @JoinColumn(name = "lider_id")
     private Vendedor lider;
 
     @OneToMany(mappedBy = "lider")
     private List<Vendedor> liderados = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cargo_id", nullable = false)
+    private Cargo cargo;
+
+    @Column(name = "tentativas_login", nullable = false)
+    private Integer tentativasLogin = 0;
+
+    @Column(name = "bloqueado_ate")
+    private java.time.LocalDateTime bloqueadoAte;
+
     @Column(length = 30)
     private String codVendedor;
 
-    @Column(length = 90)
+    @Column(length = 100)
     private String regiao;
 
     @Column(nullable = false, length = 190)
@@ -46,11 +51,13 @@ public class Vendedor {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    @Column(nullable = false)
-    private Integer tentativasLogin = 0;
-
-    private LocalDateTime bloqueadoAte;
-
+    public Cargo getCargo() { return cargo; }
+    public void setCargo(Cargo cargo) { this.cargo = cargo; }
+    public Integer getTentativasLogin() { return tentativasLogin; }
+    public void setTentativasLogin(Integer value) { this.tentativasLogin = value; }
+    public java.time.LocalDateTime getBloqueadoAte() { return bloqueadoAte; }
+    public void setBloqueadoAte(java.time.LocalDateTime value) { this.bloqueadoAte = value; }
+    public java.util.List<Vendedor> getLiderados() { return liderados; }
     public Vendedor() {
     }
 
@@ -86,14 +93,6 @@ public class Vendedor {
         return ativo;
     }
 
-    public Cargo getCargo() {
-        return cargo;
-    }
-
-    public void setCargo(Cargo cargo) {
-        this.cargo = cargo;
-    }
-
     public Vendedor getLider() {
         return lider;
     }
@@ -126,22 +125,6 @@ public class Vendedor {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
-    }
-
-    public LocalDateTime getBloqueadoAte() {
-        return bloqueadoAte;
-    }
-
-    public void setBloqueadoAte(LocalDateTime bloqueadoAte) {
-        this.bloqueadoAte = bloqueadoAte;
-    }
-
-    public Integer getTentativasLogin() {
-        return tentativasLogin;
-    }
-
-    public void setTentativasLogin(Integer tentativasLogin) {
-        this.tentativasLogin = tentativasLogin;
     }
 
     //    public void ativar() {

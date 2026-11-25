@@ -69,21 +69,19 @@ public class CadastroLeadRequestDTO {
     )
     private String telefone;
 
-    @Schema(
-            description = "Potencial do Lead definido pelo usuário (de 1 a 5)",
-            example = "1"
-    )
     @NotNull
-    @Min(1)
-    @Max(5)
-    private Integer potencial;
 
     @Schema(
-            description = "Prioridade do Lead conforme o banco definitivo",
-            example = "MEDIA"
+            description = "Potencial do Lead definido pelo usuário",
+            example = "1"
     )
-    @Pattern(regexp = "ALTA|MEDIA|BAIXA", message = "Prioridade deve ser ALTA, MEDIA ou BAIXA")
+    @jakarta.validation.constraints.Min(1)
+    @jakarta.validation.constraints.Max(5)
+    private Integer potencial;
+
+    @jakarta.validation.constraints.Pattern(regexp="ALTA|MEDIA|BAIXA")
     private String prioridade;
+
 
     @Schema(
             description = "Identificador do vendedor responsável por acompanhar o lead",
@@ -108,6 +106,7 @@ public class CadastroLeadRequestDTO {
                 example = "01310100"
         )
         @NotBlank
+        @Pattern(regexp = "^\\d{5}-?\\d{3}$")
         private String cep;
 
         @Schema(
@@ -283,20 +282,15 @@ public class CadastroLeadRequestDTO {
         this.telefone = telefone;
     }
 
+    public String getPrioridade() { return prioridade; }
+    public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
+
     public Integer getPotencial() {
         return potencial;
     }
 
     public void setPotencial(Integer potencial) {
         this.potencial = potencial;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
     }
 
     public Integer getVendedorId() {

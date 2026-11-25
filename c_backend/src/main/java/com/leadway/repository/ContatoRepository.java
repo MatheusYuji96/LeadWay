@@ -18,4 +18,8 @@ public interface ContatoRepository extends JpaRepository<Contato, Integer> {
     List<Contato> findByFiltros(@Param("termo") String termo, @Param("leadId") Integer leadId);
 
     Boolean existsByEmailIgnoreCase(String email);
+
+    List<Contato> findByLead_IdOrderByIdAsc(Integer leadId);
+
+    boolean existsByIdAndLead_Id(Integer id, Integer leadId);
 }

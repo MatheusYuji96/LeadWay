@@ -36,16 +36,14 @@ public class VendedorMapper {
         VendedorResponseDTO dto = new VendedorResponseDTO();
 
         dto.setId(vendedor.getId());
-        if (vendedor.getCargo() != null) {
-            dto.setCargoId(vendedor.getCargo().getId());
-            dto.setCargoNome(vendedor.getCargo().getNome());
-        }
         dto.setNome(vendedor.getNome());
         dto.setEmail(vendedor.getEmail());
         dto.setTelefone(vendedor.getTelefone());
         dto.setCodVendedor(vendedor.getCodVendedor());
         dto.setRegiao(vendedor.getRegiao());
-        dto.setLider(vendedor.getLider());
+        dto.setLider(null); // Evita serializar a árvore JPA e dados sensíveis do líder.
+        dto.setLiderId(vendedor.getLider() == null ? null : vendedor.getLider().getId());
+        dto.setCargo(vendedor.getCargo() == null ? null : vendedor.getCargo().getNome());
         dto.setAtivo(vendedor.getAtivo());
 
         return dto;
