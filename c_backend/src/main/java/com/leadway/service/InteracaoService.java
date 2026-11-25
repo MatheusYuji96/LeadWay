@@ -1,16 +1,5 @@
 package com.leadway.service;
 
-import com.leadway.dto.request.CadastroInteracaoRequestDTO;
-import com.leadway.entity.*;
-import com.leadway.exception.EntidadeNaoEncontradaException;
-import com.leadway.exception.LeadNaoEncontradoException;
-import com.leadway.repository.*;
-import org.springframework.stereotype.Service;
-
-import com.leadway.entity.Interacao;
-import com.leadway.entity.Lead;
-import com.leadway.repository.InteracaoRepository;
-import com.leadway.repository.LeadRepository;
 import com.leadway.dto.request.InteracaoRequestDTO;
 import com.leadway.dto.request.NotaLeadRequestDTO;
 import com.leadway.dto.response.InteracaoResponseDTO;
@@ -56,17 +45,6 @@ public class InteracaoService {
         this.leadService = leadService;
     }
 
-    private final InteracaoRepository interacaoRepository;
-    private final LeadRepository leadRepository;
-    private final EtapaRepository etapaRepository;
-    private final LeadEtapaHistoricoRepository historicoRepository;
-
-    public InteracaoService(InteracaoRepository interacaoRepository, LeadRepository leadRepository, EtapaRepository etapaRepository, LeadEtapaHistoricoRepository historicoRepository) {
-        this.interacaoRepository = interacaoRepository;
-        this.leadRepository = leadRepository;
-        this.etapaRepository = etapaRepository;
-        this.historicoRepository = historicoRepository;
-      
     @Transactional(readOnly = true)
     public List<InteracaoResponseDTO> listar(Integer leadId) {
         buscarLead(leadId);
