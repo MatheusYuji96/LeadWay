@@ -1,37 +1,139 @@
 package com.leadway.entity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
-@Entity @Table(name="cadencia")
+
+@Entity
+@Table(name = "cadencia")
 public class Cadencia {
- @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Integer id;
- @ManyToOne @JoinColumn(name="contato_id") private Contato contato;
- @ManyToOne @JoinColumn(name="lead_id",nullable=false) private Lead lead;
- @ManyToOne @JoinColumn(name="responsavel_id") private Vendedor responsavel;
- @Column(nullable=false) private String frequencia;
- @Column(name="intervalo_dias") private Integer intervaloDias;
+
+ @Id
+ @GeneratedValue(strategy = GenerationType.IDENTITY)
+ private Integer id;
+
+ @ManyToOne
+ @JoinColumn(name = "contato_id")
+ private Contato contato;
+
+ @ManyToOne
+ @JoinColumn(name = "lead_id", nullable = false)
+ private Lead lead;
+
+ @ManyToOne
+ @JoinColumn(name = "responsavel_id")
+ private Vendedor responsavel;
+
+ @Enumerated(EnumType.STRING)
+ @Column(nullable = false, columnDefinition = "ENUM('DIARIA','SEMANAL','QUINZENAL','MENSAL','PERSONALIZADA')")
+ private FrequenciaCadencia frequencia;
+
+ @Column(name = "intervalo_dias")
+ private Integer intervaloDias;
+
  private LocalDateTime dataInicio;
+
  private LocalDateTime dataFim;
- @Column(nullable=false) private String status;
+
+ @Enumerated(EnumType.STRING)
+ @Column(nullable = false, columnDefinition = "ENUM('ATIVA','PAUSADA','CONCLUIDA','CANCELADA')")
+ private StatusCadencia status = StatusCadencia.ATIVA;
+
+ @CreationTimestamp
+ @Column(nullable = false, updatable = false)
  private LocalDateTime criadoEm;
+
+ @UpdateTimestamp
+ @Column(nullable = false)
  private LocalDateTime atualizadoEm;
- @PrePersist
- public void antesDeInserir() {
-  LocalDateTime agora = LocalDateTime.now();
-  if (criadoEm == null) criadoEm = agora;
-  atualizadoEm = agora;
+
+ public Cadencia() {
  }
- @PreUpdate
- public void antesDeAtualizar() {
-  atualizadoEm = LocalDateTime.now();
+
+ public Integer getId() {
+  return id;
  }
- public Integer getId(){return id;}
- public LocalDateTime getCriadoEm(){return criadoEm;}
- public Lead getLead(){return lead;} public void setLead(Lead v){lead=v;}
- public Contato getContato(){return contato;} public void setContato(Contato v){contato=v;}
- public Vendedor getResponsavel(){return responsavel;} public void setResponsavel(Vendedor v){responsavel=v;}
- public String getFrequencia(){return frequencia;} public void setFrequencia(String v){frequencia=v;}
- public Integer getIntervaloDias(){return intervaloDias;} public void setIntervaloDias(Integer v){intervaloDias=v;}
- public LocalDateTime getDataInicio(){return dataInicio;} public void setDataInicio(LocalDateTime v){dataInicio=v;}
- public LocalDateTime getDataFim(){return dataFim;} public void setDataFim(LocalDateTime v){dataFim=v;}
- public String getStatus(){return status;} public void setStatus(String v){status=v;}
+
+ public Lead getLead() {
+  return lead;
+ }
+
+ public void setLead(Lead lead) {
+  this.lead = lead;
+ }
+
+ public Contato getContato() {
+  return contato;
+ }
+
+ public void setContato(Contato contato) {
+  this.contato = contato;
+ }
+
+ public Vendedor getResponsavel() {
+  return responsavel;
+ }
+
+ public void setResponsavel(Vendedor responsavel) {
+  this.responsavel = responsavel;
+ }
+
+ public FrequenciaCadencia getFrequencia() {
+  return frequencia;
+ }
+
+ public void setFrequencia(FrequenciaCadencia frequencia) {
+  this.frequencia = frequencia;
+ }
+
+ public Integer getIntervaloDias() {
+  return intervaloDias;
+ }
+
+ public void setIntervaloDias(Integer intervaloDias) {
+  this.intervaloDias = intervaloDias;
+ }
+
+ public LocalDateTime getDataInicio() {
+  return dataInicio;
+ }
+
+ public void setDataInicio(LocalDateTime dataInicio) {
+  this.dataInicio = dataInicio;
+ }
+
+ public LocalDateTime getDataFim() {
+  return dataFim;
+ }
+
+ public void setDataFim(LocalDateTime dataFim) {
+  this.dataFim = dataFim;
+ }
+
+ public StatusCadencia getStatus() {
+  return status;
+ }
+
+ public void setStatus(StatusCadencia status) {
+  this.status = status;
+ }
+
+ public LocalDateTime getCriadoEm() {
+  return criadoEm;
+ }
+
+ public LocalDateTime getAtualizadoEm() {
+  return atualizadoEm;
+ }
 }
