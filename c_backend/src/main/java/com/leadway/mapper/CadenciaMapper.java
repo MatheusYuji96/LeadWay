@@ -29,9 +29,8 @@ public class CadenciaMapper {
 
         CadenciaResponseDTO dto = new CadenciaResponseDTO();
         dto.setId(cadencia.getId());
-        // feature/teste-all trocou os enums de cadência por String: não existe mais .name().
-        dto.setStatus(cadencia.getStatus());
-        dto.setFrequencia(cadencia.getFrequencia());
+        dto.setStatus(cadencia.getStatus() == null ? null : cadencia.getStatus().name());
+        dto.setFrequencia(cadencia.getFrequencia() == null ? null : cadencia.getFrequencia().name());
         dto.setIntervaloDias(cadencia.getIntervaloDias());
         dto.setDataInicio(cadencia.getDataInicio() == null ? null : cadencia.getDataInicio().toString());
         dto.setDataFim(cadencia.getDataFim() == null ? null : cadencia.getDataFim().toString());

@@ -78,7 +78,7 @@ public class ContatoService {
             contato.setAtivo(dto.getAtivo());
         }
         if (dto.getContato() != null){
-            contato.setClassificacao(dto.getContato());
+            contato.setClassificacao(ClassificacaoContato.valueOf(dto.getContato().toUpperCase().trim()));
         }
         Contato contatoRegistrar = contatoRepository.save(contato);
         return contatoRegistrar;

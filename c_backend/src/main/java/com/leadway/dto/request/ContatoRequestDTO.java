@@ -1,6 +1,5 @@
 package com.leadway.dto.request;
 
-import com.leadway.entity.ClassificacaoContato;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -53,7 +52,7 @@ public class ContatoRequestDTO {
             example = "PADRAO"
     )
     @NotNull
-    private ClassificacaoContato contato;
+    private String contato;
 
     @Schema(
             description = "Status de atividade do contato",
@@ -101,11 +100,11 @@ public class ContatoRequestDTO {
         this.leadId = leadId;
     }
 
-    public ClassificacaoContato getContato() {
+    public String getContato() {
         return contato;
     }
 
-    public void setContato(ClassificacaoContato contato) {
+    public void setContato(String contato) {
         this.contato = contato;
     }
 

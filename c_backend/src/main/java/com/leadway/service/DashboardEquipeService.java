@@ -67,7 +67,7 @@ public class DashboardEquipeService {
             int contatos = carteira.stream().mapToInt(lead -> contatosPorLead.getOrDefault(lead.getId(), 0L).intValue()).sum();
             int propostas = (int) carteira.stream().filter(lead -> lead.getEtapa() != null
                     && Integer.valueOf(3).equals(lead.getEtapa().getOrdem())).count();
-            int pendencias = dashboardService.contarCadenciasVencidas(vendedor.getId());
+            int pendencias = dashboardService.buscarLeadsAtencao(vendedor.getId()).size();
             desempenho.add(new DashboardEquipeResponseDTO.DesempenhoVendedorDTO(
                     vendedor.getId(), vendedor.getNome(), carteira.size(), contatos, propostas, pendencias));
             representantes.add(new DashboardEquipeResponseDTO.RepresentanteResumoDTO(

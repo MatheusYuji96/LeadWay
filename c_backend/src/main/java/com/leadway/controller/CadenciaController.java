@@ -22,7 +22,20 @@ public class CadenciaController {
  public CadenciaController(CadenciaRepository cadencias,LeadRepository leads,ContatoRepository contatos,SessionService sessions){this.cadencias=cadencias;this.leads=leads;this.contatos=contatos;this.sessions=sessions;}
  public record CadenciaDados(Integer leadId,Integer contatoId,String frequencia,Integer intervaloDias,LocalDateTime dataInicio,LocalDateTime dataFim,Integer responsavelId,String status){}
  public record CadenciaResposta(Integer id,Integer leadId,Integer contatoId,String frequencia,Integer intervaloDias,LocalDateTime dataInicio,LocalDateTime dataFim,Integer responsavelId,String status,LocalDateTime criadoEm){}
- private CadenciaResposta output(Cadencia c){return new CadenciaResposta(c.getId(),c.getLead().getId(),c.getContato()==null?null:c.getContato().getId(),c.getFrequencia(),c.getIntervaloDias(),c.getDataInicio(),c.getDataFim(),c.getResponsavel()==null?null:c.getResponsavel().getId(),c.getStatus(),c.getCriadoEm());}
+  private CadenciaResposta output(Cadencia c){
+    return new CadenciaResposta(
+      c.getId(),
+      c.getLead().getId(),
+      c.getContato() == null ? null : c.getContato().getId(),
+      c.getFrequencia() == null ? null : c.getFrequencia().name(),
+      c.getIntervaloDias(),
+      c.getDataInicio(),
+      c.getDataFim(),
+      c.getResponsavel() == null ? null : c.getResponsavel().getId(),
+      c.getStatus() == null ? null : c.getStatus().name(),
+      c.getCriadoEm()
+    );
+  }
  private void allowed(Vendedor actor,Lead lead){
   Vendedor owner=lead.getVendedor();
   if(owner==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Lead sem responsável");
@@ -45,8 +58,14 @@ public class CadenciaController {
   if(contato!=null&&(contato.getLead()==null||!Objects.equals(contato.getLead().getId(),lead.getId())))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Contato não pertence ao lead");
   if(d.dataFim()!=null && d.dataInicio()!=null && d.dataFim().isBefore(d.dataInicio()))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Data final anterior à inicial");
   if(d.responsavelId()!=null && !d.responsavelId().equals(lead.getVendedor().getId()))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Responsável deve ser o responsável atual do lead");
-  c.setDataFim(d.dataFim());
-  c.setLead(lead);c.setContato(contato);c.setResponsavel(lead.getVendedor());c.setFrequencia(d.frequencia());c.setIntervaloDias(d.intervaloDias());c.setDataInicio(d.dataInicio()==null?LocalDateTime.now():d.dataInicio());c.setStatus(d.status()==null?"ATIVA":d.status());
+   c.setDataFim(d.dataFim());
+   c.setLead(lead);
+   c.setContato(contato);
+   c.setResponsavel(lead.getVendedor());
+   c.setFrequencia(d.frequencia() == null ? null : FrequenciaCadencia.valueOf(d.frequencia()));
+   c.setIntervaloDias(d.intervaloDias());
+   c.setDataInicio(d.dataInicio() == null ? LocalDateTime.now() : d.dataInicio());
+   c.setStatus(d.status() == null ? StatusCadencia.ATIVA : StatusCadencia.valueOf(d.status()));
  }
  @Operation(summary="Cria uma cadência")
  @PostMapping @ResponseStatus(HttpStatus.CREATED) public CadenciaResposta create(@RequestHeader(value="Authorization",required=false) String token,@RequestBody CadenciaDados data){Vendedor actor=sessions.require(token);Cadencia c=new Cadencia();fill(c,data,actor);return output(cadencias.save(c));}
