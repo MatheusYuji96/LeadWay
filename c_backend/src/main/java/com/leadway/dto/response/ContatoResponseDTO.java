@@ -1,5 +1,6 @@
 package com.leadway.dto.response;
 
+import com.leadway.entity.ClassificacaoContato;
 import com.leadway.entity.Lead;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -42,7 +43,7 @@ public class ContatoResponseDTO {
             description = "Enumerador responsável pela classificação devida do contato",
             example = "PADRAO"
     )
-    private String contato;
+    private ClassificacaoContato contato;
 
     @Schema(
             description = "Status de atividade do contato",
@@ -85,11 +86,11 @@ public class ContatoResponseDTO {
     public Integer getLeadId() { return leadId; }
     public void setLeadId(Integer leadId) { this.leadId = leadId; }
 
-    public String getContato() {
+    public ClassificacaoContato getContato() {
         return contato;
     }
 
-    public void setContato(String contato) {
+    public void setContato(ClassificacaoContato contato) {
         this.contato = contato;
     }
 

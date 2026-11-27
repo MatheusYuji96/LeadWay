@@ -2,7 +2,6 @@ package com.leadway.mapper;
 
 import com.leadway.dto.request.ContatoRequestDTO;
 import com.leadway.dto.response.ContatoResponseDTO;
-import com.leadway.entity.ClassificacaoContato;
 import com.leadway.entity.Contato;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,7 @@ public class ContatoMapper {
         contato.setCargo(dto.getCargo());
         contato.setEmail(dto.getEmail());
         contato.setWhatsapp(dto.getWhatsapp());
-        contato.setClassificacao(dto.getContato() == null ? null : ClassificacaoContato.valueOf(dto.getContato()));
+        contato.setClassificacao(dto.getContato());
         contato.setAtivo(true);
         return contato;
     }
@@ -28,7 +27,7 @@ public class ContatoMapper {
         dto.setCargo(contato.getCargo());
         dto.setEmail(contato.getEmail());
         dto.setWhatsapp(contato.getWhatsapp());
-        dto.setContato(contato.getClassificacao() == null ? null : contato.getClassificacao().name());
+        dto.setContato(contato.getClassificacao());
         dto.setAtivo(contato.getAtivo());
         return dto;
     }
